@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Button from '$lib/Button.svelte';
 	function signIn() {
 		gapi.load('client:auth2', async () => {
 			try {
@@ -19,4 +20,4 @@
 	<script async defer src="https://apis.google.com/js/api.js"></script>
 </svelte:head>
 
-<button on:click={signIn}> Log in </button>
+<Button on:click={signIn} value="Log in with Google" />

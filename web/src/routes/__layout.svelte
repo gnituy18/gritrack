@@ -1,10 +1,12 @@
 <script>
-	import '../app.css';
+	import '../app.scss';
 </script>
 
 <div>
 	<slot />
 </div>
+
+<slot />
 
 <style>
 	div {
