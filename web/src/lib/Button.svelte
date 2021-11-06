@@ -4,7 +4,7 @@
 </script>
 
 <button class="button">
-	{#if href !== undefined}
+	{#if href !== ''}
 		<a {href}>
 			{value}
 		</a>
@@ -16,25 +16,22 @@
 <style lang="scss">
 	.button {
 		display: inline-block;
-		border-radius: 8px;
 		border: 0;
+		border-radius: 8px;
 		padding: 8px 24px;
 		background-color: transparent;
-		color: black;
+		color: var(--blue);
 		cursor: pointer;
 		text-align: center;
+		transition: background-color 0.1s;
+		user-select: none;
 
 		&:hover {
-			background-color: rgba(0, 0, 0, 0.05);
-			text-decoration: none;
+			background-color: var(--blue-light);
 		}
 	}
 
 	a {
-		&:visited,
-		&:hover {
-			color: black;
-			text-decoration: none;
-		}
+		color: inherit;
 	}
 </style>
