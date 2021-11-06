@@ -17,6 +17,7 @@ func Router() *routing.Router {
 	userStore := user.New()
 
 	root := routing.New()
+	root.Use(corsHeader)
 	root.Use(injectContext)
 	root.Use(logRequest)
 

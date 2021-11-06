@@ -56,9 +56,6 @@ func (im *impl) Get(ctx context.Context, id string) (*Mission, error) {
 	return m, nil
 }
 
-func (im *impl) Search(ctx context.Context, ) error {
-}
-
 func (im *impl) Update(ctx context.Context, m *Mission) error {
 	updater := bson.M{
 		"name":        m.Name,
