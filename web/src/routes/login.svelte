@@ -3,15 +3,17 @@
 </script>
 
 <div>
+	<h1>Welcome to Gritter</h1>
 	<GoogleLoginButton />
 </div>
 
 <style>
 	div {
 		display: flex;
-		height: 100%;
-		width: 100%;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		height: 100%;
+		width: 100%;
 	}
 </style>
