@@ -1,5 +1,5 @@
 <script>
-	import GoogleLoginButton from '$lib/GoogleLoginButton.svelte';
+	import GoogleLoginButton from '$lib/components/GoogleLoginButton.svelte';
 </script>
 
 <div>

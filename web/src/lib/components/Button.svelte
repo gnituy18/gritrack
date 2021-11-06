@@ -1,9 +1,10 @@
 <script lang="ts">
 	export let href: string = '';
 	export let value: string;
+	export let onClick: () => void;
 </script>
 
-<button class="button">
+<button on:click={onClick} class="button">
 	{#if href !== ''}
 		<a {href}>
 			{value}
