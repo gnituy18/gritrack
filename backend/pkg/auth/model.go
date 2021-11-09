@@ -18,7 +18,7 @@ type Info struct {
 }
 
 type InfoGoogle struct {
-	IDToken string `json:"idToken"`
+	AccessToken string `json:"accessToken"`
 }
 
 type Result struct {
@@ -34,15 +34,15 @@ func (r *Result) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
 }
 
 type ResultGoogle struct {
-	TokenInfo *oauth2.Tokeninfo
+	UserInfo *oauth2.Userinfo
 }
 
 func (rg *ResultGoogle) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
-	bytes, err := rg.TokenInfo.MarshalJSON()
+	bytes, err := rg.UserInfo.MarshalJSON()
 	if err != nil {
 		return err
 	}
 
-	encoder.AddString("tokenInfo", string(bytes))
+	encoder.AddString("accessToken", string(bytes))
 	return nil
 }

@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	routing "github.com/qiangxue/fasthttp-routing"
@@ -73,9 +72,8 @@ func (ah *authHandler) auth(rctx *routing.Context) error {
 	}
 	defer saveStore(rctx, store)
 
-	fmt.Println(userID)
 	store.Set("userID", userID)
 
-	JSON(rctx, http.StatusOK, userID)
+	Redirect(rctx, "http://localhost:3000")
 	return nil
 }

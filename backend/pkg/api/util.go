@@ -31,3 +31,8 @@ func JSON(rctx *routing.Context, status int, body interface{}) {
 
 	rctx.SetBody(bodyBytes)
 }
+
+func Redirect(rctx *routing.Context, URL string) {
+	rctx.SetStatusCode(http.StatusFound)
+	rctx.Response.Header.Set("Location", URL)
+}

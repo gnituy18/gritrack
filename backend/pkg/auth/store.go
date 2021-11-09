@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrTypeInvalid = errors.New("type invalid")
+	ErrTypeInvalid          = errors.New("type invalid")
+	ErrTokenAudienceInvalid = errors.New("token audience invalid")
 )
 
 type Store interface {

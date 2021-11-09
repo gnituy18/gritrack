@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/valyala/fasthttp"
 
 	"gritter/pkg/api"

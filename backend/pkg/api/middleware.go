@@ -44,11 +44,11 @@ func logRequest(rctx *routing.Context) error {
 }
 
 func corsHeader(rctx *routing.Context) error {
-	rctx.Response.Header.Add("Access-Control-Allow-Origin", "http://localhost:3000")
+	rctx.Response.Header.Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	if rctx.Request.Header.IsOptions() {
-		rctx.Response.Header.Add("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE")
-		rctx.Response.Header.Add("Access-Control-Allow-Headers", "Content-Type")
-		rctx.Response.Header.Add("Access-Control-Max-Age", "86400")
+		rctx.Response.Header.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE")
+		rctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type")
+		rctx.Response.Header.Set("Access-Control-Max-Age", "86400")
 		rctx.SetContentType("text/plain")
 		rctx.SetStatusCode(http.StatusOK)
 		rctx.Abort()
