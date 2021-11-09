@@ -2,7 +2,9 @@ version: "3"
 
 services:
   backend:
-    build: ../backend
+    build: 
+      dockerfile: ./backend/Dockerfile
+      context: .
     ports:
       - "8080:8080"
     depends_on:

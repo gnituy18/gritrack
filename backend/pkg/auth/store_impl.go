@@ -2,9 +2,11 @@ package auth
 
 import (
 	"net/http"
+	"os"
 
 	"go.uber.org/zap"
 	"google.golang.org/api/oauth2/v2"
+	"google.golang.org/api/option"
 
 	"gritter/pkg/context"
 )
@@ -32,8 +34,19 @@ func (im *impl) Auth(ctx context.Context, info *Info) (*Result, error) {
 }
 
 func (im *impl) authWithGoogle(ctx context.Context, info *InfoGoogle) (*Result, error) {
-	oauth2Service, err := oauth2.New(im.httpClient)
-	tokenInfo, err := oauth2Service.Tokeninfo().IdToken(info.IDToken).Do()
+	oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(im.httpClient))
+	tokenInfoCall := oauth2Service.Tokeninfo()
+	tokenInfoCall.AccessToken(info.AccessToken)
+	tokenInfo, err := tokenInfoCall.Do()
+	if tokenInfo.Audience != os.Getenv("ENV_GOOGLE_CLIENT_ID") {
+		return nil, ErrTokenAudienceInvalid
+	} else if err != nil {
+		return nil, err
+	}
+
+	userInfoCall := oauth2Service.Userinfo.Get()
+	userInfoCall.Header().Set("Authorization", "Bearer "+info.AccessToken)
+	userInfo, err := userInfoCall.Do()
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +54,7 @@ func (im *impl) authWithGoogle(ctx context.Context, info *InfoGoogle) (*Result, 
 	return &Result{
 		Type: TypeGoogle,
 		Google: &ResultGoogle{
-			TokenInfo: tokenInfo,
+			UserInfo: userInfo,
 		},
 	}, nil
 }

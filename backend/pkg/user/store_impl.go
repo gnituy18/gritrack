@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 
 	uuid "github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
@@ -66,8 +65,10 @@ func (im *impl) CreateByAuthResult(ctx context.Context, result *auth.Result) (st
 
 func (im *impl) authGoogleToUser(ctx context.Context, result *auth.ResultGoogle) *User {
 	return &User{
-		Email:        result.TokenInfo.Email,
-		GoogleUserID: result.TokenInfo.UserId,
+		Email:        result.UserInfo.Email,
+		Name:         result.UserInfo.GivenName,
+		Picture:      result.UserInfo.Picture,
+		GoogleUserID: result.UserInfo.Id,
 	}
 }
 
@@ -109,21 +110,20 @@ func (im *impl) GetByAuthResult(ctx context.Context, result *auth.Result) (*User
 		return nil, err
 	}
 
-	fmt.Println(u)
-
 	return u, nil
 }
 
 func (im *impl) getQueryByGoogle(ctx context.Context, result *auth.ResultGoogle) bson.M {
 	return bson.M{
-		"googleUserID": result.TokenInfo.UserId,
+		"googleUserID": result.UserInfo.Id,
 	}
 }
 
 func (im *impl) Update(ctx context.Context, u *User) error {
 	updater := bson.M{
-		"name":  u.Name,
-		"intro": u.Intro,
+		"name":    u.Name,
+		"picture": u.Picture,
+		"intro":   u.Intro,
 	}
 	if err := im.doc.UpdateOne(ctx, document.User, bson.M{"id": u.ID}, updater); err == document.ErrNotFound {
 		return ErrNotFound

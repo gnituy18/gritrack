@@ -4,12 +4,14 @@
 		gapi.load('client:auth2', async () => {
 			try {
 				await gapi.client.init({
-					clientId: import.meta.env.VITE_CLIENT_ID,
+					clientId: import.meta.env.ENV_GOOGLE_CLIENT_ID,
 					scope: 'openid email profile'
 				});
 				const user = await gapi.auth2.getAuthInstance().signIn();
-				const res = await fetch('http://localhost:8080/api/v1/auth', {
+				const accessToken = user.getAuthResponse().access_token;
+				const resp = await fetch('http://localhost:8080/api/v1/auth', {
 					method: 'POST',
+					redirect: 'manual',
 					headers: {
 						'content-type': 'application/json',
 						'Access-Control-Request-Method': 'POST',
@@ -17,12 +19,12 @@
 					},
 					body: JSON.stringify({
 						type: 1,
-						google: {
-							IdToken: user.getAuthResponse().id_token
-						}
+						google: { accessToken }
 					})
 				});
-				console.log(res);
+				if (resp.type === 'opaqueredirect') {
+					window.location.href = '/';
+				}
 			} catch (err) {
 				console.log(err);
 			}
