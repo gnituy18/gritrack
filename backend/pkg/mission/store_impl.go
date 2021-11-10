@@ -25,7 +25,7 @@ type impl struct {
 
 func (im *impl) Create(ctx context.Context, m *Mission) (string, error) {
 	id := uuidNewV4().String()
-	m.ID = id
+	m.Id = id
 	if err := im.doc.CreateOne(ctx, document.Mission, m); err != nil {
 		ctx.With(
 			zap.Error(err),
@@ -61,12 +61,12 @@ func (im *impl) Update(ctx context.Context, m *Mission) error {
 		"name":        m.Name,
 		"description": m.Description,
 	}
-	if err := im.doc.UpdateOne(ctx, document.Mission, bson.M{"id": m.ID}, updater); err == document.ErrNotFound {
+	if err := im.doc.UpdateOne(ctx, document.Mission, bson.M{"id": m.Id}, updater); err == document.ErrNotFound {
 		return ErrNotFound
 	} else if err != nil {
 		ctx.With(
 			zap.Error(err),
-			zap.String("id", m.ID),
+			zap.String("id", m.Id),
 		).Error("document.Document.UpdateOne failed in mission.Store.Update")
 		return err
 	}

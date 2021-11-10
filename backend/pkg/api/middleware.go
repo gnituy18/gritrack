@@ -45,6 +45,7 @@ func logRequest(rctx *routing.Context) error {
 
 func corsHeader(rctx *routing.Context) error {
 	rctx.Response.Header.Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	rctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 	if rctx.Request.Header.IsOptions() {
 		rctx.Response.Header.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE")
 		rctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type")
@@ -69,15 +70,15 @@ func mustAuthUser(rctx *routing.Context) error {
 	}
 	defer saveStore(rctx, store)
 
-	val := store.Get("userID")
-	userID, ok := val.(string)
-	if !ok || userID == "" {
+	val := store.Get("userId")
+	userId, ok := val.(string)
+	if !ok || userId == "" {
 		JSON(rctx, http.StatusUnauthorized, nil)
 		rctx.Abort()
 		return nil
 	}
 
-	rctx.Set("userID", userID)
+	rctx.Set("userId", userId)
 
 	rctx.Next()
 

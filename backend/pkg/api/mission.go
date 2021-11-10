@@ -81,7 +81,7 @@ func (mh *missionHandler) updateMission(rctx *routing.Context) error {
 		return nil
 	}
 
-	m.ID = id
+	m.Id = id
 
 	err := mh.missionStore.Update(ctx, m)
 	if err == mission.ErrNotFound {

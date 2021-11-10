@@ -6,21 +6,21 @@ import (
 )
 
 type missionRepr struct {
-	ID          string `json:"id"`
+	Id          string `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
 func missionToRepr(m *mission.Mission) *missionRepr {
 	return &missionRepr{
-		ID:          m.ID,
+		Id:          m.Id,
 		Name:        m.Name,
 		Description: m.Description,
 	}
 }
 
 type userRepr struct {
-	ID    string `json:"id"`
+	Id    string `json:"id"`
 	Email string `json:"email"`
 	Name  string `json:"name"`
 	Intro string `json:"intro"`
@@ -28,7 +28,7 @@ type userRepr struct {
 
 func userToRepr(u *user.User) *userRepr {
 	return &userRepr{
-		ID:    u.ID,
+		Id:    u.Id,
 		Email: u.Email,
 		Name:  u.Name,
 		Intro: u.Intro,

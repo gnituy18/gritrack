@@ -28,7 +28,7 @@ type impl struct {
 
 func (im *impl) Create(ctx context.Context, u *User) (string, error) {
 	id := uuidNewV4().String()
-	u.ID = id
+	u.Id = id
 	if err := im.doc.CreateOne(ctx, document.User, u); err != nil {
 		ctx.With(
 			zap.Error(err),
@@ -50,7 +50,7 @@ func (im *impl) CreateByAuthResult(ctx context.Context, result *auth.Result) (st
 	}
 
 	id := uuidNewV4().String()
-	u.ID = id
+	u.Id = id
 
 	if err := im.doc.CreateOne(ctx, document.User, u); err != nil {
 		ctx.With(
@@ -68,7 +68,7 @@ func (im *impl) authGoogleToUser(ctx context.Context, result *auth.ResultGoogle)
 		Email:        result.UserInfo.Email,
 		Name:         result.UserInfo.GivenName,
 		Picture:      result.UserInfo.Picture,
-		GoogleUserID: result.UserInfo.Id,
+		GoogleUserId: result.UserInfo.Id,
 	}
 }
 
@@ -125,12 +125,12 @@ func (im *impl) Update(ctx context.Context, u *User) error {
 		"picture": u.Picture,
 		"intro":   u.Intro,
 	}
-	if err := im.doc.UpdateOne(ctx, document.User, bson.M{"id": u.ID}, updater); err == document.ErrNotFound {
+	if err := im.doc.UpdateOne(ctx, document.User, bson.M{"id": u.Id}, updater); err == document.ErrNotFound {
 		return ErrNotFound
 	} else if err != nil {
 		ctx.With(
 			zap.Error(err),
-			zap.String("id", u.ID),
+			zap.String("id", u.Id),
 		).Error("document.Document.UpdateOne failed in user.Store.Update")
 		return err
 	}

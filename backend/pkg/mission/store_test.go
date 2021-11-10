@@ -15,7 +15,7 @@ func TestGet(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	mockDocument := document.NewMockDocument(ctrl)
-	mockID := "mockID"
+	mockId := "mockId"
 
 	cases := []struct {
 		desc    string
@@ -29,7 +29,7 @@ func TestGet(t *testing.T) {
 				mockDocument.EXPECT().GetOne(
 					gomock.Any(),
 					gomock.Eq(document.Mission),
-					gomock.Eq(bson.M{"id": mockID}),
+					gomock.Eq(bson.M{"Id": mockId}),
 					gomock.Any(),
 				).Return(ptesting.ErrAny)
 			},
@@ -42,7 +42,7 @@ func TestGet(t *testing.T) {
 				mockDocument.EXPECT().GetOne(
 					gomock.Any(),
 					gomock.Eq(document.Mission),
-					gomock.Eq(bson.M{"id": mockID}),
+					gomock.Eq(bson.M{"Id": mockId}),
 					gomock.Any(),
 				).Return(document.ErrNotFound)
 			},
@@ -55,15 +55,15 @@ func TestGet(t *testing.T) {
 				mockDocument.EXPECT().GetOne(
 					gomock.Any(),
 					gomock.Eq(document.Mission),
-					gomock.Eq(bson.M{"id": mockID}),
+					gomock.Eq(bson.M{"Id": mockId}),
 					gomock.Any(),
 				).Do(func(ctx context.Context, name document.Name, query bson.M, doc interface{}) {
 					a := doc.(*Mission)
-					a.ID = "id"
+					a.Id = "Id"
 				}).Return(nil)
 			},
 			expRes: &Mission{
-				ID: "id",
+				Id: "Id",
 			},
 			expErr: nil,
 		},
@@ -74,7 +74,7 @@ func TestGet(t *testing.T) {
 			doc: mockDocument,
 		}
 		c.prepare()
-		res, err := im.Get(context.Background(), mockID)
+		res, err := im.Get(context.Background(), mockId)
 		ptesting.Equal(t, c.expRes, res, c.desc)
 		ptesting.Equal(t, c.expErr, err, c.desc)
 	}

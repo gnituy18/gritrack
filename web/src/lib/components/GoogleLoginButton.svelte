@@ -12,6 +12,7 @@
 				const resp = await fetch('http://localhost:8080/api/v1/auth', {
 					method: 'POST',
 					redirect: 'manual',
+					credentials: 'include',
 					headers: {
 						'content-type': 'application/json',
 						'Access-Control-Request-Method': 'POST',

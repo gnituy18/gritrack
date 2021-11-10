@@ -52,19 +52,19 @@ func (ah *authHandler) auth(rctx *routing.Context) error {
 	}
 
 	// create user if not exist
-	var userID string
+	var userId string
 	if err == user.ErrNotFound {
-		userID, err = ah.userStore.CreateByAuthResult(ctx, result)
+		userId, err = ah.userStore.CreateByAuthResult(ctx, result)
 		if err != nil {
 			ctx.With(zap.Error(err)).Error("authHandler.userStore.CreateByAuthResult failed in authHandler.auth")
 			JSON(rctx, http.StatusInternalServerError, nil)
 			return err
 		}
 	} else {
-		userID = u.ID
+		userId = u.Id
 	}
 
-	// store userID in session
+	// store userId in session
 	store, err := sess.Get(rctx.RequestCtx)
 	if err != nil {
 		ctx.Error("session.Session.Get failed in authHandler.auth")
@@ -72,8 +72,9 @@ func (ah *authHandler) auth(rctx *routing.Context) error {
 	}
 	defer saveStore(rctx, store)
 
-	store.Set("userID", userID)
+	store.Set("userId", userId)
 
 	Redirect(rctx, "http://localhost:3000")
+
 	return nil
 }
