@@ -21,21 +21,26 @@ func Router() *routing.Router {
 	root.Use(injectContext)
 	root.Use(logRequest)
 
-	// public routes
-	public := root.Group("/api/v1")
-
-	public.Get("/health", func(rctx *routing.Context) error {
+	root.Get("/health", func(rctx *routing.Context) error {
 		rctx.WriteString("healthy")
 		log.Global().Info("healthy")
 		return nil
 	})
 
+	v1 := root.Group("/api/v1")
+
+	// public routes
+	public := v1.Group("")
+
 	authGroup := public.Group("/auth")
 	MountAuthRoutes(authGroup, authStore, userStore)
 
 	// authenticated routes
-	authenticated := root.Group("")
+	authenticated := v1.Group("")
 	authenticated.Use(mustAuthUser)
+
+	userGroup := authenticated.Group("/user")
+	MountUserRoutes(userGroup, userStore)
 
 	missionGroup := authenticated.Group("/mission")
 	MountMissionRoutes(missionGroup, missionStore)

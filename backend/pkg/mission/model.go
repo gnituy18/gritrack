@@ -5,8 +5,8 @@ import (
 )
 
 type Mission struct {
-	ID     string `bson:"id"`
-	UserID string `bson:"userID"`
+	Id     string `bson:"id"`
+	UserId string `bson:"userId"`
 
 	Name        string `bson:"name"`
 	Description string `bson:"description"`
@@ -15,9 +15,9 @@ type Mission struct {
 }
 
 func (m *Mission) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
-	encoder.AddString("id", m.ID)
+	encoder.AddString("id", m.Id)
 	encoder.AddString("name", m.Name)
-	encoder.AddString("userID", m.UserID)
+	encoder.AddString("userId", m.UserId)
 	encoder.AddString("description", m.Description)
 	encoder.AddBool("deleted", m.Deleted)
 	return nil
