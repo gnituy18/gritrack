@@ -1,5 +1,4 @@
 <script context="module">
-	export const ssr = false;
 	/**
 	 * @type {import('@sveltejs/kit').Load}
 	 */
