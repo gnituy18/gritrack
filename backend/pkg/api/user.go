@@ -40,6 +40,8 @@ func (uh *userHandler) getCurrent(rctx *routing.Context) error {
 		return nil
 	}
 
-	JSON(rctx, http.StatusOK, u)
+	userRepr := userToRepr(u)
+
+	JSON(rctx, http.StatusOK, userRepr)
 	return nil
 }
