@@ -68,8 +68,6 @@ func mustAuthUser(rctx *routing.Context) error {
 		ctx.Error("session.Session.Get failed in api.GetAuthUser")
 		return err
 	}
-	defer saveStore(rctx, store)
-
 	val := store.Get("userId")
 	userId, ok := val.(string)
 	if !ok || userId == "" {

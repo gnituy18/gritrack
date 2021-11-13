@@ -22,6 +22,8 @@
 		"allowJs": true,
 		"checkJs": true,
 		"paths": {
+			"$components/*": ["src/components/*"],
+			"$stores/*": ["src/stores/*"],
 			"$lib": ["src/lib"],
 			"$lib/*": ["src/lib/*"]
 		}

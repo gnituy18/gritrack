@@ -8,6 +8,7 @@
 
 <style>
 	div {
+		display: flex;
 		height: 100vh;
 		width: 100vw;
 	}
