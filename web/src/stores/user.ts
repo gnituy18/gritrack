@@ -4,7 +4,7 @@ export interface User {
 	id: string
 	name: string
 	email: string
-	imageURL: string
+	picture: string
 }
 
 const user = writable<User>()

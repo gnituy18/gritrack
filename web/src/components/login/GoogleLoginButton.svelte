@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
+	import Button from '$components/common/Button.svelte';
 	function signIn() {
 		gapi.load('client:auth2', async () => {
 			try {

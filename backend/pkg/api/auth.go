@@ -70,9 +70,9 @@ func (ah *authHandler) auth(rctx *routing.Context) error {
 		ctx.Error("session.Session.Get failed in authHandler.auth")
 		return err
 	}
-	defer saveStore(rctx, store)
 
 	store.Set("userId", userId)
+	saveStore(rctx, store)
 
 	Redirect(rctx, "http://localhost:3000")
 
