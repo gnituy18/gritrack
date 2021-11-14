@@ -9,12 +9,10 @@ const initSession: Handle = async ({ request, resolve }) => {
 }
 
 const getUser: Handle = async ({ request, resolve }) => {
-	console.log(request.headers)
 	const apiRes = await fetch('http://localhost:8080/api/v1/user/current', {
 		headers: { ...request.headers },
 	});
 
-	console.log(apiRes)
 	if (!apiRes.ok && request.path !== '/login') {
 		return {
 			status: 302,
