@@ -5,7 +5,7 @@ import path from 'path'
 const config = {
 	preprocess: preprocess(),
 	kit: {
-		target: '#svelte',
+		target: '#root',
 		vite: {
 			envPrefix: 'ENV_',
 			envDir: '../',
