@@ -18,10 +18,10 @@
 	.button {
 		display: inline-block;
 		border: 0;
-		border-radius: 8px;
+		border-radius: 4px;
 		padding: 8px 24px;
-		background-color: transparent;
-		color: var(--blue);
+		background-color: var(--blue);
+		color: var(--white);
 		cursor: pointer;
 		text-align: center;
 		transition: background-color 0.1s;
