@@ -4,14 +4,16 @@
 </script>
 
 <figure>
-	<img {src} {alt} height={48} width={48} />
+	<img {src} {alt} height={36} width={36} />
 </figure>
 
 <style>
 	figure {
-		display: inline-block;
 		margin: 0;
+		height: 36px;
+		width: 36px;
 	}
+
 	img {
 		border-radius: 50%;
 	}
