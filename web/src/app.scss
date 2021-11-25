@@ -1,8 +1,8 @@
 :root {
   --white: white;
-  
   --blue: RoyalBlue;
   --blue-light: DodgerBlue;
+  --text: 
 }
 
 body {
@@ -13,3 +13,10 @@ body {
 a {
 	text-decoration: none;
 }
+
+hr {
+	margin: 0;
+	border-top: 0;
+	border-color: WhiteSmoke;
+}
+
