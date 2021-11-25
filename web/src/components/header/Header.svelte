@@ -15,6 +15,7 @@
 		<Avatar src={user.picture} alt={user.name} />
 		<span>{user.name}</span>
 	</div>
+	<hr />
 	<nav>
 		<ul>
 			<li><Button href="/" value="home" /></li>
@@ -26,8 +27,7 @@
 	.profile {
 		display: flex;
 		align-items: center;
-		padding: 12px 12px;
-		border-bottom: 1px solid WhiteSmoke;
+		padding: 12px;
 
 		&:hover {
 			background-color: WhiteSmoke;
@@ -42,6 +42,11 @@
 		margin: 0 8px;
 	}
 
+	hr {
+		margin: 0;
+		border-top: 0;
+		border-color: WhiteSmoke;
+	}
 
 	header {
 		height: 100%;
