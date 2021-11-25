@@ -1,8 +1,10 @@
 <script>
+	import Header from '$components/header/Header.svelte'
 	import '../app.scss';
 </script>
 
 <div>
+	<Header />
 	<slot />
 </div>
 
