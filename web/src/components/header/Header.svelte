@@ -26,7 +26,7 @@
 	.profile {
 		display: flex;
 		align-items: center;
-		padding: 16px 16px;
+		padding: 12px 12px;
 		border-bottom: 1px solid WhiteSmoke;
 
 		&:hover {
@@ -37,7 +37,8 @@
 
 	span {
 		color: SlateGray;
-		font-size: 24px;
+		font-size: 20px;
+		font-weight: 300;
 		margin: 0 8px;
 	}
 
