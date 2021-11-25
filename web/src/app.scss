@@ -1,13 +1,18 @@
 :root {
-  --white: white;
   --blue: RoyalBlue;
   --blue-light: DodgerBlue;
-  --text: 
+  --color-text: Black;
+  --color-bg: White;
+
+  --font-size-small: 12px;
+  --font-size-normal: 16px;
+  --font-size-large: 20px;
 }
 
 body {
 	margin: 0;
 	font-family: 'Roboto', sans-serif;
+	font-weight: 300;
 }
 
 a {

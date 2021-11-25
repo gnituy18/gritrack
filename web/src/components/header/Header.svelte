@@ -2,7 +2,6 @@
 	import { session } from '$app/stores';
 
 	import Avatar from '$components/common/Avatar.svelte';
-	import Button from '$components/common/Button.svelte';
 
 	let user;
 	session.subscribe(({ currentUser }) => {
@@ -18,7 +17,7 @@
 	<hr />
 	<nav>
 		<ul>
-			<li><Button href="/" value="home" /></li>
+			<li><a href="/mission">Missions</a></li>
 		</ul>
 	</nav>
 </header>
@@ -36,16 +35,9 @@
 	}
 
 	span {
-		color: SlateGray;
-		font-size: 20px;
-		font-weight: 300;
+		color: var(--color-text);
+		font-size: var(--font-size-large);
 		margin: 0 8px;
-	}
-
-	hr {
-		margin: 0;
-		border-top: 0;
-		border-color: WhiteSmoke;
 	}
 
 	header {
@@ -55,6 +47,7 @@
 	}
 
 	li {
+		margin: 16px 0;
 		list-style-type: none;
 	}
 </style>
