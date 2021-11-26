@@ -2,6 +2,7 @@
 	import { session } from '$app/stores';
 
 	import Avatar from '$components/common/Avatar.svelte';
+	import Button from '$components/common/Button.svelte';
 
 	let user;
 	session.subscribe(({ currentUser }) => {
@@ -10,37 +11,30 @@
 </script>
 
 <header>
-	<div class="profile">
-		<Avatar src={user.picture} alt={user.name} />
-		<span>{user.name}</span>
-	</div>
-	<hr />
 	<nav>
-		<ul>
-			<li><a href="/mission">Missions</a></li>
-		</ul>
+		<div class="nav-content">
+			<Avatar src={user.picture} alt={user.name} />
+			<h1>{user.name}</h1>
+		</div>
+		<hr />
+		<div class="nav-content">
+			<Button href="/mission/create" value="Create a mission" />
+		</div>
+		<div class="nav-content">
+			<h2>Your Missions</h2>
+		</div>
 	</nav>
 </header>
 
 <style lang="scss">
-	.profile {
+	.nav-content {
 		display: flex;
 		align-items: center;
 		padding: 12px;
-
-		&:hover {
-			background-color: WhiteSmoke;
-			cursor: pointer;
-		}
-	}
-
-	span {
-		color: var(--color-text);
-		font-size: var(--font-size-large);
-		margin: 0 8px;
 	}
 
 	header {
+		flex-shrink: 0;
 		height: 100%;
 		width: 240px;
 		border-right: 1px solid WhiteSmoke;
