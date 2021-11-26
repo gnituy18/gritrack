@@ -19,11 +19,14 @@
 		display: inline-block;
 		border: 0;
 		border-radius: 4px;
+		width: 100%;
 		padding: 8px 24px;
 		background-color: var(--blue);
-		color: var(--white);
+		color: white;
+		font-weight: 300;
 		cursor: pointer;
 		text-align: center;
+		font-size: var(--font-size-normal);
 		transition: background-color 0.1s;
 		user-select: none;
 

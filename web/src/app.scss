@@ -25,3 +25,9 @@ hr {
 	border-color: WhiteSmoke;
 }
 
+h1, h2 {
+	margin: 0 8px;
+	color: var(--color-text);
+	font-size: var(--font-size-large);
+	font-weight: 300;
+}
