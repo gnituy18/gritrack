@@ -1,7 +1,1 @@
-<div>Hello Gritter!</div>
-
-<style>
-	div {
-		flex-grow: 1;
-	}
-</style>
+<h1>Hello Gritter!</h1>

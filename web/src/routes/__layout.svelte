@@ -1,17 +1,11 @@
 <script>
-	import Header from '$components/header/Header.svelte'
-	import '../app.scss';
+	import '$/app.css';
+	import Header from '$components/header/Header.svelte';
 </script>
 
-<div>
+<div class="flex w-screen h-screen">
 	<Header />
-	<slot />
+	<div class="flex-grow">
+		<slot />
+	</div>
 </div>
-
-<style>
-	div {
-		display: flex;
-		height: 100vh;
-		width: 100vw;
-	}
-</style>

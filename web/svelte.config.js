@@ -1,9 +1,13 @@
 import preprocess from 'svelte-preprocess';
-import path from 'path'
+import path from 'path';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: preprocess(),
+	preprocess: [
+		preprocess({
+			postcss: true
+		})
+	],
 	kit: {
 		target: '#root',
 		vite: {
@@ -11,12 +15,13 @@ const config = {
 			envDir: '../',
 			resolve: {
 				alias: {
+					$: path.resolve('./src'),
 					$components: path.resolve('./src/components'),
 					$stores: path.resolve('./src/stores')
 				}
 			}
-		},
-	},
+		}
+	}
 };
 
 export default config;

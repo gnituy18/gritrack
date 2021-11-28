@@ -4,17 +4,5 @@
 </script>
 
 <figure>
-	<img {src} {alt} height={36} width={36} />
+	<img class="w-10 rounded-full" {src} {alt} />
 </figure>
-
-<style>
-	figure {
-		margin: 0;
-		height: 36px;
-		width: 36px;
-	}
-
-	img {
-		border-radius: 50%;
-	}
-</style>

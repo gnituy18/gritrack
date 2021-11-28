@@ -10,38 +10,16 @@
 	});
 </script>
 
-<header>
+<header class="flex-none box-border w-60 h-full border-r">
+	<div class="flex items-center p-2">
+		<Avatar src={user.picture} alt={user.name} />
+		<h1 class="ml-4">{user.name}</h1>
+	</div>
+	<hr />
 	<nav>
-		<div class="nav-content">
-			<Avatar src={user.picture} alt={user.name} />
-			<h1>{user.name}</h1>
-		</div>
-		<hr />
-		<div class="nav-content">
-			<Button href="/mission/create" value="Create a mission" />
-		</div>
-		<div class="nav-content">
-			<h2>Your Missions</h2>
+		<div class="flex justify-between p-4">
+			<h2>Missions</h2>
+			<a href="/mission/create">+</a>
 		</div>
 	</nav>
 </header>
-
-<style lang="scss">
-	.nav-content {
-		display: flex;
-		align-items: center;
-		padding: 12px;
-	}
-
-	header {
-		flex-shrink: 0;
-		height: 100%;
-		width: 240px;
-		border-right: 1px solid WhiteSmoke;
-	}
-
-	li {
-		margin: 16px 0;
-		list-style-type: none;
-	}
-</style>
