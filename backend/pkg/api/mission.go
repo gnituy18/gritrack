@@ -28,6 +28,17 @@ type missionHandler struct {
 
 func (mh *missionHandler) createMission(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
+	userId, ok := rctx.Get("userId").(string)
+	if !ok {
+		ctx.Error("rctx.Get failed in missionHandler.createMission")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	}
+	if userId == "" {
+		ctx.Error("userId empty in missionHandler.createMission")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return
+	}
 
 	body := rctx.Request.Body()
 	m := &mission.Mission{}
