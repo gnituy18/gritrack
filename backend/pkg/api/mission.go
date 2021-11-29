@@ -26,27 +26,31 @@ type missionHandler struct {
 	missionStore mission.Store
 }
 
+type missionCreateBody struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 func (mh *missionHandler) createMission(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
 	userId, ok := rctx.Get("userId").(string)
-	if !ok {
-		ctx.Error("rctx.Get failed in missionHandler.createMission")
+	if !ok || userId == "" {
+		ctx.Error("rctx.Get userId failed in missionHandler.createMission")
 		JSON(rctx, http.StatusInternalServerError, nil)
 		return nil
 	}
-	if userId == "" {
-		ctx.Error("userId empty in missionHandler.createMission")
-		JSON(rctx, http.StatusInternalServerError, nil)
-		return
-	}
 
-	body := rctx.Request.Body()
-	m := &mission.Mission{}
-	if err := json.Unmarshal(body, m); err != nil {
+	body := &missionCreateBody{}
+	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil
 	}
 
+	m := &mission.Mission{
+		UserId: userId,
+		Name: body.Name,
+		Description: body.Description,
+	}
 	id, err := mh.missionStore.Create(ctx, m)
 	if err != nil {
 		ctx.With(zap.Error(err)).Error("missionHandler.missionStore.Create failed in missionHandler.createMission")
