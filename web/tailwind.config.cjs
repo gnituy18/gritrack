@@ -1,4 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
+const forms = require("@tailwindcss/forms");
 
 const config = {
   mode: "jit",
@@ -11,7 +12,7 @@ const config = {
     extend: {},
   },
 
-  plugins: [],
+  plugins: [forms],
 };
 
 module.exports = config;
