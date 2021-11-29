@@ -1,8 +1,6 @@
 package user
 
 import (
-	"errors"
-
 	uuid "github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
@@ -46,7 +44,7 @@ func (im *impl) CreateByAuthResult(ctx context.Context, result *auth.Result) (st
 	case auth.TypeGoogle:
 		u = im.authGoogleToUser(ctx, result.Google)
 	default:
-		return "", errors.New("auth type invalid")
+		return "", ErrAuthTypeInvalid
 	}
 
 	id := uuidNewV4().String()
@@ -97,7 +95,7 @@ func (im *impl) GetByAuthResult(ctx context.Context, result *auth.Result) (*User
 	case auth.TypeGoogle:
 		q = im.getQueryByGoogle(ctx, result.Google)
 	default:
-		return nil, errors.New("invalid auth type")
+		return nil, ErrAuthTypeInvalid
 	}
 
 	u := &User{}
@@ -115,7 +113,7 @@ func (im *impl) GetByAuthResult(ctx context.Context, result *auth.Result) (*User
 
 func (im *impl) getQueryByGoogle(ctx context.Context, result *auth.ResultGoogle) bson.M {
 	return bson.M{
-		"googleUserID": result.UserInfo.Id,
+		"googleUserId": result.UserInfo.Id,
 	}
 }
 
