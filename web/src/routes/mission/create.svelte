@@ -1,16 +1,22 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import Button from "$components/common/Button.svelte";
 
   let name = "";
   let description = "";
-  let readonly = false
+  let readonly = false;
 
   async function handleSubmitClick() {
     readonly = true;
     await createMission();
+    readonly = false;
   }
 
   async function createMission() {
+    if (!name || !description) {
+      console.error("input invalid");
+      return;
+    }
     const resp = await fetch("http://localhost:8080/api/v1/mission", {
       method: "POST",
       credentials: "include",
@@ -22,19 +28,37 @@
         description: description,
       }),
     });
-    console.log(resp);
+    if (resp.status !== 201) {
+      console.error("create failed");
+      return;
+    }
+    await goto("/");
   }
 </script>
 
-<h2>Create a Mission</h2>
-<form>
-  <div>
-    <label for="name">Name</label>
-	<input type="text" bind:value={name} {readonly} />
+<div class="m-4 w-80">
+  <h2>Create a Mission</h2>
+  <form>
+    <label for="name" class="block mt-2">
+      <div class="text-gray-500">Name</div>
+      <input
+        type="text"
+        bind:value={name}
+        {readonly}
+        class="w-full rounded bg-gray-100 border-transparent focus:border-blue-300"
+      />
+    </label>
+    <label for="description" class="block mt-2">
+      <div class="text-gray-500">Description</div>
+      <input
+        type="text"
+        bind:value={description}
+        {readonly}
+        class="w-full rounded bg-gray-100 border-transparent focus:border-blue-300"
+      />
+    </label>
+  </form>
+  <div class="mt-8">
+    <Button onClick={handleSubmitClick} value="Submit" />
   </div>
-  <div>
-    <label for="description">Description</label>
-	<input type="text" bind:value={description} {readonly} />
-  </div>
-</form>
-<Button onClick={handleSubmitClick} value="Submit" />
+</div>
