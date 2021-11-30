@@ -4,5 +4,7 @@
 
 <div class="flex flex-col justify-center items-center w-screen h-screen">
   <h1>Welcome to Gritter</h1>
-  <GoogleLoginButton />
+  <div class="w-80 mt-4 text-center">
+    <GoogleLoginButton />
+  </div>
 </div>
