@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 
+	"gritter/pkg/config"
 	"gritter/pkg/context"
 	"gritter/pkg/document"
 )
@@ -21,6 +22,19 @@ var (
 
 type impl struct {
 	doc document.Document
+}
+
+func (im *impl) GetByUser(ctx context.Context, userId string) ([]*Mission, error) {
+	q := bson.M{
+		"userId": userId,
+	}
+	// Add sort by create time
+	missions := []*Mission{}
+	if err := im.doc.Search(ctx, document.Mission, 0, config.MissionMaxCount, q, nil, &missions); err != nil {
+		ctx.With(zap.Error(err)).Error("document.Document.Search failed in mission.Store.GetByUser")
+		return nil, err
+	}
+	return missions, nil
 }
 
 func (im *impl) Create(ctx context.Context, m *Mission) (string, error) {

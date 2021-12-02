@@ -13,6 +13,7 @@ var (
 )
 
 type Document interface {
+	Search(ctx context.Context, name Name, offset, limit int64, query bson.M, sort bson.D, doc interface{}) error
 	CreateOne(ctx context.Context, name Name, doc interface{}) error
 	GetOne(ctx context.Context, name Name, query bson.M, doc interface{}) error
 	UpdateOne(ctx context.Context, name Name, query bson.M, doc interface{}) error

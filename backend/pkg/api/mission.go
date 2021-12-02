@@ -16,6 +16,7 @@ func MountMissionRoutes(group *routing.RouteGroup, missionStore mission.Store) {
 		missionStore: missionStore,
 	}
 
+	group.Get("", handler.getMissionsByUserId)
 	group.Post("", handler.createMission)
 	group.Get("/<id>", handler.getMission)
 	group.Put("/<id>", handler.updateMission)
@@ -29,6 +30,30 @@ type missionHandler struct {
 type missionCreateBody struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+func (mh *missionHandler) getMissionsByUserId(rctx *routing.Context) error {
+	ctx := rctx.Get("ctx").(context.Context)
+	userId, ok := rctx.Get("userId").(string)
+	if !ok || userId == "" {
+		ctx.Error("rctx.Get userId failed in missionHandler.getMissionsByUserId")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	}
+	missions, err := mh.missionStore.GetByUser(ctx, userId)
+	if err != nil {
+		ctx.Error("missionHandler.missionStore.GetByUser failed in missionHandler.getMissionsByUserId")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	}
+
+	missionsRepr := []*missionRepr{}
+	for _, m := range missions {
+		missionsRepr = append(missionsRepr, missionToRepr(m))
+	}
+
+	JSON(rctx, http.StatusOK, missionsRepr)
+	return nil
 }
 
 func (mh *missionHandler) createMission(rctx *routing.Context) error {
@@ -47,8 +72,8 @@ func (mh *missionHandler) createMission(rctx *routing.Context) error {
 	}
 
 	m := &mission.Mission{
-		UserId: userId,
-		Name: body.Name,
+		UserId:      userId,
+		Name:        body.Name,
 		Description: body.Description,
 	}
 	id, err := mh.missionStore.Create(ctx, m)
