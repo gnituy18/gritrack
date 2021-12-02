@@ -11,6 +11,7 @@ var (
 )
 
 type Store interface {
+	GetByUser(ctx context.Context, userId string) ([]*Mission, error)
 	Create(ctx context.Context, m *Mission) (string, error)
 	Get(ctx context.Context, id string) (*Mission, error)
 	Update(ctx context.Context, m *Mission) error

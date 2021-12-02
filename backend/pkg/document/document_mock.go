@@ -77,6 +77,20 @@ func (mr *MockDocumentMockRecorder) GetOne(ctx, name, query, doc interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOne", reflect.TypeOf((*MockDocument)(nil).GetOne), ctx, name, query, doc)
 }
 
+// Search mocks base method.
+func (m *MockDocument) Search(ctx context.Context, name Name, offset, limit int64, query bson.M, sort bson.D, doc interface{}) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", ctx, name, offset, limit, query, sort, doc)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Search indicates an expected call of Search.
+func (mr *MockDocumentMockRecorder) Search(ctx, name, offset, limit, query, sort, doc interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockDocument)(nil).Search), ctx, name, offset, limit, query, sort, doc)
+}
+
 // UpdateOne mocks base method.
 func (m *MockDocument) UpdateOne(ctx context.Context, name Name, query bson.M, doc interface{}) error {
 	m.ctrl.T.Helper()
