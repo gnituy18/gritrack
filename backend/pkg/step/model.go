@@ -8,8 +8,8 @@ type Step struct {
 	Id        string `bson:"id"`
 	MissionId string `bson:"missionId"`
 
-	Summary   string `bson:"summary"`
-	Items     Items  `bson:"items"`
+	Summary string `bson:"summary"`
+	Items   Items  `bson:"items"`
 
 	CreatedAt int64 `bson:"createdAt"`
 }

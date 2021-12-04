@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/satori/go.uuid"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 
 	"gritter/pkg/context"
@@ -39,6 +40,20 @@ func (im *impl) Create(ctx context.Context, missionId string, s *Step) (string, 
 
 	return id, nil
 }
-func (im *impl) Update(ctx context.Context, itemId string, s *Step) error {
+func (im *impl) Update(ctx context.Context, s *Step) error {
+	updater := bson.M{
+		"summary": s.Summary,
+		"items":   s.Items,
+	}
+	if err := im.doc.UpdateOne(ctx, document.Mission, bson.M{"id": s.Id}, updater); err == document.ErrNotFound {
+		return ErrNotFound
+	} else if err != nil {
+		ctx.With(
+			zap.Error(err),
+			zap.String("id", s.Id),
+		).Error("document.Document.UpdateOne failed in step.Store.Update")
+		return err
+	}
+
 	return nil
 }
