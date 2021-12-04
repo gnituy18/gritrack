@@ -5,6 +5,6 @@ import (
 )
 
 type Store interface {
-	Create(ctx context.Context, missionId string) (string error)
-	Update(ctx context.Context, itemId string, item *Item) error
+	Create(ctx context.Context, missionId string, step *Step) (string, error)
+	Update(ctx context.Context, itemId string, step *Step) error
 }
