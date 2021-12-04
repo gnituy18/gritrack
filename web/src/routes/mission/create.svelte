@@ -3,7 +3,6 @@
   import Button from "$components/common/Button.svelte";
 
   let name = "";
-  let description = "";
   let readonly = false;
 
   async function handleSubmitClick() {
@@ -13,7 +12,7 @@
   }
 
   async function createMission() {
-    if (!name || !description) {
+    if (!name) {
       console.error("input invalid");
       return;
     }
@@ -25,7 +24,6 @@
       },
       body: JSON.stringify({
         name: name,
-        description: description,
       }),
     });
     if (resp.status !== 201) {
@@ -44,15 +42,6 @@
       <input
         type="text"
         bind:value={name}
-        {readonly}
-        class="w-full rounded bg-gray-100 border-transparent focus:border-blue-300"
-      />
-    </label>
-    <label for="description" class="block mt-2">
-      <div class="text-gray-500">Description</div>
-      <input
-        type="text"
-        bind:value={description}
         {readonly}
         class="w-full rounded bg-gray-100 border-transparent focus:border-blue-300"
       />
