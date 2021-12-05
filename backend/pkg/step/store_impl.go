@@ -25,10 +25,9 @@ type impl struct {
 	doc document.Document
 }
 
-func (im *impl) Create(ctx context.Context, missionId string, s *Step) (string, error) {
+func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
 	id := uuidNewV4().String()
 	s.Id = id
-	s.MissionId = missionId
 	s.CreatedAt = time.Now().Unix()
 	if err := im.doc.CreateOne(ctx, document.Step, s); err != nil {
 		ctx.With(

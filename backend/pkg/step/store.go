@@ -11,6 +11,6 @@ var (
 )
 
 type Store interface {
-	Create(ctx context.Context, missionId string, step *Step) (string, error)
+	Create(ctx context.Context, step *Step) (string, error)
 	Update(ctx context.Context, step *Step) error
 }

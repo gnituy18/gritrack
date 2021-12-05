@@ -27,7 +27,7 @@ type missionHandler struct {
 	missionStore mission.Store
 }
 
-type missionCreateBody struct {
+type createMissionBody struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
@@ -65,7 +65,7 @@ func (mh *missionHandler) createMission(rctx *routing.Context) error {
 		return nil
 	}
 
-	body := &missionCreateBody{}
+	body := &createMissionBody{}
 	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil

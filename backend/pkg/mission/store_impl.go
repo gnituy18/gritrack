@@ -24,6 +24,27 @@ type impl struct {
 	doc document.Document
 }
 
+func (im *impl) OwnedBy(ctx context.Context, missionId, userId string) (bool, error) {
+	q := bson.M{
+		"id":      missionId,
+		"userId":  userId,
+		"deleted": false,
+	}
+	m := &Mission{}
+	if err := im.doc.GetOne(ctx, document.Mission, q, m); err == document.ErrNotFound {
+		return false, ErrNotFound
+	} else if err != nil {
+		ctx.With(
+			zap.Error(err),
+			zap.String("id", missionId),
+			zap.String("userId", userId),
+		).Error("document.Document.GetOne failed in mission.Store.OwnedBy")
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (im *impl) GetByUser(ctx context.Context, userId string) ([]*Mission, error) {
 	q := bson.M{
 		"userId": userId,
