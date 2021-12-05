@@ -27,12 +27,12 @@
       <h2>Missions</h2>
       <a href="/mission/create" class="font-medium">+</a>
     </div>
-    {#each missions as { id, name }}
-      <li>
-        <a target="_blank" href="/mission/{id}">
-          {name}
-        </a>
-      </li>
-    {/each}
+    <ul class="m-4">
+      {#each missions as { id, name }}
+        <li class="rounded p-2 hover:cursor-pointer hover:bg-gray-100 ">
+          <a href="/mission/{id}" class="block text-lg">{name}</a>
+        </li>
+      {/each}
+    </ul>
   </nav>
 </header>
