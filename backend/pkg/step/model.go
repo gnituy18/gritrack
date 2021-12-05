@@ -38,23 +38,21 @@ func (items Items) MarshalLogArray(encoder zapcore.ArrayEncoder) error {
 }
 
 type Item struct {
-	Type      ItemType `bson:"type"`
-	Desc      string   `bson:"desc"`
-	CreatedAt int64    `bson:"createdAt"`
+	Type ItemType `json:"type" bson:"type"`
+	Desc string   `json:"desc" bson:"desc"`
 
-	Time *ItemTime `bson:"time"`
+	Time *ItemTime `json:"time" bson:"time"`
 }
 
 func (i *Item) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
 	encoder.AddInt("type", int(i.Type))
 	encoder.AddString("desc", i.Desc)
-	encoder.AddInt64("createdAt", i.CreatedAt)
 	encoder.AddObject("time", i.Time)
 	return nil
 }
 
 type ItemTime struct {
-	Duration int `bson:"duration"`
+	Duration int `json:"duration" bson:"duration"`
 }
 
 func (it *ItemTime) MarshalLogObject(encoder zapcore.ObjectEncoder) error {

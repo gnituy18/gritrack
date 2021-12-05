@@ -11,6 +11,7 @@ var (
 )
 
 type Store interface {
+	OwnedBy(ctx context.Context, missonId, userId string) (bool, error)
 	GetByUser(ctx context.Context, userId string) ([]*Mission, error)
 	Create(ctx context.Context, m *Mission) (string, error)
 	Get(ctx context.Context, id string) (*Mission, error)

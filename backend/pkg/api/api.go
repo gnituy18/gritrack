@@ -8,6 +8,7 @@ import (
 	"gritter/pkg/auth"
 	"gritter/pkg/log"
 	"gritter/pkg/mission"
+	"gritter/pkg/step"
 	"gritter/pkg/user"
 )
 
@@ -15,6 +16,7 @@ func Router() *routing.Router {
 	authStore := auth.New()
 	missionStore := mission.New()
 	userStore := user.New()
+	stepStore := step.New()
 
 	root := routing.New()
 	root.Use(corsHeader)
@@ -44,6 +46,9 @@ func Router() *routing.Router {
 
 	missionGroup := authenticated.Group("/mission")
 	MountMissionRoutes(missionGroup, missionStore)
+
+	stepGroup := missionGroup.Group("/<missionId>/step")
+	MountStepRoutes(stepGroup, stepStore, missionStore)
 
 	root.Any("*", func(rctx *routing.Context) error {
 		JSON(rctx, http.StatusNotFound, nil)
