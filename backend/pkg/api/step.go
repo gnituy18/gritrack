@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"gritter/pkg/context"
@@ -26,8 +27,8 @@ type stepHandler struct {
 	missionStore mission.Store
 }
 
-type createStepBody struct {
-	Summary string     `json:"summray"`
+type stepBody struct {
+	Summary string     `json:"summary"`
 	Items   step.Items `json:"items"`
 }
 
@@ -51,7 +52,7 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	body := &createStepBody{}
+	body := &stepBody{}
 	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil
@@ -74,5 +75,49 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 }
 
 func (sh *stepHandler) updateStep(rctx *routing.Context) error {
+	ctx := rctx.Get("ctx").(context.Context)
+	userId, ok := rctx.Get("userId").(string)
+	if !ok || userId == "" {
+		ctx.Error("rctx.Get userId failed in stepHandler.updateStep")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	}
+
+	missionId := rctx.Param("missionId")
+	owned, err := sh.missionStore.OwnedBy(ctx, missionId, userId)
+	if err != nil {
+		ctx.Error("stepHandler.missionStore.OwnedBy failed in stepHandler.updateStep")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	} else if !owned {
+		JSON(rctx, http.StatusForbidden, nil)
+		return nil
+	}
+
+	body := &stepBody{}
+	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
+		JSON(rctx, http.StatusBadRequest, err.Error())
+		return nil
+	}
+
+	stepId := rctx.Param("stepId")
+	s := &step.Step{
+		Id:        stepId,
+		MissionId: missionId,
+		Summary:   body.Summary,
+		Items:     body.Items,
+	}
+	fmt.Println(s)
+	err = sh.stepStore.Update(ctx, s)
+	if err == step.ErrNotFound {
+		JSON(rctx, http.StatusNotFound, nil)
+		return nil
+	} else if err != nil {
+		ctx.Error("stepHandler.stepStore.Update failed in stepHandler.updateStep")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	}
+
+	JSON(rctx, http.StatusOK, nil)
 	return nil
 }

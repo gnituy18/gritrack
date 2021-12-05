@@ -29,6 +29,10 @@ func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
 	id := uuidNewV4().String()
 	s.Id = id
 	s.CreatedAt = time.Now().Unix()
+	if s.Items == nil {
+		s.Items = []*Item{}
+	}
+
 	if err := im.doc.CreateOne(ctx, document.Step, s); err != nil {
 		ctx.With(
 			zap.Error(err),
@@ -40,11 +44,15 @@ func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
 	return id, nil
 }
 func (im *impl) Update(ctx context.Context, s *Step) error {
+	q := bson.M{
+		"id":        s.Id,
+		"missionId": s.MissionId,
+	}
 	updater := bson.M{
 		"summary": s.Summary,
 		"items":   s.Items,
 	}
-	if err := im.doc.UpdateOne(ctx, document.Mission, bson.M{"id": s.Id}, updater); err == document.ErrNotFound {
+	if err := im.doc.UpdateOne(ctx, document.Step, q, updater); err == document.ErrNotFound {
 		return ErrNotFound
 	} else if err != nil {
 		ctx.With(
