@@ -2,6 +2,7 @@ package api
 
 import (
 	"gritter/pkg/mission"
+	"gritter/pkg/step"
 	"gritter/pkg/user"
 )
 
@@ -34,5 +35,19 @@ func userToRepr(u *user.User) *userRepr {
 		Name:    u.Name,
 		Picture: u.Picture,
 		Intro:   u.Intro,
+	}
+}
+
+type stepRepr struct {
+	Id      string     `json:"id"`
+	Summary string     `json:"summary"`
+	Items   step.Items `json:"items"`
+}
+
+func stepToRepr(s *step.Step) *stepRepr {
+	return &stepRepr{
+		Id:      s.Id,
+		Summary: s.Summary,
+		Items:   s.Items,
 	}
 }
