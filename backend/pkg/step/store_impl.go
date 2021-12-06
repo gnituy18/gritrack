@@ -25,6 +25,20 @@ type impl struct {
 	doc document.Document
 }
 
+func (im *impl) GetByMissionId(ctx context.Context, missionId string, offset, limit int64) ([]*Step, error) {
+	q := bson.M{
+		"missionId": missionId,
+	}
+	sort := bson.D{bson.E{Key: "createdAt", Value: -1}}
+	steps := []*Step{}
+	if err := im.doc.Search(ctx, document.Step, offset, limit, q, sort, &steps); err != nil {
+		ctx.With(zap.Error(err)).Error("document.Document.Search failed in step.Store.GetByMissionId")
+		return nil, err
+	}
+
+	return steps, nil
+}
+
 func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
 	id := uuidNewV4().String()
 	s.Id = id
@@ -43,6 +57,7 @@ func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
 
 	return id, nil
 }
+
 func (im *impl) Update(ctx context.Context, s *Step) error {
 	q := bson.M{
 		"id":        s.Id,

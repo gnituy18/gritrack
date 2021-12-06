@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"gritter/pkg/context"
 	"gritter/pkg/mission"
@@ -18,6 +19,7 @@ func MountStepRoutes(group *routing.RouteGroup, stepStore step.Store, missionSto
 		missionStore: missionStore,
 	}
 
+	group.Get("", handler.getByMissionId)
 	group.Post("", handler.createStep)
 	group.Put("/<stepId>", handler.updateStep)
 }
@@ -30,6 +32,28 @@ type stepHandler struct {
 type stepBody struct {
 	Summary string     `json:"summary"`
 	Items   step.Items `json:"items"`
+}
+
+func (sh *stepHandler) getByMissionId(rctx *routing.Context) error {
+	ctx := rctx.Get("ctx").(context.Context)
+	missionId := rctx.Param("missionId")
+	offset, err := strconv.ParseInt(rctx.Param("offset"), 10, 64)
+	if err != nil {
+		JSON(rctx, http.StatusBadRequest, nil)
+	}
+	limit, err := strconv.ParseInt(rctx.Param("limit"), 10, 64)
+	if err != nil {
+		JSON(rctx, http.StatusBadRequest, nil)
+	}
+
+	steps, err := sh.stepStore.GetByMissionId(ctx, missionId, offset, limit)
+	reprs := []*stepRepr{}
+	for _, s := range steps {
+		reprs = append(reprs, stepToRepr(s))
+	}
+
+	JSON(rctx, http.StatusOK, reprs)
+	return nil
 }
 
 func (sh *stepHandler) createStep(rctx *routing.Context) error {
