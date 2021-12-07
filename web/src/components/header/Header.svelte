@@ -21,7 +21,6 @@
     <Avatar src={user.picture} alt={user.name} />
     <h1 class="ml-2">{user.name}</h1>
   </div>
-  <hr />
   <nav>
     <div class="flex justify-between items-center m-4">
       <h2>Missions</h2>
