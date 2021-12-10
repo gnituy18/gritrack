@@ -15,7 +15,7 @@ const config = {
       envDir: "../",
       resolve: {
         alias: {
-          $: path.resolve("./src"),
+          $types: path.resolve("./src/types"),
           $components: path.resolve("./src/components"),
           $stores: path.resolve("./src/stores"),
         },

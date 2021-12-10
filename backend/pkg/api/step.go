@@ -37,11 +37,11 @@ type stepBody struct {
 func (sh *stepHandler) getByMissionId(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
 	missionId := rctx.Param("missionId")
-	offset, err := strconv.ParseInt(rctx.Param("offset"), 10, 64)
+	offset, err := strconv.ParseInt(string(rctx.QueryArgs().Peek("offset")), 10, 64)
 	if err != nil {
 		JSON(rctx, http.StatusBadRequest, nil)
 	}
-	limit, err := strconv.ParseInt(rctx.Param("limit"), 10, 64)
+	limit, err := strconv.ParseInt(string(rctx.QueryArgs().Peek("limit")), 10, 64)
 	if err != nil {
 		JSON(rctx, http.StatusBadRequest, nil)
 	}

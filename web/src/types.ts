@@ -13,5 +13,10 @@ export interface Step {
 export interface Item {
 	type: number;
 	desc: string;
-	time: { duration: number };
+
+	time?: ItemTime;
+}
+
+export interface ItemTime {
+	duration: number;
 }
