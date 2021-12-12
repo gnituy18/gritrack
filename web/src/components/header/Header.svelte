@@ -11,7 +11,7 @@
   });
 </script>
 
-<header class="flex-none box-border ml-4 w-60 h-full border-r">
+<header class="sticky top-0 flex-none box-border ml-4 w-60 h-full border-r">
   <nav>
     <div class="flex items-center my-4 mr-4">
       <Logo />
