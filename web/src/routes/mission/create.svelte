@@ -43,7 +43,7 @@
         type="text"
         bind:value={name}
         {readonly}
-        class="w-full rounded bg-gray-100 border-transparent focus:border-blue-300"
+        class="w-full rounded-full bg-gray-100 border-transparent focus:border-blue-300"
       />
     </label>
   </form>
