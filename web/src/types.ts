@@ -8,6 +8,7 @@ export interface Step {
 	id: string;
 	summary: string;
 	items: Array<Item>;
+	createdAt: number;
 }
 
 export interface Item {

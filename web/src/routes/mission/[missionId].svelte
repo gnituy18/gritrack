@@ -7,7 +7,7 @@
     });
     const mission = await res.json();
 
-    res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}/step?offset=0&limit=5`, {
+    res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}/step?offset=0&limit=10`, {
       credentials: "include",
     });
     const steps = await res.json();
@@ -31,12 +31,14 @@
 
 <StepForm {mission} />
 <ul class="mt-20">
-  {#each steps as { summary, items }}
+  {#each steps as { summary, items, createdAt }}
     <li class="m-2">
+	  {createdAt}
       {summary}
       {#each items as item}
         <li>{item.type}</li>
       {/each}
     </li>
+	<hr>
   {/each}
 </ul>
