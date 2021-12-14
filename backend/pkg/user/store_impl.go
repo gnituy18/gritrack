@@ -150,5 +150,5 @@ func (im *impl) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	return nil
+	return n
 }
