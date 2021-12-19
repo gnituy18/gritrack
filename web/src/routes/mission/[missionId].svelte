@@ -23,22 +23,27 @@
 
 <script lang="ts">
   import type { Step, Mission } from "$types";
-  import StepForm from "$components/mission/StepForm.svelte"
+  import StepForm from "$components/mission/StepForm.svelte";
+  import StepItem from "$components/mission/Step.svelte";
 
   export let mission: Mission;
   export let steps: Array<Step>;
+
+  let editingStepId: string = "";
+  function setEditingStepId(stepId: string) {
+    editingStepId = stepId;
+  }
 </script>
 
 <StepForm {mission} />
 <ul class="mt-20">
-  {#each steps as { summary, items, createdAt }}
-    <li class="m-2">
-	  {createdAt}
-      {summary}
-      {#each items as item}
-        <li>{item.type}</li>
-      {/each}
-    </li>
-	<hr>
+  {#each steps as step}
+    {#if step.id === editingStepId}
+      <div on:click={() => setEditingStepId("")}>cancel</div>
+      <StepForm {mission} />
+    {:else}
+      <div on:click={() => setEditingStepId(step.id)}>edit</div>
+      <StepItem {step} />
+    {/if}
   {/each}
 </ul>
