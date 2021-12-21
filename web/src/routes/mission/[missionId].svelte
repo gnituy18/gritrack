@@ -33,14 +33,20 @@
   function setEditingStepId(stepId: string) {
     editingStepId = stepId;
   }
+
+  function isToday(ts: number): boolean {
+    return new Date().toLocaleDateString() === new Date(ts * 1000).toLocaleDateString();
+  }
 </script>
 
-<StepForm {mission} />
-<ul class="mt-20">
+<ul>
+  {#if steps.length === 0 || !isToday(steps[0].createdAt)}
+    <StepForm {mission} />
+  {/if}
   {#each steps as step}
     {#if step.id === editingStepId}
       <div on:click={() => setEditingStepId("")}>cancel</div>
-      <StepForm {mission} />
+      <StepForm {step} {mission} />
     {:else}
       <div on:click={() => setEditingStepId(step.id)}>edit</div>
       <StepItem {step} />
