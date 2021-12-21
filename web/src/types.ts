@@ -1,23 +1,26 @@
-export interface Mission {
-	id: string;
-	name: string;
-	description: string;
+export type Mission = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+export type Step = {
+  id: string;
+  summary: string;
+  items: Array<Item>;
+  createdAt: number;
+};
+
+export enum ItemType {
+  Time = 1,
 }
 
-export interface Step {
-	id: string;
-	summary: string;
-	items: Array<Item>;
-	createdAt: number;
-}
+export type Item = {
+  type: ItemType.Time;
+  desc: string;
+  time: ItemTime;
+};
 
-export interface Item {
-	type: number;
-	desc: string;
-
-	time?: ItemTime;
-}
-
-export interface ItemTime {
-	duration: number;
-}
+export type ItemTime = {
+  duration: number;
+};
