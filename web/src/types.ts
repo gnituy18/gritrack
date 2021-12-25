@@ -1,3 +1,10 @@
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  picture: string;
+};
+
 export type Mission = {
   id: string;
   name: string;
@@ -6,9 +13,9 @@ export type Mission = {
 
 export type Step = {
   id: string;
+  createdAt: number;
   summary: string;
   items: Array<Item>;
-  createdAt: number;
 };
 
 export enum ItemType {

@@ -15,7 +15,7 @@
     return {
       props: {
         mission,
-        steps,
+        propSteps: steps,
       },
     };
   }
@@ -23,16 +23,18 @@
 
 <script lang="ts">
   import type { Step, Mission } from "$types";
-  import StepForm from "$components/mission/StepForm.svelte";
-  import StepItem from "$components/mission/Step.svelte";
+  import { steps as storeSteps } from "$stores/mission";
+  import StepComp from "$components/mission/Step.svelte";
 
   export let mission: Mission;
-  export let steps: Array<Step>;
+  export let propSteps: Array<Step>;
 
-  let editingStepId: string = "";
-  function setEditingStepId(stepId: string) {
-    editingStepId = stepId;
-  }
+  let steps: Array<Step> = [];
+  let noStepToday: boolean = true;
+
+  $: steps = $storeSteps;
+  $: steps = propSteps;
+  $: noStepToday = steps.length === 0 || !isToday(steps[0].createdAt);
 
   function isToday(ts: number): boolean {
     return new Date().toLocaleDateString() === new Date(ts * 1000).toLocaleDateString();
@@ -40,16 +42,12 @@
 </script>
 
 <ul>
-  {#if steps.length === 0 || !isToday(steps[0].createdAt)}
-    <StepForm {mission} />
-  {/if}
-  {#each steps as step}
-    {#if step.id === editingStepId}
-      <div on:click={() => setEditingStepId("")}>cancel</div>
-      <StepForm {step} {mission} />
-    {:else}
-      <div on:click={() => setEditingStepId(step.id)}>edit</div>
-      <StepItem {step} />
+  {#key steps}
+    {#if noStepToday}
+      <StepComp editing {mission} />
     {/if}
-  {/each}
+    {#each steps as step}
+      <StepComp {step} {mission} />
+    {/each}
+  {/key}
 </ul>
