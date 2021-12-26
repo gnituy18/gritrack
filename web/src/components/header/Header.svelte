@@ -16,10 +16,10 @@
     <div class="flex items-center my-4 mr-4">
       <Logo />
     </div>
-    <div class="mt-8 mr-4">
-      <Button href="/mission/create" value="Create a mission" />
+    <div class="flex mt-8">
+      <h2 class="mr-16">Missions</h2>
+      <Button href="/mission/create" value="Create" />
     </div>
-    <h2 class="mt-8">Missions</h2>
     <ul class="my-4 mr-4">
       {#each missions as { id, name }}
         <li class="mt-1 rounded-full px-4 hover:cursor-pointer hover:bg-gray-100 ">
