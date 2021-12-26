@@ -95,7 +95,7 @@
         {editingStep.summary}
       </div>
     {:else}
-      <div class="my-1 p-1">{step.summary}</div>
+      <div class="my-1 p-1">{@html step.summary}</div>
     {/if}
     {#if editing}
       <span
