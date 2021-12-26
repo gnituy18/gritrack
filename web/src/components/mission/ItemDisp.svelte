@@ -4,8 +4,11 @@
   export let item: Item;
 </script>
 
-<li>
+<li class="flex my-1 rounded hover:bg-slate-200">
   {#if item.type === ItemType.Time}
-    ⏰{item.time.duration} hours
+    <p>⏰ {item.time.duration} {item.time.duration > 1 ? "hours" : "hour"} of {item.desc}</p>
+    <div class="ml-auto">
+      <slot />
+    </div>
   {/if}
 </li>

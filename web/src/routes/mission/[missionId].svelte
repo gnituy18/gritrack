@@ -41,7 +41,7 @@
   }
 </script>
 
-<ul>
+<ul class="divide-y-2">
   {#key steps}
     {#if noStepToday}
       <StepComp editing {mission} />

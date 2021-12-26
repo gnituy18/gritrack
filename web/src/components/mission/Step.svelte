@@ -9,10 +9,10 @@
   export let mission: Mission;
   export let step: Step = { id: undefined, summary: "", items: [], createdAt: undefined };
   const isNew = step.createdAt === undefined;
-  const currentTs: number = (step as Step).createdAt || Math.floor(new Date().getTime() / 1000);
+  const displayDate: Date = step.createdAt ? new Date(step.createdAt * 1000) : new Date();
   let editingStep: Step = { ...step };
 
-  console.log(step.items)
+  let showItemForm: boolean = false;
 
   async function submit() {
     if (isNew) {
@@ -29,7 +29,7 @@
         console.error(await res.text());
       }
     } else {
-	  let res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step/${step.id}`, {
+      let res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step/${step.id}`, {
         method: "PUT",
         credentials: "include",
         body: JSON.stringify({
@@ -54,50 +54,88 @@
     editingStep.items = [item, ...editingStep.items];
   }
 
-  function getDisplayTime(ts: number): string {
-    return new Date(ts * 1000).toLocaleDateString();
+  function removeItem(i: number) {
+    editingStep.items = [...editingStep.items.slice(0, i), ...editingStep.items.slice(i + 1, editingStep.items.length)];
   }
 </script>
 
-<li class="mt-2 p-4 hover:bg-gray-100">
-  {#if editing}
-    <div class="m-2 p-2 summary empty:before:text-gray-400" contenteditable bind:innerHTML={editingStep.summary}>
-      {editingStep.summary}
+<li class="border-gray-100 p-4 hover:bg-gray-100">
+  <div class="flex">
+    <time
+      class="inlint-block border border-slate-300 rounded-full px-2 text-sm bg-slate-200"
+      datetime={displayDate.toISOString()}>{displayDate.toLocaleDateString()}</time
+    >
+    <div class="ml-auto underline cursor-pointer">
+      {#if editing}
+        <span
+          on:click={() => {
+            editing = false;
+          }}
+        >
+          cancel
+        </span>
+      {:else}
+        <span
+          on:click={() => {
+            editing = true;
+          }}
+        >
+          edit
+        </span>
+      {/if}
     </div>
+  </div>
+  <div class="mt-2 ml-2">
+    {#if editing}
+      <div
+        class="my-2 rounded-md p-1 summary empty:before:text-gray-400 bg-white"
+        contenteditable
+        bind:innerHTML={editingStep.summary}
+      >
+        {editingStep.summary}
+      </div>
+    {:else}
+      <div class="my-1 p-1">{step.summary}</div>
+    {/if}
+    {#if editing}
+      <span
+        on:click={() => {
+          showItemForm = true;
+        }}
+        class="underline cursor-pointer">Add an item</span
+      >
+      {#if showItemForm}
+        <ItemForm
+          handleAdd={addItem}
+          handleCancel={() => {
+            showItemForm = false;
+          }}
+        />
+      {/if}
+    {/if}
     <ul>
-      <ItemForm {addItem} />
-      <li class="p-2">
-        {#each editingStep.items as item}
-          <li>⏰{item.time.duration} hours</li>
+      {#if editing}
+        {#each editingStep.items as item, i}
+          <ItemDisp {item}>
+            <span on:click={() => removeItem(i)} class="underline cursor-pointer">remove</span>
+          </ItemDisp>
         {/each}
-      </li>
+      {:else}
+        {#each step.items as item}
+          <ItemDisp {item} />
+        {/each}
+      {/if}
     </ul>
-    <Button onClick={submit} value="Submit" />
-    <div
-      on:click={() => {
-        editing = false;
-      }}
-    >
-      cancel
-    </div>
-  {:else}
-    {getDisplayTime(currentTs)}
-    {step.summary}
-    {#each step.items as item}
-      <ItemDisp {item} />
-    {/each}
-    <div
-      on:click={() => {
-        editing = true;
-      }}
-    >
-      edit
-    </div>
-  {/if}
+    {#if editing}
+      <div class="flex mt-4 justify-end">
+        <Button onClick={submit} value="Submit" />
+      </div>
+    {/if}
+  </div>
 </li>
 
 <style>
   .summary:empty::before {
-    content: "What have you done?";
+    content: "Today's summary";
   }
 </style>
