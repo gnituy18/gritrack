@@ -4,7 +4,10 @@
   export let onClick: () => void = () => {};
 </script>
 
-<button class="w-full rounded-full pt-2 pb-2 text-gray-500 bg-gray-300 hover:bg-gray-200" on:click={onClick}>
+<button
+  class="border border-slate-500 rounded-full px-3 text-slate-500 bg-slate-300 hover:bg-slate-200"
+  on:click={onClick}
+>
   {#if href !== ""}
     <a {href}>
       {value}
