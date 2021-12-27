@@ -15,9 +15,9 @@
   {#if item.type === 1}
     <input bind:value={item.time.duration} type="number" min={0} class="ml-2 border-slate-300 rounded p-1 w-12" />
     {#if item.time.duration > 1}
-      <span class="ml-1">hours of</span>
+      <span class="ml-1">hours : </span>
     {:else}
-      <span class="ml-1">hour of</span>
+      <span class="ml-1">hour : </span>
     {/if}
   {/if}
   <span
