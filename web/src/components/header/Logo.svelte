@@ -5,7 +5,4 @@
       <h1>Gritter</h1>
     </div>
   </a>
-  <a class="ml-auto text-xl" href="/about">
-    <strong title="What is Gritter?">?<strong /></strong>
-  </a>
 </div>
