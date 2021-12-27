@@ -34,8 +34,8 @@
   }
 </script>
 
-<div class="m-4 w-80">
-  <h2>Create a Mission</h2>
+<div class="m-4 w-full">
+  <h2>Set a mission that's really important to you and you want to spend more than a year on it.</h2>
   <form>
     <label for="name" class="block mt-2">
       <div class="text-gray-500">Name</div>
@@ -43,7 +43,7 @@
         type="text"
         bind:value={name}
         {readonly}
-        class="w-full rounded-full bg-gray-100 border-transparent focus:border-blue-300"
+        class="w-80 rounded-full p-1 bg-gray-100 border-transparent focus:border-blue-300"
       />
     </label>
   </form>
