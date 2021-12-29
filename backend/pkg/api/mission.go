@@ -18,9 +18,12 @@ func MountMissionRoutes(group *routing.RouteGroup, missionStore mission.Store) {
 
 	group.Get("", handler.getMissionsByUserId)
 	group.Post("", handler.createMission)
-	group.Get("/<id>", handler.getMission)
-	group.Put("/<id>", handler.updateMission)
-	group.Delete("/<id>", handler.deleteMission)
+
+	mustOwnMission := createMustOwnMission(missionStore)
+	group.Use(mustOwnMission)
+	group.Get("/<missionId>", handler.getMission)
+	group.Put("/<missionId>", handler.updateMission)
+	group.Delete("/<missionId>", handler.deleteMission)
 }
 
 type missionHandler struct {
@@ -89,7 +92,7 @@ func (mh *missionHandler) createMission(rctx *routing.Context) error {
 
 func (mh *missionHandler) getMission(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
-	id := rctx.Param("id")
+	id := rctx.Param("missionId")
 
 	m, err := mh.missionStore.Get(ctx, id)
 	if err == mission.ErrNotFound {
@@ -98,7 +101,7 @@ func (mh *missionHandler) getMission(rctx *routing.Context) error {
 	} else if err != nil {
 		ctx.With(
 			zap.Error(err),
-			zap.String("id", id),
+			zap.String("missionId", id),
 		).Error("missionHandler.missionStore.Get failed in missionHandler.getMission")
 		JSON(rctx, http.StatusInternalServerError, nil)
 		return err
@@ -112,7 +115,7 @@ func (mh *missionHandler) getMission(rctx *routing.Context) error {
 
 func (mh *missionHandler) updateMission(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
-	id := rctx.Param("id")
+	id := rctx.Param("missionId")
 
 	body := rctx.Request.Body()
 	m := &mission.Mission{}
@@ -130,7 +133,7 @@ func (mh *missionHandler) updateMission(rctx *routing.Context) error {
 	} else if err != nil {
 		ctx.With(
 			zap.Error(err),
-			zap.String("id", id),
+			zap.String("missionId", id),
 		).Error("missionHandler.missionStore.Update failed in missionHandler.updateMission")
 		JSON(rctx, http.StatusInternalServerError, nil)
 		return err
@@ -142,13 +145,13 @@ func (mh *missionHandler) updateMission(rctx *routing.Context) error {
 
 func (mh *missionHandler) deleteMission(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
-	id := rctx.Param("id")
+	id := rctx.Param("missionId")
 
 	err := mh.missionStore.Delete(ctx, id)
 	if err != nil {
 		ctx.With(
 			zap.Error(err),
-			zap.String("id", id),
+			zap.String("missionId", id),
 		).Error("missionHandler.missionStore.Delete failed in missionHandler.deleteMission")
 		JSON(rctx, http.StatusInternalServerError, nil)
 		return err

@@ -1,23 +1,29 @@
 <script lang="ts" context="module">
   /** @type {import('@sveltejs/kit').Load} */
   export async function load({ page, fetch }) {
-    const missionId = page.params.missionId;
-    let res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}`, {
-      credentials: "include",
-    });
-    const mission = await res.json();
+    try {
+      const missionId = page.params.missionId;
+      let res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}`, {
+        credentials: "include",
+      });
+      const mission = await res.json();
 
-    res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}/step?offset=0&limit=10`, {
-      credentials: "include",
-    });
-    const steps = await res.json();
-
-    return {
-      props: {
-        mission,
-        propSteps: steps,
-      },
-    };
+      res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}/step?offset=0&limit=10`, {
+        credentials: "include",
+      });
+      const steps = await res.json();
+      return {
+        props: {
+          mission,
+          propSteps: steps,
+        },
+      };
+    } catch (error) {
+	  console.error(error)
+      return {
+        status: 404,
+      };
+    }
   }
 </script>
 

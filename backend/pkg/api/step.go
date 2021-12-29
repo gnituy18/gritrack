@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -131,7 +130,6 @@ func (sh *stepHandler) updateStep(rctx *routing.Context) error {
 		Summary:   body.Summary,
 		Items:     body.Items,
 	}
-	fmt.Println(s)
 	err = sh.stepStore.Update(ctx, s)
 	if err == step.ErrNotFound {
 		JSON(rctx, http.StatusNotFound, nil)
