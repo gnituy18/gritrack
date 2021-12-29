@@ -32,7 +32,7 @@ func (im *impl) OwnedBy(ctx context.Context, missionId, userId string) (bool, er
 	}
 	m := &Mission{}
 	if err := im.doc.GetOne(ctx, document.Mission, q, m); err == document.ErrNotFound {
-		return false, ErrNotFound
+		return false, nil
 	} else if err != nil {
 		ctx.With(
 			zap.Error(err),

@@ -10,6 +10,7 @@ import (
 
 	"gritter/pkg/context"
 	"gritter/pkg/log"
+	"gritter/pkg/mission"
 )
 
 var (
@@ -81,6 +82,25 @@ func mustAuthUser(rctx *routing.Context) error {
 	rctx.Next()
 
 	return nil
+}
+
+func createMustOwnMission(ms mission.Store) func(rctx *routing.Context) error {
+	return func(rctx *routing.Context) error {
+		ctx := rctx.Get("ctx").(context.Context)
+		missionId := rctx.Param("missionId")
+		userId := rctx.Get("userId").(string)
+		if owned, err := ms.OwnedBy(ctx, missionId, userId); err != nil {
+			ctx.Error("missionStore.OwnedBy failed in api.createMustHasMission")
+			return err
+		} else if !owned {
+			JSON(rctx, http.StatusForbidden, nil)
+			rctx.Abort()
+			return nil
+		}
+
+		rctx.Next()
+		return nil
+	}
 }
 
 func saveStore(rctx *routing.Context, store *session.Store) {
