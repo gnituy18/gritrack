@@ -1,5 +1,6 @@
 import { sequence } from "@sveltejs/kit/hooks";
 import type { Handle } from "@sveltejs/kit";
+import v1 from "$apis/v1";
 
 const initSession: Handle = async ({ request, resolve }) => {
   request.locals = {
@@ -9,7 +10,7 @@ const initSession: Handle = async ({ request, resolve }) => {
 };
 
 const getUser: Handle = async ({ request, resolve }) => {
-  const apiRes = await fetch("http://localhost:8080/api/v1/user/current", {
+  const apiRes = await fetch(v1("user/current"), {
     headers: { ...request.headers },
   });
 

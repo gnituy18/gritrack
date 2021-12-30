@@ -1,5 +1,7 @@
 <script lang="ts">
   import Button from "$components/common/Button.svelte";
+  import v1 from "$apis/v1";
+
   function signIn() {
     gapi.load("client:auth2", async () => {
       try {
@@ -9,7 +11,7 @@
         });
         const user = await gapi.auth2.getAuthInstance().signIn();
         const accessToken = user.getAuthResponse().access_token;
-        const resp = await fetch("http://localhost:8080/api/v1/auth", {
+        const resp = await fetch(v1("/auth"), {
           method: "POST",
           redirect: "manual",
           credentials: "include",

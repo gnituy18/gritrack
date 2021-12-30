@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Mission, Step, Item } from "$types";
+  import v1 from "$apis/v1";
   import { steps as storeSteps } from "$stores/mission";
   import ItemDisp from "$components/mission/ItemDisp.svelte";
   import Button from "$components/common/Button.svelte";
@@ -16,7 +17,7 @@
 
   async function submit() {
     if (isNew) {
-      let res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step`, {
+      let res = await fetch(v1(`/mission/${mission.id}/step`), {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({
@@ -29,7 +30,7 @@
         console.error(await res.text());
       }
     } else {
-      let res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step/${step.id}`, {
+      let res = await fetch(v1(`/mission/${mission.id}/step/${step.id}`), {
         method: "PUT",
         credentials: "include",
         body: JSON.stringify({
@@ -43,7 +44,7 @@
       }
     }
 
-    const res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step?offset=0&limit=10`, {
+    const res = await fetch(v1(`/mission/${mission.id}/step?offset=0&limit=10`), {
       credentials: "include",
     });
     $storeSteps = await res.json();

@@ -1,10 +1,11 @@
 <script lang="ts" context="module">
   import type { Load } from "@sveltejs/kit";
+  import v1 from "$apis/v1";
 
   export const load: Load = async ({ page, fetch }) => {
     try {
       const missionId = page.params.missionId;
-      let res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}`, {
+      let res = await fetch(v1(`/mission/${missionId}`), {
         credentials: "include",
       });
       if (res.status !== 200) {
@@ -14,10 +15,9 @@
       }
       const mission = await res.json();
 
-      res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}/step?offset=0&limit=10`, {
+      res = await fetch(v1(`/mission/${missionId}/step?offset=0&limit=10`), {
         credentials: "include",
       });
-
       if (res.status !== 200) {
         return {
           status: res.status,
@@ -63,7 +63,7 @@
   }
 
   async function fetchMoreStep() {
-    const res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step?offset=${count}&limit=10`, {
+    const res = await fetch(v1(`/mission/${mission.id}/step?offset=${count}&limit=10`), {
       credentials: "include",
     });
     const moreSteps = await res.json();
