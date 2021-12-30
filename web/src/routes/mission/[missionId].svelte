@@ -19,7 +19,7 @@
         },
       };
     } catch (error) {
-	  console.error(error)
+      console.error(error);
       return {
         status: 404,
       };
@@ -31,12 +31,15 @@
   import type { Step, Mission } from "$types";
   import { steps as storeSteps } from "$stores/mission";
   import StepComp from "$components/mission/Step.svelte";
+  import Button from "$/components/common/Button.svelte";
 
   export let mission: Mission;
   export let propSteps: Array<Step>;
 
   let steps: Array<Step> = [];
   let noStepToday: boolean = true;
+  let count: number = 10;
+  let hasMore: boolean = true;
 
   $: steps = $storeSteps;
   $: steps = propSteps;
@@ -44,6 +47,18 @@
 
   function isToday(ts: number): boolean {
     return new Date().toLocaleDateString() === new Date(ts * 1000).toLocaleDateString();
+  }
+
+  async function fetchMoreStep() {
+    const res = await fetch(`http://localhost:8080/api/v1/mission/${mission.id}/step?offset=${count}&limit=10`, {
+      credentials: "include",
+    });
+    const moreSteps = await res.json();
+    steps = [...steps, ...moreSteps];
+    count += 10;
+    if (moreSteps.length < 10) {
+      hasMore = false;
+    }
   }
 </script>
 
@@ -57,3 +72,8 @@
     {/each}
   {/key}
 </ul>
+{#if hasMore}
+  <div class="p-4 flex justify-center">
+    <Button onClick={fetchMoreStep} value="show more" />
+  </div>
+{/if}
