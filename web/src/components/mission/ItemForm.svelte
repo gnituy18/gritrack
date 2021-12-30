@@ -3,7 +3,11 @@
 
   export let handleAdd: (item: Item) => void;
   export let handleCancel: () => void;
-  export let item: Item = { type: 1, desc: "", time: { duration: 1 } };
+  let timeInput = 10;
+  export let item: Item = { type: 1, desc: "", time: { duration: timeInput * 60 } };
+
+  // TODO: Put it somewhere else
+  $: item = { ...item, time: { duration: Math.floor(timeInput * 60) } };
 
   let selected: number = 1;
 </script>
@@ -13,11 +17,11 @@
     <option value={1}>⏰ time</option>
   </select>
   {#if item.type === 1}
-    <input bind:value={item.time.duration} type="number" min={0} class="ml-2 border-slate-300 rounded p-1 w-12" />
+    <input bind:value={timeInput} type="number" min={0} class="ml-2 border-slate-300 rounded p-1 w-12" />
     {#if item.time.duration > 1}
-      <span class="ml-1">hours : </span>
+      <span class="ml-1">minutes: </span>
     {:else}
-      <span class="ml-1">hour : </span>
+      <span class="ml-1">minute: </span>
     {/if}
   {/if}
   <span
