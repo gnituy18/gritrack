@@ -1,4 +1,5 @@
 <script lang="ts">
+  import v1 from "$apis/v1";
   import { goto } from "$app/navigation";
   import Button from "$components/common/Button.svelte";
 
@@ -16,7 +17,7 @@
       console.error("input invalid");
       return;
     }
-    const resp = await fetch("http://localhost:8080/api/v1/mission", {
+    const resp = await fetch(v1("/mission"), {
       method: "POST",
       credentials: "include",
       headers: {

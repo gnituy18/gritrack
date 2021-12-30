@@ -1,12 +1,13 @@
 <script>
   import { onMount } from "svelte";
+  import v1 from "$apis/v1";
 
   import Logo from "$components/header/Logo.svelte";
   import Button from "$components/common/Button.svelte";
 
   let missions = [];
   onMount(async () => {
-    const resp = await fetch("http://localhost:8080/api/v1/mission", { credentials: "include" });
+    const resp = await fetch(v1("/mission"), { credentials: "include" });
     missions = await resp.json();
   });
 </script>

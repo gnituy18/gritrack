@@ -19,6 +19,7 @@ const config = {
           $types: path.resolve("./src/types"),
           $components: path.resolve("./src/components"),
           $stores: path.resolve("./src/stores"),
+          $apis: path.resolve("./src/apis"),
         },
       },
     },

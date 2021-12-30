@@ -20,7 +20,8 @@
       "$components/*": ["src/components/*"],
       "$stores/*": ["src/stores/*"],
       "$lib": ["src/lib"],
-      "$lib/*": ["src/lib/*"]
+      "$lib/*": ["src/lib/*"],
+      "$apis/*": ["src/apis/*"]
     }
   },
   "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "src/**/*.svelte"]
