@@ -1,6 +1,6 @@
 <div class="m-2">
   <h1 id="Hello-Gritter">Hello Gritter!</h1>
-  <p><span>我想要幫助那些想追逐目標卻受挫無力的人，因此有了這個專案。</span></p>
+  <p><span>我想要幫助有目標想達成卻受挫無力的人，因此有了這個專案。</span></p>
 
   <p class="mt-4"><span class="ui-comment-inline-span">Gritter</span><span>是一項幫助個人達成目標的工具。</span></p>
   <ol>
