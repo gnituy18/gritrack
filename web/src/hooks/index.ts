@@ -10,7 +10,7 @@ const initSession: Handle = async ({ request, resolve }) => {
 };
 
 const getUser: Handle = async ({ request, resolve }) => {
-  const apiRes = await fetch(v1("user/current"), {
+  const apiRes = await fetch(v1("/user/current"), {
     headers: { ...request.headers },
   });
 
