@@ -1,17 +1,30 @@
 <script lang="ts" context="module">
-  /** @type {import('@sveltejs/kit').Load} */
-  export async function load({ page, fetch }) {
+  import type { Load } from "@sveltejs/kit";
+
+  export const load: Load = async ({ page, fetch }) => {
     try {
       const missionId = page.params.missionId;
       let res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}`, {
         credentials: "include",
       });
+      if (res.status !== 200) {
+        return {
+          status: res.status,
+        };
+      }
       const mission = await res.json();
 
       res = await fetch(`http://localhost:8080/api/v1/mission/${missionId}/step?offset=0&limit=10`, {
         credentials: "include",
       });
+
+      if (res.status !== 200) {
+        return {
+          status: res.status,
+        };
+      }
       const steps = await res.json();
+
       return {
         props: {
           mission,
@@ -21,10 +34,10 @@
     } catch (error) {
       console.error(error);
       return {
-        status: 404,
+        status: 500,
       };
     }
-  }
+  };
 </script>
 
 <script lang="ts">
