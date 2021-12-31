@@ -18,10 +18,10 @@ func MountMissionRoutes(group *routing.RouteGroup, missionStore mission.Store) {
 
 	group.Get("", handler.getMissionsByUserId)
 	group.Post("", handler.createMission)
+	group.Get("/<missionId>", handler.getMission)
 
 	mustOwnMission := createMustOwnMission(missionStore)
 	group.Use(mustOwnMission)
-	group.Get("/<missionId>", handler.getMission)
 	group.Put("/<missionId>", handler.updateMission)
 	group.Delete("/<missionId>", handler.deleteMission)
 }

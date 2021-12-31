@@ -19,6 +19,9 @@ func MountStepRoutes(group *routing.RouteGroup, stepStore step.Store, missionSto
 	}
 
 	group.Get("", handler.getByMissionId)
+
+	mustOwnMission := createMustOwnMission(missionStore)
+	group.Use(mustOwnMission)
 	group.Post("", handler.createStep)
 	group.Put("/<stepId>", handler.updateStep)
 }
@@ -64,23 +67,13 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	missionId := rctx.Param("missionId")
-	owned, err := sh.missionStore.OwnedBy(ctx, missionId, userId)
-	if err != nil {
-		ctx.Error("stepHandler.missionStore.OwnedBy failed in stepHandler.createStep")
-		JSON(rctx, http.StatusInternalServerError, nil)
-		return nil
-	} else if !owned {
-		JSON(rctx, http.StatusForbidden, nil)
-		return nil
-	}
-
 	body := &stepBody{}
 	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil
 	}
 
+	missionId := rctx.Param("missionId")
 	step := &step.Step{
 		MissionId: missionId,
 		Summary:   body.Summary,
@@ -106,23 +99,13 @@ func (sh *stepHandler) updateStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	missionId := rctx.Param("missionId")
-	owned, err := sh.missionStore.OwnedBy(ctx, missionId, userId)
-	if err != nil {
-		ctx.Error("stepHandler.missionStore.OwnedBy failed in stepHandler.updateStep")
-		JSON(rctx, http.StatusInternalServerError, nil)
-		return nil
-	} else if !owned {
-		JSON(rctx, http.StatusForbidden, nil)
-		return nil
-	}
-
 	body := &stepBody{}
 	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil
 	}
 
+	missionId := rctx.Param("missionId")
 	stepId := rctx.Param("stepId")
 	s := &step.Step{
 		Id:        stepId,
@@ -130,7 +113,7 @@ func (sh *stepHandler) updateStep(rctx *routing.Context) error {
 		Summary:   body.Summary,
 		Items:     body.Items,
 	}
-	err = sh.stepStore.Update(ctx, s)
+	err := sh.stepStore.Update(ctx, s)
 	if err == step.ErrNotFound {
 		JSON(rctx, http.StatusNotFound, nil)
 		return nil
