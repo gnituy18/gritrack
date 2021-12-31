@@ -2,6 +2,7 @@
   import type { Mission, Step, Item } from "$types";
   import v1 from "$apis/v1";
   import { steps as storeSteps } from "$stores/mission";
+  import { session } from "$app/stores";
   import ItemDisp from "$components/mission/ItemDisp.svelte";
   import Button from "$components/common/Button.svelte";
   import ItemForm from "$components/mission/ItemForm.svelte";
@@ -11,9 +12,11 @@
   export let step: Step = { id: undefined, summary: "", items: [], createdAt: undefined };
   const isNew = step.createdAt === undefined;
   const displayDate: Date = step.createdAt ? new Date(step.createdAt * 1000) : new Date();
-  let editingStep: Step = { ...step };
 
+  let isOwner: boolean;
+  let editingStep: Step = { ...step };
   let showItemForm: boolean = false;
+  $: isOwner = $session.currentUser.id === mission.userId;
 
   async function submit() {
     if (isNew) {
@@ -66,25 +69,27 @@
       class="inlint-block border border-slate-300 rounded-full px-2 text-sm bg-slate-200"
       datetime={displayDate.toISOString()}>{displayDate.toLocaleDateString()}</time
     >
-    <div class="ml-auto underline cursor-pointer">
-      {#if editing}
-        <span
-          on:click={() => {
-            editing = false;
-          }}
-        >
-          cancel
-        </span>
-      {:else}
-        <span
-          on:click={() => {
-            editing = true;
-          }}
-        >
-          edit
-        </span>
-      {/if}
-    </div>
+    {#if isOwner}
+      <div class="ml-auto underline cursor-pointer">
+        {#if editing}
+          <span
+            on:click={() => {
+              editing = false;
+            }}
+          >
+            cancel
+          </span>
+        {:else}
+          <span
+            on:click={() => {
+              editing = true;
+            }}
+          >
+            edit
+          </span>
+        {/if}
+      </div>
+    {/if}
   </div>
   <div class="mt-2 ml-2">
     {#if editing}

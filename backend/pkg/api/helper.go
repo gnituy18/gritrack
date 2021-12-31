@@ -8,6 +8,7 @@ import (
 
 type missionRepr struct {
 	Id          string `json:"id"`
+	UserId      string `json:"userId"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
@@ -15,6 +16,7 @@ type missionRepr struct {
 func missionToRepr(m *mission.Mission) *missionRepr {
 	return &missionRepr{
 		Id:          m.Id,
+		UserId:      m.UserId,
 		Name:        m.Name,
 		Description: m.Description,
 	}
