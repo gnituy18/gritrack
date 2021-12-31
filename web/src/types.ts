@@ -7,6 +7,7 @@ export type User = {
 
 export type Mission = {
   id: string;
+  userId: string;
   name: string;
   description: string;
 };

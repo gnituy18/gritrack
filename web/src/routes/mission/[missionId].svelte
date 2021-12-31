@@ -43,17 +43,20 @@
 <script lang="ts">
   import type { Step, Mission } from "$types";
   import { steps as storeSteps } from "$stores/mission";
+  import { session } from "$app/stores";
   import StepComp from "$components/mission/Step.svelte";
   import Button from "$/components/common/Button.svelte";
 
   export let mission: Mission;
   export let propSteps: Array<Step>;
 
+  let isOwner: boolean;
   let steps: Array<Step> = [];
   let noStepToday: boolean = true;
   let count: number = 10;
   let hasMore: boolean = true;
 
+  $: isOwner = $session.currentUser.id === mission.userId;
   $: steps = $storeSteps;
   $: steps = propSteps;
   $: noStepToday = steps.length === 0 || !isToday(steps[0].createdAt);
@@ -76,8 +79,11 @@
 </script>
 
 <ul class="divide-y-2">
+  {#if !isOwner}
+    <h1>{mission.name}</h1>
+  {/if}
   {#key steps}
-    {#if noStepToday}
+    {#if noStepToday && isOwner}
       <StepComp editing {mission} />
     {/if}
     {#each steps as step}
