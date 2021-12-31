@@ -47,7 +47,7 @@ func Router() *routing.Router {
 	missionGroup := authenticated.Group("/mission")
 	MountMissionRoutes(missionGroup, missionStore)
 
-	stepGroup := missionGroup.Group("/<missionId>/step")
+	stepGroup := authenticated.Group("/mission/<missionId>/step")
 	MountStepRoutes(stepGroup, stepStore, missionStore)
 
 	root.Any("*", func(rctx *routing.Context) error {
