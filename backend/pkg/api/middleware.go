@@ -26,6 +26,8 @@ func init() {
 	provider, err := redis.New(redis.Config{
 		KeyPrefix:   "session",
 		Addr:        os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		Username:    os.Getenv("REDIS_USERNAME"),
+		Password:    os.Getenv("REDIS_PASSWORD"),
 		PoolSize:    10,
 		IdleTimeout: 24 * time.Hour,
 	})
