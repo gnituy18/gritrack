@@ -2,9 +2,11 @@ package api
 
 import (
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/fasthttp/session/v2"
-	"github.com/fasthttp/session/v2/providers/memory"
+	"github.com/fasthttp/session/v2/providers/redis"
 	routing "github.com/qiangxue/fasthttp-routing"
 	"go.uber.org/zap"
 
@@ -21,7 +23,12 @@ func init() {
 	cfg := session.NewDefaultConfig()
 	sess = session.New(cfg)
 
-	provider, err := memory.New(memory.Config{})
+	provider, err := redis.New(redis.Config{
+		KeyPrefix:   "session",
+		Addr:        os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		PoolSize:    10,
+		IdleTimeout: 24 * time.Hour,
+	})
 	if err != nil {
 		log.Global().Fatal(err)
 	}
