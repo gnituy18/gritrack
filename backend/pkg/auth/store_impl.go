@@ -38,7 +38,7 @@ func (im *impl) authWithGoogle(ctx context.Context, info *InfoGoogle) (*Result, 
 	tokenInfoCall := oauth2Service.Tokeninfo()
 	tokenInfoCall.AccessToken(info.AccessToken)
 	tokenInfo, err := tokenInfoCall.Do()
-	if tokenInfo.Audience != os.Getenv("ENV_GOOGLE_CLIENT_ID") {
+	if tokenInfo.Audience != os.Getenv("GOOGLE_CLIENT_ID") {
 		return nil, ErrTokenAudienceInvalid
 	} else if err != nil {
 		return nil, err

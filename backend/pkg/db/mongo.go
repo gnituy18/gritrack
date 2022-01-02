@@ -2,12 +2,13 @@ package db
 
 import (
 	"context"
-
-	"gritter/pkg/log"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+
+	"gritter/pkg/log"
 )
 
 var (
@@ -18,8 +19,7 @@ func GetMongo() (*mongo.Client, error) {
 	if mongoClient != nil {
 		return mongoClient, nil
 	}
-
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://mongo:27017"))
+	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGO_URI")))
 	if err != nil {
 		log.Global().With(zap.Error(err)).Error("mongo.NewClient failed in db.GetMongo")
 		return nil, err
