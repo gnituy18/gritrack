@@ -1,7 +1,6 @@
-FROM golang:1.16
+FROM golang:1.17
 
 WORKDIR /go/src/gritter
-COPY ./backend .
-COPY .env .
+COPY . .
 
 CMD ["go", "run", "main.go"]

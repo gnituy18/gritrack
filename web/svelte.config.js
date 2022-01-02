@@ -12,7 +12,6 @@ const config = {
     target: "#root",
     vite: {
       envPrefix: "ENV_",
-      envDir: "../",
       resolve: {
         alias: {
           $: path.resolve("./src"),
