@@ -1,14 +1,6 @@
 version: "3"
 
 services:
-  backend:
-    build: .
-    image: gritter_backend:latest
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongo
-      - redis
   mongo:
     image: mongo:4.4
     restart: always
