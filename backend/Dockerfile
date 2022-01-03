@@ -1,6 +1,12 @@
-FROM golang:1.17
+FROM golang:1.17-alpine as builder
 
-WORKDIR /go/src/gritter
+WORKDIR /backend
+COPY go.* ./
+RUN go mod download
 COPY . .
+RUN go build -v -o server
 
-CMD ["go", "run", "main.go"]
+FROM alpine:3.15
+COPY --from=builder /backend/server /backend/server
+
+CMD ["/backend/server"]
