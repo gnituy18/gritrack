@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	routing "github.com/qiangxue/fasthttp-routing"
 	"go.uber.org/zap"
@@ -74,7 +75,7 @@ func (ah *authHandler) auth(rctx *routing.Context) error {
 	store.Set("userId", userId)
 	saveStore(rctx, store)
 
-	Redirect(rctx, "http://localhost:3000")
+	Redirect(rctx, os.Getenv("WEB_CLIENT_HOST"))
 
 	return nil
 }
