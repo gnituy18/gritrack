@@ -54,7 +54,7 @@ func logRequest(rctx *routing.Context) error {
 }
 
 func corsHeader(rctx *routing.Context) error {
-	rctx.Response.Header.Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	rctx.Response.Header.Set("Access-Control-Allow-Origin", os.Getenv("WEB_CLIENT_HOST"))
 	rctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 	if rctx.Request.Header.IsOptions() {
 		rctx.Response.Header.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE")
