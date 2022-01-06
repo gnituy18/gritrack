@@ -2,9 +2,9 @@
   import type { Load } from "@sveltejs/kit";
   import v1 from "$apis/v1";
 
-  export const load: Load = async ({ page, fetch }) => {
+  export const load: Load = async ({ params, fetch }) => {
     try {
-      const missionId = page.params.missionId;
+      const missionId = params.missionId;
       let res = await fetch(v1(`/mission/${missionId}`), {
         credentials: "include",
       });

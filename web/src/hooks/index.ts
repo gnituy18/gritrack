@@ -1,5 +1,5 @@
 import { sequence } from "@sveltejs/kit/hooks";
-import type { Handle } from "@sveltejs/kit";
+import type { Handle, HandleError } from "@sveltejs/kit";
 import v1 from "$apis/v1";
 
 const initSession: Handle = async ({ request, resolve }) => {
@@ -14,7 +14,7 @@ const getUser: Handle = async ({ request, resolve }) => {
     headers: { ...request.headers },
   });
 
-  if (!apiRes.ok && request.path !== "/login") {
+  if (!apiRes.ok && request.url.pathname !== "/login") {
     return {
       status: 302,
       headers: {
@@ -23,7 +23,7 @@ const getUser: Handle = async ({ request, resolve }) => {
     };
   }
 
-  if (apiRes.ok && request.path === "/login") {
+  if (apiRes.ok && request.url.pathname === "/login") {
     return {
       status: 302,
       headers: {
@@ -58,6 +58,10 @@ export const handle: Handle<{
     name: string;
   };
 }> = sequence(initSession, getUser);
+
+export const handleError: HandleError = async ({ error }) => {
+  console.error(error);
+};
 
 export async function getSession({ locals: { session } }) {
   return session;
