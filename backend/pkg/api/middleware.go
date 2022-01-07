@@ -8,6 +8,7 @@ import (
 	"github.com/fasthttp/session/v2"
 	"github.com/fasthttp/session/v2/providers/redis"
 	routing "github.com/qiangxue/fasthttp-routing"
+	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 
 	"gritter/pkg/context"
@@ -21,6 +22,8 @@ var (
 
 func init() {
 	cfg := session.NewDefaultConfig()
+	cfg.CookieSameSite = fasthttp.CookieSameSiteNoneMode
+	cfg.Secure = true
 	sess = session.New(cfg)
 
 	provider, err := redis.New(redis.Config{
