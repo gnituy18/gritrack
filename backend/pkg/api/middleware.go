@@ -24,6 +24,7 @@ func init() {
 	cfg := session.NewDefaultConfig()
 	cfg.CookieSameSite = fasthttp.CookieSameSiteNoneMode
 	cfg.Secure = true
+	cfg.Domain = os.Getenv("DOMAIN")
 	sess = session.New(cfg)
 
 	provider, err := redis.New(redis.Config{
