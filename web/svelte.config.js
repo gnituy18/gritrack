@@ -13,7 +13,7 @@ const config = {
     target: "#root",
     adapter: adapter(),
     prerender: {
-      onError: "continue",
+      enabled: false,
     },
     vite: {
       envPrefix: "ENV_",
