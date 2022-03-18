@@ -10,7 +10,6 @@ const config = {
     }),
   ],
   kit: {
-    target: "#root",
     adapter: adapter(),
     prerender: {
       enabled: false,
