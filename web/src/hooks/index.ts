@@ -1,5 +1,5 @@
 import { sequence } from "@sveltejs/kit/hooks";
-import type { Handle, HandleError } from "@sveltejs/kit";
+import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
 import v1 from "$apis/v1";
 
 const initSession: Handle = async ({ event, resolve }) => {
@@ -38,6 +38,6 @@ export const handleError: HandleError = async ({ error }) => {
   console.error(error);
 };
 
-export async function getSession({ locals }) {
+export const getSession: GetSession = async ({ locals }) => {
   return locals;
 }
