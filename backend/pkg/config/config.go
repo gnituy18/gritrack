@@ -1,6 +1,6 @@
 package config
 
 const (
-	MissionMaxCount = 3
+	MissionMaxCount = 10
 )
 
