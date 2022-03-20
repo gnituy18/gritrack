@@ -1,5 +1,7 @@
 <script lang="ts">
+  import type { Mission } from "$/types";
   import v1 from "$apis/v1";
+  import { missions } from "$stores/mission";
   import { goto } from "$app/navigation";
   import Button from "$components/common/Button.svelte";
 
@@ -31,7 +33,11 @@
       console.error("create failed");
       return;
     }
-    await goto("/");
+
+    const newMissions: Array<Mission> = await (await fetch(v1("/mission"), { credentials: "include" })).json();
+    $missions = newMissions;
+
+    await goto(`/mission/${await resp.json()}`);
   }
 </script>
 
