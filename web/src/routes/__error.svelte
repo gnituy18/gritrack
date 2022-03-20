@@ -1,16 +1,17 @@
 <script context="module" lang="ts">
-import type { Load } from '@sveltejs/kit';
-export const load: Load = ({ status }) => {
+  import type { ErrorLoad } from "@sveltejs/kit";
+
+  export const load: ErrorLoad = ({ status }) => {
     return {
       props: {
         title: `${status}`,
       },
     };
-  }
+  };
 </script>
 
-<script>
-  export let title;
+<script lang="ts">
+  export let title: string;
 </script>
 
 <h1>{title}</h1>

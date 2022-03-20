@@ -3,7 +3,9 @@ import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
 import v1 from "$apis/v1";
 
 const initSession: Handle = async ({ event, resolve }) => {
-  event.locals = {};
+  event.locals = {
+    currentUser: null,
+  };
   return resolve(event);
 };
 
@@ -40,4 +42,4 @@ export const handleError: HandleError = async ({ error }) => {
 
 export const getSession: GetSession = async ({ locals }) => {
   return locals;
-}
+};
