@@ -1,5 +1,5 @@
-<script lang="ts" context="module">
-  import type { Load } from "@sveltejs/kit";
+<script context="module" lang="ts">
+  import type { Load } from "./[missionId]";
   import v1 from "$apis/v1";
 
   export const load: Load = async ({ params, fetch }) => {

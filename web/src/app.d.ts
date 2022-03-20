@@ -1,17 +1,17 @@
 declare namespace App {
-	type User = import('$types').User
+  type User = import("$types").User;
 
-	interface Locals {
-		currentUser: User;
-	}
+  interface Locals {
+    currentUser: User;
+  }
 
-	interface Platform {}
+  interface Platform {}
 
-	interface Session {
-		currentUser: User;
-	}
+  interface Session {
+    currentUser: User;
+  }
 
-	interface Stuff {}
+  interface Stuff {}
 }
 
 interface ImportMetaEnv {

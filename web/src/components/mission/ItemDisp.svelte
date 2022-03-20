@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Item, ItemType } from "$types";
+  import type { Item } from "$types";
+  import { ItemType } from "$types";
 
   export let item: Item;
   let duration: number = 0;

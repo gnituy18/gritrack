@@ -1,5 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
-const forms = require("tailwindcss/forms");
+const forms = require("@tailwindcss/forms");
 
 const config = {
   mode: "jit",
