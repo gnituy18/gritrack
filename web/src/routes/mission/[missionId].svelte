@@ -5,9 +5,8 @@
   export const load: Load = async ({ params, fetch }) => {
     try {
       const missionId = params.missionId;
-      let res = await fetch(v1(`/mission/${missionId}`), {
-        credentials: "include",
-      });
+
+      let res = await fetch(v1(`/mission/${missionId}`), { credentials: "include" });
       if (res.status !== 200) {
         return {
           status: res.status,

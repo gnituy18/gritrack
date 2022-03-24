@@ -1,5 +1,5 @@
 import { sequence } from "@sveltejs/kit/hooks";
-import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
+import type { Handle, HandleError, GetSession, ExternalFetch } from "@sveltejs/kit";
 import v1 from "$apis/v1";
 
 const initSession: Handle = async ({ event, resolve }) => {
@@ -29,9 +29,7 @@ const getUser: Handle = async ({ event, resolve }) => {
     };
   }
 
-  const res = await resolve(event);
-  res.headers.set("set-cookie", apiRes.headers.get("set-cookie"));
-  return res;
+  return await resolve(event);
 };
 
 export const handle: Handle = sequence(initSession, getUser);
@@ -42,4 +40,10 @@ export const handleError: HandleError = async ({ error }) => {
 
 export const getSession: GetSession = async ({ locals }) => {
   return locals;
+};
+
+export const externalFetch: ExternalFetch = async (request) => {
+  request = new Request(request.url, request);
+
+  return fetch(request);
 };

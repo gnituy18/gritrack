@@ -3,8 +3,14 @@
   import v1 from "$/apis/v1";
 
   export const load: Load = async ({ fetch }) => {
-    const resp = await fetch(v1("/mission"), { credentials: "include" });
-    const missions = await resp.json();
+    const res = await fetch(v1("/mission"), { credentials: "include" });
+    if (res.status !== 200) {
+      return {
+        status: res.status,
+      };
+    }
+
+    const missions = await res.json();
 
     return {
       props: {
