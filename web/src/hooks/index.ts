@@ -43,7 +43,24 @@ export const getSession: GetSession = async ({ locals }) => {
 };
 
 export const externalFetch: ExternalFetch = async (request) => {
-  request = new Request(request.url, request);
+  const cookiesStr = request.headers.get("cookie");
 
-  return fetch(request);
+  console.log(request.headers)
+
+  if (!cookiesStr) {
+    return fetch(request);
+  }
+  const cookies = cookiesStr
+    .split(";")
+    .map((str) => str.trim().split("="))
+    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+  const sessionId = cookies["sessionid"];
+  if (sessionId) {
+    request.headers.set("sessionid", sessionId);
+  }
+
+  console.log(request.headers)
+
+  return fetch(new Request(request.url, request));
 };

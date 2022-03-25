@@ -23,6 +23,7 @@ var (
 func init() {
 	cfg := session.NewDefaultConfig()
 	cfg.CookieSameSite = fasthttp.CookieSameSiteNoneMode
+	cfg.SessionIDInHTTPHeader = true
 	cfg.Secure = true
 	cfg.Domain = os.Getenv("DOMAIN")
 	sess = session.New(cfg)
@@ -76,6 +77,8 @@ func corsHeader(rctx *routing.Context) error {
 
 func mustAuthUser(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
+
+	log.Global().Info(rctx.Request.Header.String())
 
 	store, err := sess.Get(rctx.RequestCtx)
 	if err != nil {
