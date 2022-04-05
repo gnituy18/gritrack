@@ -4,11 +4,8 @@
   export let onClick: () => Promise<void> | void = () => {};
 </script>
 
-<a {href}>
-  <button
-    class="border border-slate-500 rounded-full px-3 text-slate-500 bg-slate-300 hover:bg-slate-200"
-    on:click={onClick}
-  >
+<a class="shrink-0" {href}>
+  <button class="border rounded-md px-5 py-2 text-white bg-blue-500 font-medium hover:bg-blue-600" on:click={onClick}>
     {value}
   </button>
 </a>
