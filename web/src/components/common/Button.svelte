@@ -1,7 +1,7 @@
 <script lang="ts">
   export let href: string = "";
   export let value: string = "";
-  export let onClick: () => void = () => {};
+  export let onClick: () => Promise<void> | void = () => {};
 </script>
 
 <a {href}>

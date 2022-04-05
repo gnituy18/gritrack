@@ -26,7 +26,7 @@
           }),
         });
         if (resp.type === "opaqueredirect") {
-          window.location.href = "/";
+          window.location.href = "/home";
         }
       } catch (err) {
         console.log(err);

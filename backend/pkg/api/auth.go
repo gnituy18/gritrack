@@ -19,6 +19,7 @@ func MountAuthRoutes(group *routing.RouteGroup, authStore auth.Store, userStore 
 	}
 
 	group.Post("", handler.auth)
+	group.Post("/logout", handler.logout)
 }
 
 type authHandler struct {
@@ -74,7 +75,21 @@ func (ah *authHandler) auth(rctx *routing.Context) error {
 	store.Set("userId", userId)
 	saveStore(rctx, store)
 
-	Redirect(rctx, "/")
+	rctx.SetStatusCode(http.StatusFound)
+
+	return nil
+}
+
+func (ah *authHandler) logout(rctx *routing.Context) error {
+	ctx := rctx.Get("ctx").(context.Context)
+
+	err := sess.Destroy(rctx.RequestCtx)
+	if err != nil {
+		ctx.Error("session.Session.Destroy failed in authHandler.logout")
+		return err
+	}
+
+	rctx.SetStatusCode(http.StatusResetContent)
 
 	return nil
 }
