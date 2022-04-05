@@ -2,11 +2,14 @@
   import type { Load } from "./[missionId]";
   import v1 from "$apis/v1";
 
-  export const load: Load = async ({ params, fetch }) => {
+  export const load: Load = async ({ params, fetch, session }) => {
     try {
       const missionId = params.missionId;
-
-      let res = await fetch(v1(`/mission/${missionId}`), { credentials: "include" });
+      let res = await fetch(v1(`/mission/${missionId}`), {
+        headers: {
+          sessionid: session.sessionId,
+        },
+      });
       if (res.status !== 200) {
         return {
           status: res.status,

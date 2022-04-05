@@ -9,3 +9,7 @@
     <li class="list-disc list-inside"><span>它幫你找到有共同目標的人並給你動力。</span></li>
   </ol>
 </div>
+
+<div>
+  <a href="/login"> login </a>
+</div>

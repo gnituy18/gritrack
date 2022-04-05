@@ -1,4 +1,5 @@
 <script>
+  import v1 from "$/apis/v1";
   import { missions } from "$stores/mission";
   import Logo from "$components/header/Logo.svelte";
   import Button from "$components/common/Button.svelte";
@@ -8,6 +9,17 @@
   <nav>
     <div class="flex items-center my-4 mr-4">
       <Logo />
+      <Button
+        value="logout"
+        onClick={async () => {
+          await fetch(v1("/auth/logout"), {
+            method: "POST",
+            credentials: "include",
+          });
+
+          window.location.href = "/";
+        }}
+      />
     </div>
     <div class="flex mt-8">
       <h2 class="mr-16">Missions</h2>

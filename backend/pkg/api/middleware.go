@@ -17,13 +17,15 @@ import (
 )
 
 var (
-	sess *session.Session
+	sess          *session.Session
+	sessionIdName = "sessionid"
 )
 
 func init() {
 	cfg := session.NewDefaultConfig()
 	cfg.CookieSameSite = fasthttp.CookieSameSiteNoneMode
 	cfg.SessionIDInHTTPHeader = true
+	cfg.SessionNameInHTTPHeader = sessionIdName
 	cfg.Secure = true
 	cfg.Domain = os.Getenv("DOMAIN")
 	sess = session.New(cfg)
@@ -64,6 +66,7 @@ func corsHeader(rctx *routing.Context) error {
 	if rctx.Request.Header.IsOptions() {
 		rctx.Response.Header.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE")
 		rctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type")
+		rctx.Response.Header.Add("Access-Control-Allow-Headers", sessionIdName)
 		rctx.Response.Header.Set("Access-Control-Max-Age", "86400")
 		rctx.SetContentType("text/plain")
 		rctx.SetStatusCode(http.StatusOK)
@@ -77,8 +80,6 @@ func corsHeader(rctx *routing.Context) error {
 
 func mustAuthUser(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
-
-	log.Global().Info(rctx.Request.Header.String())
 
 	store, err := sess.Get(rctx.RequestCtx)
 	if err != nil {
