@@ -34,7 +34,7 @@
   $storeMissions = missions;
 </script>
 
-<div class="flex max-w-screen-lg h-screen mx-auto overflow-y-auto">
+<div class="flex h-screen mx-auto overflow-y-auto">
   <Header />
   <div class="flex-grow">
     <slot />

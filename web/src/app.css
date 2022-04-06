@@ -14,3 +14,13 @@
     @apply text-xl;
   }
 }
+
+@layer components {
+  .btn {
+	@apply inline-block border rounded-md bg-blue-500 text-white font-medium hover:bg-blue-600;
+  }
+
+  .btn-hidden {
+	@apply inline-block rounded-md font-medium text-blue-800 hover:bg-slate-50;;
+  }
+}

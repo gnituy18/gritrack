@@ -9,7 +9,21 @@ const config = {
     fontFamily: {
       sans: ["Roboto", "Noto Sans TC", ...defaultTheme.fontFamily.sans],
     },
-    extend: {},
+    extend: {
+      colors: {
+        blue: {
+          100: "#adcdff",
+          200: "#82b1ff",
+          300: "#5c9aff",
+          400: "#3381ff",
+          500: "#0a68ff",
+          600: "#0056e0",
+          700: "#0046b8",
+          800: "#00378f",
+          900: "#002766",
+        },
+      },
+    },
   },
 
   plugins: [forms],
