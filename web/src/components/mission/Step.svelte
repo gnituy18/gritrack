@@ -63,7 +63,7 @@
   }
 </script>
 
-<li class="border-gray-100 p-4 hover:bg-gray-100">
+<li class="border-gray-100 p-4 hover:bg-slate-50">
   <div class="flex">
     <time
       class="inlint-block border border-slate-300 rounded-full px-2 text-sm bg-slate-200"
@@ -94,7 +94,7 @@
   <div class="mt-2 ml-2">
     {#if editing}
       <div
-        class="my-2 rounded-md p-1 summary empty:before:text-gray-400 bg-white"
+        class="my-2 rounded p-1 summary empty:before:text-gray-400 bg-white"
         contenteditable
         bind:innerHTML={editingStep.summary}
       >
