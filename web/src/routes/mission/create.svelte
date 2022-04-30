@@ -50,7 +50,7 @@
         type="text"
         bind:value={name}
         {readonly}
-        class="w-80 rounded-full p-1 bg-gray-100 border-transparent focus:border-blue-300"
+        class="w-80 rounded p-1 bg-gray-100 border-transparent focus:border-blue-300 focus:border"
       />
     </label>
   </form>
