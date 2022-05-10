@@ -15,20 +15,17 @@
   };
 
   const themeClass = (theme: "primary" | "hidden") => {
-	switch (theme) {
-	  case "primary":
-		return "btn"
-	  case "hidden":
-		return "btn-hidden";
-	}
+    switch (theme) {
+      case "primary":
+        return "btn";
+      case "hidden":
+        return "btn-hidden";
+    }
   };
 </script>
 
 <a class="flex-none" {href}>
-  <button
-		class={`${themeClass(theme)} ${pClass(size)}`}
-    on:click={onClick}
-  >
+  <button class={`${themeClass(theme)} ${pClass(size)}`} on:click={onClick}>
     {value}
   </button>
 </a>

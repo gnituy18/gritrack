@@ -12,7 +12,7 @@
       <Avatar alt={$session.currentUser.name} src={$session.currentUser.picture} />
       <Button
         size="s"
-		theme="hidden"
+        theme="hidden"
         value="Logout"
         onClick={async () => {
           await fetch(v1("/auth/logout"), {
