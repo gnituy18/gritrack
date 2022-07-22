@@ -32,3 +32,8 @@ export type Item = {
 export type ItemTime = {
   duration: number;
 };
+
+export type DropdownItem = {
+  label: string;
+  action: (label: string) => void;
+};
