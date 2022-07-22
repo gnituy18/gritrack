@@ -48,6 +48,7 @@ func (im *impl) OwnedBy(ctx context.Context, missionId, userId string) (bool, er
 func (im *impl) GetByUser(ctx context.Context, userId string) ([]*Mission, error) {
 	q := bson.M{
 		"userId": userId,
+		"deleted": false,
 	}
 	// Add sort by create time
 	missions := []*Mission{}
