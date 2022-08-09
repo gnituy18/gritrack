@@ -1,6 +1,8 @@
 package mission
 
 import (
+	"fmt"
+
 	"github.com/satori/go.uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
@@ -57,6 +59,28 @@ func (im *impl) GetByUser(ctx context.Context, userId string) ([]*Mission, error
 		return nil, err
 	}
 	return missions, nil
+}
+
+func (im *impl) GetByUserMissionName(ctx context.Context, userId, missionName string) (*Mission, error) {
+	q := bson.M{
+		"userId": userId,
+		"name":   missionName,
+		"deleted": false,
+	}
+	fmt.Println(q)
+	m := &Mission{}
+	if err := im.doc.GetOne(ctx, document.Mission, q, m); err == document.ErrNotFound {
+		return nil, ErrNotFound
+	} else if err != nil {
+		ctx.With(
+			zap.Error(err),
+			zap.String("userId", userId),
+			zap.String("missionName", missionName),
+		).Error("document.Document.GetOne failed in mission.Store.GetByUserMissionName")
+		return nil, err
+	}
+
+	return m, nil
 }
 
 func (im *impl) Create(ctx context.Context, m *Mission) (string, error) {

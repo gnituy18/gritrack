@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Mission } from "$/types";
   import v1 from "$apis/v1";
+  import { session } from "$app/stores";
   import { missions } from "$stores/mission";
   import { goto } from "$app/navigation";
   import Button from "$components/common/Button.svelte";
@@ -37,7 +38,7 @@
     const newMissions: Array<Mission> = await (await fetch(v1("/mission"), { credentials: "include" })).json();
     $missions = newMissions;
 
-    await goto(`/mission/${await resp.json()}`);
+    await goto(`/home`);
   }
 </script>
 
