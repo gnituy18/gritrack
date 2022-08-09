@@ -46,12 +46,12 @@
     </div>
     <div class="flex items-baseline">
       <h2 class="mr-auto">Missions</h2>
-      <Button theme="hidden" size="s" href="/mission/create" value="Create" />
+      <Button theme="hidden" size="s" href="/{$session.currentUser.id}/create" value="Create" />
     </div>
     <ul class="my-4">
       {#each $missions as { id, name }}
         <li class="mt-1 rounded px-2 hover:cursor-pointer hover:bg-slate-50 ">
-          <a href="/mission/{id}" class="block text-lg"
+          <a href="/{$session.currentUser.id}/{name}" class="block text-lg"
             >{name}
             <Dropdown classes="float-right" items={[{ label: "delete", action: () => deleteMission(id) }]}>
               ...

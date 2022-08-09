@@ -1,11 +1,12 @@
 <script context="module" lang="ts">
-  import type { Load } from "./[missionId]";
+  import type { Load } from "./[missionName]";
   import v1 from "$apis/v1";
 
   export const load: Load = async ({ params, fetch, session }) => {
     try {
-      const missionId = params.missionId;
-      let res = await fetch(v1(`/mission/${missionId}`), {
+      const userId = params.userId;
+      const missionName = params.missionName;
+      let res = await fetch(v1(`/user/${userId}/missionName/${missionName}`), {
         headers: {
           sessionid: session.sessionId,
         },
@@ -15,11 +16,12 @@
           status: res.status,
         };
       }
-      const mission = await res.json();
 
-      res = await fetch(v1(`/mission/${missionId}/step?offset=0&limit=10`), {
+      const mission = await res.json();
+      res = await fetch(v1(`/mission/${mission.id}/step?offset=0&limit=10`), {
         credentials: "include",
       });
+
       if (res.status !== 200) {
         return {
           status: res.status,
