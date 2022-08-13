@@ -14,18 +14,6 @@ const config = {
     prerender: {
       enabled: false,
     },
-    vite: {
-      envPrefix: "ENV_",
-      resolve: {
-        alias: {
-          $: path.resolve("./src"),
-          $types: path.resolve("./src/types"),
-          $components: path.resolve("./src/components"),
-          $stores: path.resolve("./src/stores"),
-          $apis: path.resolve("./src/apis"),
-        },
-      },
-    },
   },
 };
 
