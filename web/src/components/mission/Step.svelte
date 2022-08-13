@@ -9,7 +9,7 @@
 
   export let editing: boolean = false;
   export let mission: Mission;
-  export let step: Step = { id: undefined, summary: "", items: [], createdAt: undefined };
+  export let step: Step = { date: "", id: undefined, summary: "", items: [], createdAt: undefined };
   const isNew = step.createdAt === undefined;
   const displayDate: Date = step.createdAt ? new Date(step.createdAt * 1000) : new Date();
 
@@ -17,6 +17,7 @@
   let editingStep: Step = { ...step };
   let showItemForm: boolean = false;
   $: isOwner = $session.currentUser.id === mission.userId;
+  $: console.log(editingStep);
 
   async function submit() {
     if (isNew) {
@@ -66,9 +67,14 @@
 <li class="border-gray-100 p-4 hover:bg-slate-50">
   <div class="flex">
     <time
+      on:click={() => {
+        editing = true;
+        editingStep = { ...step };
+      }}
       class="inlint-block border border-slate-300 rounded-full px-2 text-sm bg-slate-200"
       datetime={displayDate.toISOString()}>{displayDate.toLocaleDateString()}</time
     >
+    <input type="date" bind:value={editingStep.date} />
     {#if isOwner}
       <div class="ml-auto underline cursor-pointer">
         {#if editing}

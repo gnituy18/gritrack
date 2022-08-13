@@ -38,7 +38,7 @@
     const newMissions: Array<Mission> = await (await fetch(v1("/mission"), { credentials: "include" })).json();
     $missions = newMissions;
 
-    await goto(`/home`);
+    await goto(`/${$session.currentUser.id}/${name}`);
   }
 </script>
 

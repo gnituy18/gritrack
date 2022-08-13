@@ -1,26 +1,10 @@
 <script context="module" lang="ts">
   import type { Load } from "./__layout";
-  import v1 from "$/apis/v1";
 
-  export const load: Load = async ({ fetch, session }) => {
-    const res = await fetch(v1("/mission"), {
-      headers: {
-        sessionid: session.sessionId,
-      },
-    });
-
-    if (res.status !== 200) {
-      return {
-        status: res.status,
-      };
-    }
-
-    const missions = await res.json();
-
+  export const load: Load = async ({ session }) => {
     return {
-      props: {
-        missions,
-      },
+      status: 302,
+      redirect: `/${session.currentUser.id}/`,
     };
   };
 </script>
