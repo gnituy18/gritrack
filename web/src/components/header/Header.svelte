@@ -22,7 +22,7 @@
     const newMissions: Array<Mission> = await (await fetch(v1("/mission"), { credentials: "include" })).json();
     $missions = newMissions;
 
-    await goto("/home");
+    await goto(`/${$session.currentUser.id}`);
   }
 </script>
 
@@ -46,7 +46,7 @@
     </div>
     <div class="flex items-baseline">
       <h2 class="mr-auto">Missions</h2>
-      <Button theme="hidden" size="s" href="/{$session.currentUser.id}/create" value="Create" />
+      <Button theme="hidden" size="s" href="/mission/create" value="Create" />
     </div>
     <ul class="my-4">
       {#each $missions as { id, name }}

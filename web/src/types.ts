@@ -17,6 +17,7 @@ export type Step = {
   createdAt: number;
   summary: string;
   items: Array<Item>;
+  date: string;
 };
 
 export enum ItemType {
