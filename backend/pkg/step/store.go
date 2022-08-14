@@ -11,7 +11,7 @@ var (
 )
 
 type Store interface {
-	IsStepTimeExists(ctx context.Context, ts int64) (bool, error)
+	IsStepTimeExists(ctx context.Context, missionId string, ts int64) (bool, error)
 	GetByMissionId(ctx context.Context, missionId string, offset, limit int64) ([]*Step, error)
 	Create(ctx context.Context, step *Step) (string, error)
 	Update(ctx context.Context, step *Step) error

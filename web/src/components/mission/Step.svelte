@@ -15,13 +15,11 @@
     ? formatDate(new Date(step.time * 1000))
     : formatDate(new Date(step.createdAt * 1000));
   let date = isNew ? formatDate(new Date()) : displayDate;
-  $: console.log(date);
 
   let isOwner: boolean;
   let editingStep: Step = { ...step };
   let showItemForm: boolean = false;
   $: isOwner = $session.currentUser.id === mission.userId;
-  $: console.log(editingStep);
   $: editingStep = { ...editingStep, date };
 
   function formatDate(date: Date) {
