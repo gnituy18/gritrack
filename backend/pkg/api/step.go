@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"gritter/pkg/context"
 	"gritter/pkg/mission"
@@ -31,7 +32,13 @@ type stepHandler struct {
 	missionStore mission.Store
 }
 
-type stepBody struct {
+type createStepBody struct {
+	Date    string     `json:"date"`
+	Summary string     `json:"summary"`
+	Items   step.Items `json:"items"`
+}
+
+type updateStepBody struct {
 	Summary string     `json:"summary"`
 	Items   step.Items `json:"items"`
 }
@@ -67,15 +74,24 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	body := &stepBody{}
+	body := &createStepBody{}
 	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil
 	}
 
+	ts, err := dateToTimestamp(body.Date)
+	if err != nil {
+		JSON(rctx, http.StatusBadRequest, err.Error())
+		return nil
+	}
+
+
+
 	missionId := rctx.Param("missionId")
 	step := &step.Step{
 		MissionId: missionId,
+		Time:      ts,
 		Summary:   body.Summary,
 		Items:     body.Items,
 	}
@@ -90,6 +106,15 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 	return nil
 }
 
+func dateToTimestamp(date string) (int64, error) {
+	t, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return 0, err
+	}
+
+	return t.Unix(), nil
+}
+
 func (sh *stepHandler) updateStep(rctx *routing.Context) error {
 	ctx := rctx.Get("ctx").(context.Context)
 	userId, ok := rctx.Get("userId").(string)
@@ -99,7 +124,7 @@ func (sh *stepHandler) updateStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	body := &stepBody{}
+	body := &updateStepBody{}
 	if err := json.Unmarshal(rctx.Request.Body(), body); err != nil {
 		JSON(rctx, http.StatusBadRequest, err.Error())
 		return nil
