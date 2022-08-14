@@ -10,11 +10,9 @@
   export let editing: boolean = false;
   export let mission: Mission;
   export let step: Step = { date: undefined, id: undefined, summary: "", items: [], createdAt: undefined };
+
   const isNew = step.createdAt === undefined;
-  const displayDate: string = step.time
-    ? formatDate(new Date(step.time * 1000))
-    : formatDate(new Date(step.createdAt * 1000));
-  let date = isNew ? formatDate(new Date()) : displayDate;
+  let date = isNew ? formatDate(new Date()) : formatDate(new Date(step.time * 1000));
 
   let isOwner: boolean;
   let editingStep: Step = { ...step };
@@ -88,7 +86,7 @@
         }}
         class="inlint-block border border-slate-300 rounded-full px-2 text-sm bg-slate-200"
       >
-        {displayDate}
+        {date}
       </time>
     {/if}
     {#if isOwner}

@@ -36,25 +36,6 @@ func (im *impl) GetByMissionId(ctx context.Context, missionId string, offset, li
 		return nil, err
 	}
 
-	// TODO remove this when db all have time
-	// sort steps by time desc
-	for i := 0; i < len(steps)-1; i++ {
-		for j := i + 1; j < len(steps); j++ {
-			it := steps[i].Time
-			if it == 0 {
-				it = steps[i].CreatedAt
-			}
-			jt := steps[j].Time
-			if jt == 0 {
-				jt = steps[j].CreatedAt
-			}
-
-			if it < jt {
-				steps[i], steps[j] = steps[j], steps[i]
-			}
-		}
-	}
-
 	return steps, nil
 }
 
