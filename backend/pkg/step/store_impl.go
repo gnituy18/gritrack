@@ -99,9 +99,10 @@ func (im *impl) Update(ctx context.Context, s *Step) error {
 	return nil
 }
 
-func (im *impl) IsStepTimeExists(ctx context.Context, ts int64) (bool, error) {
+func (im *impl) IsStepTimeExists(ctx context.Context, missionId string, ts int64) (bool, error) {
 	q := bson.M{
-		"time": ts,
+		"missionId": missionId,
+		"time":      ts,
 	}
 
 	if err := im.doc.GetOne(ctx, document.Step, q, &Step{}); err == document.ErrNotFound {

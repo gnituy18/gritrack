@@ -86,7 +86,8 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	exist, err := sh.stepStore.IsStepTimeExists(ctx, ts)
+	missionId := rctx.Param("missionId")
+	exist, err := sh.stepStore.IsStepTimeExists(ctx, missionId, ts)
 	if err != nil {
 		JSON(rctx, http.StatusInternalServerError, err.Error())
 		return nil
@@ -95,7 +96,6 @@ func (sh *stepHandler) createStep(rctx *routing.Context) error {
 		return nil
 	}
 
-	missionId := rctx.Param("missionId")
 	step := &step.Step{
 		MissionId: missionId,
 		Time:      ts,
