@@ -87,7 +87,7 @@
     <h1>{mission.name}</h1>
   {/if}
   {#key steps}
-    {#if noStepToday && isOwner}
+    {#if isOwner}
       <StepComp editing {mission} />
     {/if}
     {#each steps as step}

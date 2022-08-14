@@ -42,7 +42,7 @@ func Router() *routing.Router {
 	authenticated.Use(mustAuthUser)
 
 	userGroup := authenticated.Group("/user")
-	MountUserRoutes(userGroup, userStore, missionStore )
+	MountUserRoutes(userGroup, userStore, missionStore)
 
 	missionGroup := authenticated.Group("/mission")
 	MountMissionRoutes(missionGroup, missionStore)

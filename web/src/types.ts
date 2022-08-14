@@ -17,7 +17,9 @@ export type Step = {
   createdAt: number;
   summary: string;
   items: Array<Item>;
+  // TODO refactor this
   date: string;
+  time?: number;
 };
 
 export enum ItemType {

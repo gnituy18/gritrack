@@ -98,3 +98,21 @@ func (im *impl) Update(ctx context.Context, s *Step) error {
 
 	return nil
 }
+
+func (im *impl) IsStepTimeExists(ctx context.Context, ts int64) (bool, error) {
+	q := bson.M{
+		"time": ts,
+	}
+
+	if err := im.doc.GetOne(ctx, document.Step, q, &Step{}); err == document.ErrNotFound {
+		return false, nil
+	} else if err != nil {
+		ctx.With(
+			zap.Error(err),
+			zap.Int64("time", ts),
+		).Error("document.Document.GetOne failed in step.Store.IsStepDateExists")
+		return false, err
+	}
+
+	return true, nil
+}

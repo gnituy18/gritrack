@@ -49,7 +49,7 @@ func (im *impl) OwnedBy(ctx context.Context, missionId, userId string) (bool, er
 
 func (im *impl) GetByUser(ctx context.Context, userId string) ([]*Mission, error) {
 	q := bson.M{
-		"userId": userId,
+		"userId":  userId,
 		"deleted": false,
 	}
 	// Add sort by create time
@@ -63,8 +63,8 @@ func (im *impl) GetByUser(ctx context.Context, userId string) ([]*Mission, error
 
 func (im *impl) GetByUserMissionName(ctx context.Context, userId, missionName string) (*Mission, error) {
 	q := bson.M{
-		"userId": userId,
-		"name":   missionName,
+		"userId":  userId,
+		"name":    missionName,
 		"deleted": false,
 	}
 	fmt.Println(q)

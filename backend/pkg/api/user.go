@@ -14,7 +14,7 @@ import (
 
 func MountUserRoutes(group *routing.RouteGroup, userStore user.Store, missionStore mission.Store) {
 	handler := &userHandler{
-		userStore: userStore,
+		userStore:    userStore,
 		missionStore: missionStore,
 	}
 
@@ -23,7 +23,7 @@ func MountUserRoutes(group *routing.RouteGroup, userStore user.Store, missionSto
 }
 
 type userHandler struct {
-	userStore user.Store
+	userStore    user.Store
 	missionStore mission.Store
 }
 

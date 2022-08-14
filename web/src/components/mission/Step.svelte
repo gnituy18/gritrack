@@ -7,14 +7,15 @@
   import Button from "$components/common/Button.svelte";
   import ItemForm from "$components/mission/ItemForm.svelte";
 
-
   export let editing: boolean = false;
   export let mission: Mission;
   export let step: Step = { date: undefined, id: undefined, summary: "", items: [], createdAt: undefined };
   const isNew = step.createdAt === undefined;
-  const displayDate: string = step.date || formatDate(new Date(step.createdAt * 1000));
+  const displayDate: string = step.time
+    ? formatDate(new Date(step.time * 1000))
+    : formatDate(new Date(step.createdAt * 1000));
   let date = isNew ? formatDate(new Date()) : displayDate;
-  $: console.log(date)
+  $: console.log(date);
 
   let isOwner: boolean;
   let editingStep: Step = { ...step };
@@ -37,6 +38,7 @@
         method: "POST",
         credentials: "include",
         body: JSON.stringify({
+          date: editingStep.date,
           summary: editingStep.summary,
           items: editingStep.items,
         }),

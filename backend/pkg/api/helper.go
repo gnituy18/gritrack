@@ -42,6 +42,7 @@ func userToRepr(u *user.User) *userRepr {
 
 type stepRepr struct {
 	Id        string     `json:"id"`
+	Time      int64      `json:"time"`
 	Summary   string     `json:"summary"`
 	Items     step.Items `json:"items"`
 	CreatedAt int64      `json:"createdAt"`
@@ -50,6 +51,7 @@ type stepRepr struct {
 func stepToRepr(s *step.Step) *stepRepr {
 	return &stepRepr{
 		Id:        s.Id,
+		Time:      s.Time,
 		Summary:   s.Summary,
 		Items:     s.Items,
 		CreatedAt: s.CreatedAt,
