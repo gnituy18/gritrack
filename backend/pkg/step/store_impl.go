@@ -29,11 +29,30 @@ func (im *impl) GetByMissionId(ctx context.Context, missionId string, offset, li
 	q := bson.M{
 		"missionId": missionId,
 	}
-	sort := bson.D{bson.E{Key: "createdAt", Value: -1}}
+	sort := bson.D{bson.E{Key: "time", Value: -1}}
 	steps := []*Step{}
 	if err := im.doc.Search(ctx, document.Step, offset, limit, q, sort, &steps); err != nil {
 		ctx.With(zap.Error(err)).Error("document.Document.Search failed in step.Store.GetByMissionId")
 		return nil, err
+	}
+
+	// TODO remove this when db all have time
+	// sort steps by time desc
+	for i := 0; i < len(steps)-1; i++ {
+		for j := i + 1; j < len(steps); j++ {
+			it := steps[i].Time
+			if it == 0 {
+				it = steps[i].CreatedAt
+			}
+			jt := steps[j].Time
+			if jt == 0 {
+				jt = steps[j].CreatedAt
+			}
+
+			if it < jt {
+				steps[i], steps[j] = steps[j], steps[i]
+			}
+		}
 	}
 
 	return steps, nil

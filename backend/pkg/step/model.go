@@ -8,6 +8,7 @@ type Step struct {
 	Id        string `bson:"id"`
 	MissionId string `bson:"missionId"`
 
+	Time    int64  `bson:"time"`
 	Summary string `bson:"summary"`
 	Items   Items  `bson:"items"`
 
@@ -16,6 +17,7 @@ type Step struct {
 
 func (s *Step) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
 	encoder.AddString("id", s.Id)
+	encoder.AddInt64("time", s.Time)
 	encoder.AddString("summary", s.Summary)
 	encoder.AddArray("items", s.Items)
 	encoder.AddInt64("createdAt", s.CreatedAt)
