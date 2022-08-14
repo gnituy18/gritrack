@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("user not found")
+	ErrNotFound        = errors.New("user not found")
 	ErrAuthTypeInvalid = errors.New("auth type invalid")
 )
 

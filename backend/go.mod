@@ -1,6 +1,6 @@
 module gritter
 
-go 1.17
+go 1.19
 
 require (
 	github.com/fasthttp/session/v2 v2.3.1
