@@ -28,6 +28,7 @@ func init() {
 	cfg.SessionNameInHTTPHeader = sessionIdName
 	cfg.Secure = true
 	cfg.Domain = os.Getenv("DOMAIN")
+	cfg.Expiration = 7 * 24 * time.Hour
 	sess = session.New(cfg)
 
 	provider, err := redis.New(redis.Config{
