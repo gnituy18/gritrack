@@ -14,9 +14,9 @@ declare namespace App {
   }
 
   interface Stuff {}
-}
 
-interface ImportMetaEnv {
-  ENV_GOOGLE_CLIENT_ID: string;
-  ENV_BACKEND_HOST: string;
+  interface PublicEnv {
+    PUBLIC_GOOGLE_CLIENT_ID: string;
+    PUBLIC_BACKEND_HOST: string;
+  }
 }

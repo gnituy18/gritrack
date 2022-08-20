@@ -7,7 +7,7 @@
 <header class="flex justify-between items-center m-2">
   <Logo href="/" />
   {#if $session.sessionId}
-    <Button href="/login" value={`Continue with ${$session.currentUser.name}`} />
+    <Button href="/login" value={`Continue with ${$session.currentUser.name}`} reload />
   {:else}
     <Button href="/login" value="Try Gritter free" />
   {/if}

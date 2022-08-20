@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { env } from "$env/dynamic/public";
   import Button from "$components/common/Button.svelte";
   import v1 from "$apis/v1";
 
@@ -6,7 +7,7 @@
     gapi.load("client:auth2", async () => {
       try {
         await gapi.client.init({
-          clientId: import.meta.env.ENV_GOOGLE_CLIENT_ID,
+          clientId: env.PUBLIC_GOOGLE_CLIENT_ID,
           scope: "openid email profile",
         });
         const user = await gapi.auth2.getAuthInstance().signIn();
@@ -29,7 +30,7 @@
           window.location.href = "/home";
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     });
   }

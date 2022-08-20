@@ -4,7 +4,6 @@ import path from "path";
 /** @type {import('vite').UserConfig} */
 const config = {
   plugins: [sveltekit()],
-  envPrefix: "ENV_",
   resolve: {
     alias: {
       $: path.resolve("./src"),
