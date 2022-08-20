@@ -2,7 +2,7 @@ import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
 import v1 from "$apis/v1";
 
 function isPublicPage(path: string): boolean {
-  return path === "/" || path === "/login";
+  return path === "/login" || path === "/product";
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -18,44 +18,19 @@ export const handle: Handle = async ({ event, resolve }) => {
       });
       if (apiRes.ok) {
         isLoggedIn = true;
-        event.locals = { currentUser: await apiRes.json(), sessionId }
+        event.locals = { currentUser: await apiRes.json(), sessionId };
       }
     }
   }
 
-  if (!isLoggedIn || !isPublicPage(event.url.pathname)) {
-  }
-
-
-  if (!sessionId && !isPublicPage(event.url.pathname)) {
+  if (!isLoggedIn && !isPublicPage(event.url.pathname)) {
     return new Response(null, {
       status: 302,
       headers: {
         location: "/product",
       },
     });
-  }
-
-
-  if (apiRes.status === 401) {
-    return new Response(null, {
-      status: 302,
-      headers: {
-        location: "/product",
-      },
-    });
-  }
-
-  if (!apiRes.ok && !isPublicPage(event.url.pathname)) {
-    return new Response(null, {
-      status: 302,
-      headers: {
-        location: "/product",
-      },
-    });
-  }
-
-  if (apiRes.ok && event.url.pathname === "/login") {
+  } else if (isLoggedIn && (event.url.pathname === "/login" || event.url.pathname === "/")) {
     return new Response(null, {
       status: 302,
       headers: {
@@ -64,13 +39,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     });
   }
 
-  event.locals = {
-    ...event.locals,
-    currentUser: await apiRes.json(),
-  };
-
   return resolve(event);
-});
+};
 
 export const handleError: HandleError = async ({ error }) => {
   console.error(error);

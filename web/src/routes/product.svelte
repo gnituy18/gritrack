@@ -1,11 +1,16 @@
-<script>
+<script lang="ts">
+  import { session } from "$app/stores";
   import Button from "$/components/common/Button.svelte";
   import Logo from "$components/header/Logo.svelte";
 </script>
 
 <header class="flex justify-between items-center m-2">
   <Logo href="/" />
-  <Button href="/login" value="Try Gritter free" />
+  {#if $session.sessionId}
+    <Button href="/login" value={`Continue with ${$session.currentUser.name}`} />
+  {:else}
+    <Button href="/login" value="Try Gritter free" />
+  {/if}
 </header>
 <main>
   <section class="m-4 text-center">

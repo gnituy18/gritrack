@@ -24,7 +24,7 @@
   };
 </script>
 
-<a class="flex-none" {href}>
+<a sveltekit:reload class="flex-none" {href}>
   <button class={`${themeClass(theme)} ${pClass(size)}`} on:click={onClick}>
     {value}
   </button>
