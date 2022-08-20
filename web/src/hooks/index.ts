@@ -1,45 +1,76 @@
-import { sequence } from "@sveltejs/kit/hooks";
 import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
 import v1 from "$apis/v1";
 
-const extractSessionId: Handle = async ({ event, resolve }) => {
+function isPublicPage(path: string): boolean {
+  return path === "/" || path === "/login";
+}
+
+export const handle: Handle = async ({ event, resolve }) => {
+  let isLoggedIn = false;
+
   const cookieStr = event.request.headers.get("cookie");
-  if (!cookieStr) {
-    return resolve(event);
-  }
-
-  const sessionIdCookie = cookieStr.split(";").find((c) => c.trim().startsWith("sessionid="));
-
-  let sessionId: string;
-  if (sessionIdCookie) {
-    sessionId = sessionIdCookie.trim().split("=")[1];
-  }
-
-  event.locals = {
-    sessionId,
-  };
-  return resolve(event);
-};
-
-const getUser: Handle = async ({ event, resolve }) => {
-  const { sessionId } = event.locals;
-  if (sessionId) {
-    const apiRes = await fetch(v1("/user/current"), {
-      headers: { cookie: event.request.headers.get("cookie") },
-    });
-
-    if (apiRes.ok) {
-      event.locals = {
-        ...event.locals,
-        currentUser: await apiRes.json(),
-      };
+  if (cookieStr) {
+    const sessionIdCookie = cookieStr.split(";").find((c) => c.trim().startsWith("sessionid="));
+    if (sessionIdCookie) {
+      const sessionId = sessionIdCookie.trim().split("=")[1];
+      const apiRes = await fetch(v1("/user/current"), {
+        headers: { cookie: event.request.headers.get("cookie") },
+      });
+      if (apiRes.ok) {
+        isLoggedIn = true;
+        event.locals = { currentUser: await apiRes.json(), sessionId }
+      }
     }
   }
 
-  return await resolve(event);
-};
+  if (!isLoggedIn || !isPublicPage(event.url.pathname)) {
+  }
 
-export const handle: Handle = sequence(extractSessionId, getUser);
+
+  if (!sessionId && !isPublicPage(event.url.pathname)) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: "/product",
+      },
+    });
+  }
+
+
+  if (apiRes.status === 401) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: "/product",
+      },
+    });
+  }
+
+  if (!apiRes.ok && !isPublicPage(event.url.pathname)) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: "/product",
+      },
+    });
+  }
+
+  if (apiRes.ok && event.url.pathname === "/login") {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: `/${event.locals.currentUser.id}`,
+      },
+    });
+  }
+
+  event.locals = {
+    ...event.locals,
+    currentUser: await apiRes.json(),
+  };
+
+  return resolve(event);
+});
 
 export const handleError: HandleError = async ({ error }) => {
   console.error(error);
