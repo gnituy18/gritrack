@@ -3,6 +3,7 @@
   export let value: string = "";
   export let size: "s" | "m" | "l" = "s";
   export let theme: "primary" | "hidden" = "primary";
+  export let reload: boolean = false;
   export let onClick: () => Promise<void> | void = () => {};
 
   const pClass = (size: "s" | "m" | "l") => {
@@ -24,7 +25,7 @@
   };
 </script>
 
-<a sveltekit:reload class="flex-none" {href}>
+<a {...reload ? { "sveltekit:reload": true } : {}} class="flex-none" {href}>
   <button class={`${themeClass(theme)} ${pClass(size)}`} on:click={onClick}>
     {value}
   </button>
