@@ -1,50 +1,6 @@
-<script context="module" lang="ts">
-  import type { Load } from "./[missionName]";
-  import v1 from "$apis/v1";
-
-  export const load: Load = async ({ params, fetch, session }) => {
-    try {
-      const userId = params.userId;
-      const missionName = params.missionName;
-      let res = await fetch(v1(`/user/${userId}/missionName/${missionName}`), {
-        headers: {
-          sessionid: session.sessionId,
-        },
-      });
-      if (res.status !== 200) {
-        return {
-          status: res.status,
-        };
-      }
-
-      const mission = await res.json();
-      res = await fetch(v1(`/mission/${mission.id}/step?offset=0&limit=10`), {
-        credentials: "include",
-      });
-
-      if (res.status !== 200) {
-        return {
-          status: res.status,
-        };
-      }
-      const steps = await res.json();
-
-      return {
-        props: {
-          mission,
-          propSteps: steps,
-        },
-      };
-    } catch (error) {
-      console.error(error);
-      return {
-        status: 500,
-      };
-    }
-  };
-</script>
-
 <script lang="ts">
+  throw new Error("@migration task: Add data prop (https://github.com/sveltejs/kit/discussions/5774#discussioncomment-3292707)");
+
   import type { Step, Mission } from "$types";
   import { steps as storeSteps } from "$stores/mission";
   import { session } from "$app/stores";

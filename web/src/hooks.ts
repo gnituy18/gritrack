@@ -1,5 +1,5 @@
 import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
-import v1 from "$apis/v1";
+import v1 from "$lib/apis/v1";
 
 function isPublicPage(path: string): boolean {
   return path === "/login" || path === "/product";

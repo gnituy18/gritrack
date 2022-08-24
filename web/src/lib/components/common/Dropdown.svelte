@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DropdownItem } from "$types";
+  import type { DropdownItem } from "$lib/types";
   export let classes: string = "";
   export let items: Array<DropdownItem> = [];
 </script>
