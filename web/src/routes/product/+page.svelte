@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { session } from "$app/stores";
-  import Button from "$/components/common/Button.svelte";
-  import Logo from "$components/header/Logo.svelte";
+  import type { PageServerData } from "./$types";
+  import Button from "$lib/components/common/Button.svelte";
+  import Logo from "$lib/components/header/Logo.svelte";
+
+  export let data: PageServerData;
 </script>
 
 <header class="flex justify-between items-center m-2">
   <Logo href="/" />
-  {#if $session.sessionId}
-    <Button href="/login" value={`Continue with ${$session.currentUser.name}`} reload />
+  {#if data}
+    <Button href="/login" value={`Continue with ${page.currentUser.name}`} reload />
   {:else}
     <Button href="/login" value="Try Gritter free" />
   {/if}

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import v1 from "$/apis/v1";
+  import v1 from "$lib/apis/v1";
   import { session } from "$app/stores";
-  import { missions } from "$stores/mission";
-  import Button from "$components/common/Button.svelte";
-  import Avatar from "$components/common/Avatar.svelte";
-  import Dropdown from "$components/common/Dropdown.svelte";
-  import type { Mission } from "$types";
+  import { missions } from "$lib/stores/mission";
+  import Button from "$lib/components/common/Button.svelte";
+  import Avatar from "$lib/components/common/Avatar.svelte";
+  import Dropdown from "$lib/components/common/Dropdown.svelte";
+  import type { Mission } from "$lib/types";
   import { goto } from "$app/navigation";
 
   async function deleteMission(missionId: string) {

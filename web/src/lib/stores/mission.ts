@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { Mission, Step } from "$types";
+import type { Mission, Step } from "$lib/types";
 
 export const missions = writable<Array<Mission>>([]);
 

@@ -1,5 +1,5 @@
 declare namespace App {
-  type User = import("$types").User;
+  type User = import("$lib/types").User;
 
   interface Locals {
     currentUser?: User;
@@ -7,11 +7,6 @@ declare namespace App {
   }
 
   interface Platform {}
-
-  interface Session {
-    currentUser?: User;
-    sessionId?: string;
-  }
 
   interface Stuff {}
 
