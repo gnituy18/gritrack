@@ -18,7 +18,6 @@
   }
 
   async function createMission() {
-    console.log(data);
     if (!name) {
       console.error("input invalid");
       return;
@@ -33,7 +32,7 @@
         name: name,
       }),
     });
-    if (resp.status !== 201) {
+    if (!resp.ok) {
       console.error("create failed");
       return;
     }

@@ -9,7 +9,7 @@ export const load: LayoutLoad = async ({ fetch, parent }) => {
     },
   });
 
-  if (res.status !== 200) {
+  if (!res.ok) {
     return {
       status: res.status,
     };

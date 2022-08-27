@@ -5,9 +5,9 @@ declare namespace App {
     user?: User;
   }
 
-  interface Platform {}
-
-  interface Stuff {}
+  interface PageData {
+    user?: User;
+  }
 
   interface PublicEnv {
     PUBLIC_GOOGLE_CLIENT_ID: string;

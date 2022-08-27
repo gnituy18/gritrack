@@ -50,7 +50,7 @@
         }),
       });
 
-      if (res.status !== 201) {
+      if (!res.ok) {
         console.error(await res.text());
       }
     } else {
@@ -63,7 +63,7 @@
         }),
       });
 
-      if (res.status !== 200) {
+      if (!res.ok) {
         console.error(await res.text());
       }
     }

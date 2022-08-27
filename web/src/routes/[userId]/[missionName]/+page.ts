@@ -11,7 +11,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         sessionid: user.sessionId,
       },
     });
-    if (res.status !== 200) {
+    if (!res.ok) {
       return {
         status: res.status,
       };
@@ -22,7 +22,7 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
       credentials: "include",
     });
 
-    if (res.status !== 200) {
+    if (!res.ok) {
       return {
         status: res.status,
       };
