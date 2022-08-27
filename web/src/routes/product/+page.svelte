@@ -8,12 +8,8 @@
 
 <header class="flex justify-between items-center m-2">
   <Logo href="/" />
-  {#if data.currentUser}
-    <Button
-      href="/login"
-      value={`Continue with ${data.currentUser.name}`}
-      reload
-    />
+  {#if data.user}
+    <Button href="/login" value={`Continue with ${data.user.name}`} reload />
   {:else}
     <Button href="/login" value="Try Gritter free" />
   {/if}

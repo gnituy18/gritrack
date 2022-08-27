@@ -25,7 +25,7 @@
   let isOwner: boolean;
   let editingStep: Step = { ...step };
   let showItemForm: boolean = false;
-  $: isOwner = $page.data.currentUser.id === mission.userId;
+  $: isOwner = $page.data.user.id === mission.userId;
   $: editingStep = { ...editingStep, date };
 
   function formatDate(date: Date) {
