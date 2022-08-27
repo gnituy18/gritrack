@@ -1,10 +1,12 @@
 <script lang="ts">
-  import type { Mission } from "$/types";
-  import v1 from "$apis/v1";
-  import { session } from "$app/stores";
-  import { missions } from "$stores/mission";
+  import type { Mission } from "$lib/types";
+  import v1 from "$lib/apis/v1";
+  import { missions } from "$lib/stores/mission";
   import { goto } from "$app/navigation";
-  import Button from "$components/common/Button.svelte";
+  import Button from "$lib/components/common/Button.svelte";
+  import type { PageData } from "./$types";
+
+  export let data: PageData;
 
   let name = "";
   let readonly = false;
@@ -16,6 +18,7 @@
   }
 
   async function createMission() {
+    console.log(data);
     if (!name) {
       console.error("input invalid");
       return;
@@ -35,15 +38,20 @@
       return;
     }
 
-    const newMissions: Array<Mission> = await (await fetch(v1("/mission"), { credentials: "include" })).json();
+    const newMissions: Array<Mission> = await (
+      await fetch(v1("/mission"), { credentials: "include" })
+    ).json();
     $missions = newMissions;
 
-    await goto(`/${$session.currentUser.id}/${name}`);
+    await goto(`/${data.currentUser.id}/${name}`);
   }
 </script>
 
 <div class="m-4 w-full">
-  <h2>Set a mission that's really important to you and you want to spend more than a year on it.</h2>
+  <h2>
+    Set a mission that's really important to you and you want to spend more than
+    a year on it.
+  </h2>
   <form>
     <label for="name" class="block mt-2">
       <div class="text-gray-500">Name</div>

@@ -1,10 +1,14 @@
 <script lang="ts">
-  import type { Item } from "$types";
+  import type { Item } from "$lib/types";
 
   export let handleAdd: (item: Item) => void;
   export let handleCancel: () => void;
   let timeInput = 10;
-  export let item: Item = { type: 1, desc: "", time: { duration: timeInput * 60 } };
+  export let item: Item = {
+    type: 1,
+    desc: "",
+    time: { duration: timeInput * 60 },
+  };
 
   // TODO: Put it somewhere else
   $: item = { ...item, time: { duration: Math.floor(timeInput * 60) } };
@@ -17,7 +21,12 @@
     <option value={1}>⏰ time</option>
   </select>
   {#if item.type === 1}
-    <input bind:value={timeInput} type="number" min={0} class="ml-2 border-slate-300 rounded p-1 w-12" />
+    <input
+      bind:value={timeInput}
+      type="number"
+      min={0}
+      class="ml-2 border-slate-300 rounded p-1 w-12"
+    />
     {#if item.time.duration > 1}
       <span class="ml-1">minutes: </span>
     {:else}
@@ -29,7 +38,10 @@
     class="flex-grow desc rounded mx-2 p-1 empty:before:text-gray-400 bg-white"
     contenteditable
   />
-  <span on:click={handleCancel} class="mx-1 px-1 underline text-sm cursor-pointer">cancel</span>
+  <span
+    on:click={handleCancel}
+    class="mx-1 px-1 underline text-sm cursor-pointer">cancel</span
+  >
   <span
     on:click={() => {
       handleAdd(item);

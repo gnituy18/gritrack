@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "app.css"
   import { appName } from "$lib/const";
+  import "../app.css";
 </script>
 
 <svelte:head>

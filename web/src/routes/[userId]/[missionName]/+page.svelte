@@ -1,34 +1,29 @@
 <script lang="ts">
-  throw new Error("@migration task: Add data prop (https://github.com/sveltejs/kit/discussions/5774#discussioncomment-3292707)");
+  import type { Step, Mission } from "$lib/types";
+  import { steps as storeSteps } from "$lib/stores/mission";
+  import StepComp from "$lib/components/mission/Step.svelte";
+  import Button from "$lib/components/common/Button.svelte";
+  import type { PageData } from "./$types";
+  import v1 from "$lib/apis/v1";
 
-  import type { Step, Mission } from "$types";
-  import { steps as storeSteps } from "$stores/mission";
-  import { session } from "$app/stores";
-  import StepComp from "$components/mission/Step.svelte";
-  import Button from "$/components/common/Button.svelte";
-
-  export let mission: Mission;
-  export let propSteps: Array<Step>;
+  export let data: PageData;
 
   let isOwner: boolean;
   let steps: Array<Step> = [];
-  let noStepToday: boolean = true;
   let count: number = 10;
   let hasMore: boolean = true;
 
-  $: isOwner = $session.currentUser.id === mission.userId;
+  $: isOwner = data.currentUser.id === data.mission.userId;
   $: steps = $storeSteps;
-  $: steps = propSteps;
-  $: noStepToday = steps.length === 0 || !isToday(steps[0].createdAt);
-
-  function isToday(ts: number): boolean {
-    return new Date().toLocaleDateString() === new Date(ts * 1000).toLocaleDateString();
-  }
+  $: steps = data.propSteps;
 
   async function fetchMoreStep() {
-    const res = await fetch(v1(`/mission/${mission.id}/step?offset=${count}&limit=10`), {
-      credentials: "include",
-    });
+    const res = await fetch(
+      v1(`/mission/${data.mission.id}/step?offset=${count}&limit=10`),
+      {
+        credentials: "include",
+      }
+    );
     const moreSteps = await res.json();
     steps = [...steps, ...moreSteps];
     count += 10;
@@ -40,14 +35,14 @@
 
 <ul class="divide-y-2">
   {#if !isOwner}
-    <h1>{mission.name}</h1>
+    <h1>{data.mission.name}</h1>
   {/if}
   {#key steps}
     {#if isOwner}
-      <StepComp editing {mission} />
+      <StepComp editing mission={data.mission} />
     {/if}
     {#each steps as step}
-      <StepComp {step} {mission} />
+      <StepComp {step} mission={data.mission} />
     {/each}
   {/key}
 </ul>

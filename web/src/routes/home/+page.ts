@@ -1,6 +1,7 @@
-import { redirect } from '@sveltejs/kit';
-import type { PageLoad } from "../__layout";
+import { redirect } from "@sveltejs/kit";
+import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({ session }) => {
-  throw redirect(302, `/${session.currentUser.id}/`);
+export const load: PageLoad = async ({ parent }) => {
+  const { currentUser } = await parent();
+  throw redirect(302, `/${currentUser.id}/`);
 };

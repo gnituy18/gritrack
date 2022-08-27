@@ -1,5 +1,5 @@
 <script>
-  import GoogleLoginButton from "$components/login/GoogleLoginButton.svelte";
+  import GoogleLoginButton from "$lib/components/login/GoogleLoginButton.svelte";
 </script>
 
 <div class="flex flex-col justify-center items-center w-screen h-screen">

@@ -1,27 +1,37 @@
 <script lang="ts">
-  import type { Mission, Step, Item } from "$types";
-  import v1 from "$apis/v1";
-  import { steps as storeSteps } from "$stores/mission";
-  import { session } from "$app/stores";
-  import ItemDisp from "$components/mission/ItemDisp.svelte";
-  import Button from "$components/common/Button.svelte";
-  import ItemForm from "$components/mission/ItemForm.svelte";
+  import type { Mission, Step, Item } from "$lib/types";
+  import v1 from "$lib/apis/v1";
+  import { steps as storeSteps } from "$lib/stores/mission";
+  import { page } from "$app/stores";
+  import ItemDisp from "$lib/components/mission/ItemDisp.svelte";
+  import Button from "$lib/components/common/Button.svelte";
+  import ItemForm from "$lib/components/mission/ItemForm.svelte";
 
   export let editing: boolean = false;
   export let mission: Mission;
-  export let step: Step = { date: undefined, id: undefined, summary: "", items: [], createdAt: undefined };
+  export let step: Step = {
+    date: undefined,
+    id: undefined,
+    summary: "",
+    items: [],
+    createdAt: undefined,
+  };
 
   const isNew = step.createdAt === undefined;
-  let date = isNew ? formatDate(new Date()) : formatDate(new Date(step.time * 1000));
+  let date = isNew
+    ? formatDate(new Date())
+    : formatDate(new Date(step.time * 1000));
 
   let isOwner: boolean;
   let editingStep: Step = { ...step };
   let showItemForm: boolean = false;
-  $: isOwner = $session.currentUser.id === mission.userId;
+  $: isOwner = $page.data.currentUser.id === mission.userId;
   $: editingStep = { ...editingStep, date };
 
   function formatDate(date: Date) {
-    return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(date.getDate())}`;
+    return `${date.getFullYear()}-${addZero(date.getMonth() + 1)}-${addZero(
+      date.getDate()
+    )}`;
   }
 
   function addZero(num: number) {
@@ -58,9 +68,12 @@
       }
     }
 
-    const res = await fetch(v1(`/mission/${mission.id}/step?offset=0&limit=10`), {
-      credentials: "include",
-    });
+    const res = await fetch(
+      v1(`/mission/${mission.id}/step?offset=0&limit=10`),
+      {
+        credentials: "include",
+      }
+    );
     $storeSteps = await res.json();
     editing = false;
   }
@@ -70,7 +83,10 @@
   }
 
   function removeItem(i: number) {
-    editingStep.items = [...editingStep.items.slice(0, i), ...editingStep.items.slice(i + 1, editingStep.items.length)];
+    editingStep.items = [
+      ...editingStep.items.slice(0, i),
+      ...editingStep.items.slice(i + 1, editingStep.items.length),
+    ];
   }
 </script>
 
@@ -143,7 +159,10 @@
       {#if editing}
         {#each editingStep.items as item, i}
           <ItemDisp {item}>
-            <span on:click={() => removeItem(i)} class="underline cursor-pointer">remove</span>
+            <span
+              on:click={() => removeItem(i)}
+              class="underline cursor-pointer">remove</span
+            >
           </ItemDisp>
         {/each}
       {:else}
