@@ -2,13 +2,13 @@ import type { PageLoad } from "./$types";
 import v1 from "$lib/apis/v1";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
-  const { sessionId } = await parent();
+  const { user } = await parent();
   try {
     const userId = params.userId;
     const missionName = params.missionName;
     let res = await fetch(v1(`/user/${userId}/missionName/${missionName}`), {
       headers: {
-        sessionid: sessionId,
+        sessionid: user.sessionId,
       },
     });
     if (res.status !== 200) {

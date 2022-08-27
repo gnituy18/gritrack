@@ -3,7 +3,6 @@ declare namespace App {
 
   interface Locals {
     user?: User;
-    sessionId?: string;
   }
 
   interface Platform {}

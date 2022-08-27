@@ -20,7 +20,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       });
       if (apiRes.ok) {
         isLoggedIn = true;
-        event.locals = { user: await apiRes.json(), sessionId };
+        event.locals = { user: { ...(await apiRes.json()), sessionId } };
       }
     }
   }
