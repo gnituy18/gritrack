@@ -10,7 +10,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   const cookieStr = event.request.headers.get("cookie");
   if (cookieStr) {
-    const sessionIdCookie = cookieStr.split(";").find((c) => c.trim().startsWith("sessionid="));
+    const sessionIdCookie = cookieStr
+      .split(";")
+      .find((c) => c.trim().startsWith("sessionid="));
     if (sessionIdCookie) {
       const sessionId = sessionIdCookie.trim().split("=")[1];
       const apiRes = await fetch(v1("/user/current"), {
@@ -30,7 +32,10 @@ export const handle: Handle = async ({ event, resolve }) => {
         location: "/product",
       },
     });
-  } else if (isLoggedIn && (event.url.pathname === "/login" || event.url.pathname === "/")) {
+  } else if (
+    isLoggedIn &&
+    (event.url.pathname === "/login" || event.url.pathname === "/")
+  ) {
     return new Response(null, {
       status: 302,
       headers: {

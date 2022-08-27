@@ -1,18 +1,17 @@
-import { error } from '@sveltejs/kit';
-import type { PageLoad } from "../$types";
-import v1 from "$apis/v1";
+import type { PageLoad } from "./$types";
+import v1 from "$lib/apis/v1";
 
-export const load: PageLoad = async ({ params, fetch, session }) => {
+export const load: PageLoad = async ({ params, fetch, parent }) => {
+  const { sessionId } = await parent();
   try {
     const userId = params.userId;
     const missionName = params.missionName;
     let res = await fetch(v1(`/user/${userId}/missionName/${missionName}`), {
       headers: {
-        sessionid: session.sessionId,
+        sessionid: sessionId,
       },
     });
     if (res.status !== 200) {
-      throw new Error("@migration task: Migrate this return statement (https://github.com/sveltejs/kit/discussions/5774#discussioncomment-3292693)");
       return {
         status: res.status,
       };
@@ -24,7 +23,6 @@ export const load: PageLoad = async ({ params, fetch, session }) => {
     });
 
     if (res.status !== 200) {
-      throw new Error("@migration task: Migrate this return statement (https://github.com/sveltejs/kit/discussions/5774#discussioncomment-3292693)");
       return {
         status: res.status,
       };
@@ -32,9 +30,9 @@ export const load: PageLoad = async ({ params, fetch, session }) => {
     const steps = await res.json();
 
     return {
-  mission,
-  propSteps: steps,
-};
+      mission,
+      propSteps: steps,
+    };
   } catch (error) {
     console.error(error);
     throw error(500);

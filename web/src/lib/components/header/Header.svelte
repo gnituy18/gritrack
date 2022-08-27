@@ -1,6 +1,6 @@
 <script lang="ts">
   import v1 from "$lib/apis/v1";
-  import { session } from "$app/stores";
+  import { page } from "$app/stores";
   import { missions } from "$lib/stores/mission";
   import Button from "$lib/components/common/Button.svelte";
   import Avatar from "$lib/components/common/Avatar.svelte";
@@ -19,17 +19,22 @@
       return;
     }
 
-    const newMissions: Array<Mission> = await (await fetch(v1("/mission"), { credentials: "include" })).json();
+    const newMissions: Array<Mission> = await (
+      await fetch(v1("/mission"), { credentials: "include" })
+    ).json();
     $missions = newMissions;
 
-    await goto(`/${$session.currentUser.id}`);
+    await goto(`/${$page.data.currentUser.id}`);
   }
 </script>
 
 <header class="sticky top-0 flex-none box-border px-4 w-60 h-full border-r">
   <nav>
     <div class="flex justify-between items-center my-4">
-      <Avatar alt={$session.currentUser.name} src={$session.currentUser.picture} />
+      <Avatar
+        alt={$page.data.currentUser.name}
+        src={$page.data.currentUser.picture}
+      />
       <Button
         size="s"
         theme="hidden"
@@ -51,9 +56,12 @@
     <ul class="my-4">
       {#each $missions as { id, name }}
         <li class="mt-1 rounded px-2 hover:cursor-pointer hover:bg-slate-50 ">
-          <a href="/{$session.currentUser.id}/{name}" class="block text-lg"
+          <a href="/{$page.data.currentUser.id}/{name}" class="block text-lg"
             >{name}
-            <Dropdown classes="float-right" items={[{ label: "delete", action: () => deleteMission(id) }]}>
+            <Dropdown
+              classes="float-right"
+              items={[{ label: "delete", action: () => deleteMission(id) }]}
+            >
               ...
             </Dropdown>
           </a>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { env } from "$env/dynamic/public";
-  import Button from "$components/common/Button.svelte";
-  import v1 from "$apis/v1";
+  import Button from "$lib/components/common/Button.svelte";
+  import v1 from "$lib/apis/v1";
 
   function signIn() {
     gapi.load("client:auth2", async () => {
