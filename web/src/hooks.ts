@@ -1,4 +1,4 @@
-import type { Handle, HandleError, GetSession } from "@sveltejs/kit";
+import type { Handle, HandleError } from "@sveltejs/kit";
 import v1 from "$lib/apis/v1";
 
 function isPublicPage(path: string): boolean {
@@ -20,7 +20,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       });
       if (apiRes.ok) {
         isLoggedIn = true;
-        event.locals = { currentUser: await apiRes.json(), sessionId };
+        event.locals = { user: await apiRes.json(), sessionId };
       }
     }
   }
@@ -39,7 +39,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     return new Response(null, {
       status: 302,
       headers: {
-        location: `/${event.locals.currentUser.id}`,
+        location: `/${event.locals.user.id}`,
       },
     });
   }
@@ -49,8 +49,4 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 export const handleError: HandleError = async ({ error }) => {
   console.error(error);
-};
-
-export const getSession: GetSession = async ({ locals }) => {
-  return locals;
 };

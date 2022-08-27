@@ -43,7 +43,7 @@
     ).json();
     $missions = newMissions;
 
-    await goto(`/${data.currentUser.id}/${name}`);
+    await goto(`/${data.user.id}/${name}`);
   }
 </script>
 

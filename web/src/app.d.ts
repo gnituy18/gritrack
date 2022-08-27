@@ -2,7 +2,7 @@ declare namespace App {
   type User = import("$lib/types").User;
 
   interface Locals {
-    currentUser?: User;
+    user?: User;
     sessionId?: string;
   }
 

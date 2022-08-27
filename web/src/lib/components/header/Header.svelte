@@ -24,17 +24,14 @@
     ).json();
     $missions = newMissions;
 
-    await goto(`/${$page.data.currentUser.id}`);
+    await goto(`/${$page.data.user.id}`);
   }
 </script>
 
 <header class="sticky top-0 flex-none box-border px-4 w-60 h-full border-r">
   <nav>
     <div class="flex justify-between items-center my-4">
-      <Avatar
-        alt={$page.data.currentUser.name}
-        src={$page.data.currentUser.picture}
-      />
+      <Avatar alt={$page.data.user.name} src={$page.data.user.picture} />
       <Button
         size="s"
         theme="hidden"
@@ -56,7 +53,7 @@
     <ul class="my-4">
       {#each $missions as { id, name }}
         <li class="mt-1 rounded px-2 hover:cursor-pointer hover:bg-slate-50 ">
-          <a href="/{$page.data.currentUser.id}/{name}" class="block text-lg"
+          <a href="/{$page.data.user.id}/{name}" class="block text-lg"
             >{name}
             <Dropdown
               classes="float-right"

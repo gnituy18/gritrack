@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Step, Mission } from "$lib/types";
+  import type { Step } from "$lib/types";
   import { steps as storeSteps } from "$lib/stores/mission";
   import StepComp from "$lib/components/mission/Step.svelte";
   import Button from "$lib/components/common/Button.svelte";
@@ -13,7 +13,7 @@
   let count: number = 10;
   let hasMore: boolean = true;
 
-  $: isOwner = data.currentUser.id === data.mission.userId;
+  $: isOwner = data.user.id === data.mission.userId;
   $: steps = $storeSteps;
   $: steps = data.propSteps;
 
