@@ -1,7 +1,5 @@
 <script lang="ts">
-  import type { Mission } from "$lib/types";
-  import v1 from "$lib/apis/v1";
-  import { missions } from "$lib/stores/mission";
+  import missions from "$lib/stores/mission";
   import { goto } from "$app/navigation";
   import Button from "$lib/components/common/Button.svelte";
   import type { PageData } from "./$types";
@@ -13,36 +11,14 @@
 
   async function handleSubmitClick() {
     readonly = true;
-    await createMission();
-    readonly = false;
-  }
-
-  async function createMission() {
-    if (!name) {
-      console.error("input invalid");
-      return;
+    try {
+      await missions.create(name);
+      await goto(`/${data.user.id}/${name}`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      readonly = false;
     }
-    const resp = await fetch(v1("/mission"), {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name,
-      }),
-    });
-    if (!resp.ok) {
-      console.error("create failed");
-      return;
-    }
-
-    const newMissions: Array<Mission> = await (
-      await fetch(v1("/mission"), { credentials: "include" })
-    ).json();
-    $missions = newMissions;
-
-    await goto(`/${data.user.id}/${name}`);
   }
 </script>
 

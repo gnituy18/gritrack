@@ -1,28 +1,18 @@
 <script lang="ts">
   import v1 from "$lib/apis/v1";
   import { page } from "$app/stores";
-  import { missions } from "$lib/stores/mission";
+  import missions from "$lib/stores/mission";
   import Button from "$lib/components/common/Button.svelte";
   import Avatar from "$lib/components/common/Avatar.svelte";
   import Dropdown from "$lib/components/common/Dropdown.svelte";
-  import type { Mission } from "$lib/types";
   import { goto } from "$app/navigation";
 
   async function deleteMission(missionId: string) {
-    const res = await fetch(v1(`/mission/${missionId}`), {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      console.error("create failed");
-      return;
+    try {
+      await missions.delete(missionId);
+    } catch (error) {
+      console.error(error);
     }
-
-    const newMissions: Array<Mission> = await (
-      await fetch(v1("/mission"), { credentials: "include" })
-    ).json();
-    $missions = newMissions;
 
     await goto(`/${$page.data.user.id}`);
   }
