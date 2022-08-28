@@ -1,5 +1,6 @@
 import type { PageLoad } from "./$types";
 import v1 from "$lib/apis/v1";
+import type { Step } from "$lib/types";
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
   const { user } = await parent();
@@ -27,11 +28,12 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
         status: res.status,
       };
     }
-    const steps = await res.json();
+    const steps: Array<Step> = await res.json();
 
     return {
       mission,
-      propSteps: steps,
+      steps,
+      currentOffset: steps.length,
     };
   } catch (error) {
     console.error(error);

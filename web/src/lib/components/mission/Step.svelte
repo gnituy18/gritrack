@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Mission, Step, Item } from "$lib/types";
   import v1 from "$lib/apis/v1";
-  import { steps as storeSteps } from "$lib/stores/mission";
+  import steps from "$lib/stores/step";
   import { page } from "$app/stores";
   import ItemDisp from "$lib/components/mission/ItemDisp.svelte";
   import Button from "$lib/components/common/Button.svelte";
@@ -68,13 +68,8 @@
       }
     }
 
-    const res = await fetch(
-      v1(`/mission/${mission.id}/step?offset=0&limit=10`),
-      {
-        credentials: "include",
-      }
-    );
-    $storeSteps = await res.json();
+    // TODO fix update / create and miss all loaded steps
+    await steps.setRange(mission.id, 0, 10);
     editing = false;
   }
 
