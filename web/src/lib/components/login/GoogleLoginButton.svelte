@@ -1,6 +1,7 @@
 <script lang="ts">
   import { env } from "$env/dynamic/public";
   import Button from "$lib/components/common/Button.svelte";
+  import { goto } from "$app/navigation";
   import v1 from "$lib/apis/v1";
 
   function signIn() {
@@ -27,7 +28,7 @@
           }),
         });
         if (resp.type === "opaqueredirect") {
-          window.location.href = "/home";
+          await goto("/");
         }
       } catch (err) {
         console.error(err);

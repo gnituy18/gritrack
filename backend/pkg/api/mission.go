@@ -74,6 +74,20 @@ func (mh *missionHandler) createMission(rctx *routing.Context) error {
 		return nil
 	}
 
+	_, err := mh.missionStore.GetByUserMissionName(ctx, userId, body.Name)
+	if err == nil {
+		JSON(rctx, http.StatusConflict, nil)
+		return nil
+	} else if err != nil && err != mission.ErrNotFound {
+		ctx.With(
+			zap.Error(err),
+			zap.String("userId", userId),
+			zap.String("missionName", body.Name),
+		).Error("missionHandler.missionStore.GetByUserMissionName failed in missionHandler.createMission")
+		JSON(rctx, http.StatusInternalServerError, nil)
+		return nil
+	}
+
 	m := &mission.Mission{
 		UserId:      userId,
 		Name:        body.Name,
