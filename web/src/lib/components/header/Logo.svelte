@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let href: string = "/home";
+  export let href: string = "/";
 </script>
 
 <a {href} class="inline-block">

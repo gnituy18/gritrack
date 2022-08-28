@@ -6,7 +6,7 @@ class StepsStore {
   private steps = writable<Array<Step>>([]);
   private missionId: string;
   private currentOffset: number = 0;
-  private more: boolean ;
+  private more: boolean;
 
   public subscribe = this.steps.subscribe;
 

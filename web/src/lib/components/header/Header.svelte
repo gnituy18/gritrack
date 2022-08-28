@@ -32,7 +32,7 @@
             credentials: "include",
           });
 
-          window.location.href = "/";
+          await goto("/");
         }}
       />
     </div>
