@@ -8,7 +8,7 @@
 
   let isOwner: boolean = data.user.id === data.mission.userId;
 
-  $: steps.set(data.mission.id, data.steps, data.currentOffset);
+  $: steps.set(data.mission.id, data.steps, data.more, data.currentOffset);
 </script>
 
 <ul class="divide-y-2">

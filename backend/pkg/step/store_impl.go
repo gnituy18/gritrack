@@ -1,6 +1,7 @@
 package step
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/satori/go.uuid"
@@ -25,18 +26,21 @@ type impl struct {
 	doc document.Document
 }
 
-func (im *impl) GetByMissionId(ctx context.Context, missionId string, offset, limit int64) ([]*Step, error) {
+func (im *impl) GetByMissionId(ctx context.Context, missionId string, offset, limit int64) ([]*Step, bool, error) {
 	q := bson.M{
 		"missionId": missionId,
 	}
 	sort := bson.D{bson.E{Key: "time", Value: -1}}
 	steps := []*Step{}
-	if err := im.doc.Search(ctx, document.Step, offset, limit, q, sort, &steps); err != nil {
+	err := im.doc.Search(ctx, document.Step, offset, limit+1, q, sort, &steps)
+	if err != nil {
 		ctx.With(zap.Error(err)).Error("document.Document.Search failed in step.Store.GetByMissionId")
-		return nil, err
+		return nil, false, err
 	}
 
-	return steps, nil
+	fmt.Println("steps", steps)
+
+	return steps[:len(steps)-1], int64(len(steps)) > limit, nil
 }
 
 func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
