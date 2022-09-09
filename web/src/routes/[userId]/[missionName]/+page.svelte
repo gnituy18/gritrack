@@ -15,16 +15,16 @@
   {#if !isOwner}
     <h1>{data.mission.name}</h1>
   {/if}
-  {#key $steps}
+  {#key $steps.steps}
     {#if isOwner}
       <Step editing mission={data.mission} />
     {/if}
-    {#each $steps as step}
+    {#each $steps.steps as step}
       <Step {step} mission={data.mission} />
     {/each}
   {/key}
 </ul>
-{#if steps.hasMore()}
+{#if $steps.more}
   <div class="p-4 flex justify-center">
     <Button onClick={() => steps.updateMore(7)} value="show more" />
   </div>

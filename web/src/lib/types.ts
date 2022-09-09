@@ -26,7 +26,7 @@ export type Step = {
 export type Steps = {
   steps: Array<Step>;
   more: boolean;
-}
+};
 
 export enum ItemType {
   Time = 1,

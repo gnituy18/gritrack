@@ -1,20 +1,23 @@
 import { writable } from "svelte/store";
-import type { Step } from "$lib/types";
+import type { Step, Steps } from "$lib/types";
 import v1 from "$lib/apis/v1";
 
 class StepsStore {
-  private steps = writable<Array<Step>>([]);
+  private steps = writable<Steps>({ steps: [], more: false });
   private missionId: string;
   private currentOffset: number = 0;
-  private more: boolean;
 
   public subscribe = this.steps.subscribe;
 
-  public set(missionId: string, steps: Array<Step>, more: boolean, currentOffset: number) {
+  public set(
+    missionId: string,
+    steps: Array<Step>,
+    more: boolean,
+    currentOffset: number
+  ) {
     this.missionId = missionId;
     this.currentOffset = currentOffset;
-    this.steps.set(steps);
-    this.more = more;
+    this.steps.set({ steps, more });
   }
 
   public async setRange(missionId: string, offset: number, limit: number) {
@@ -28,7 +31,6 @@ class StepsStore {
     this.missionId = missionId;
     this.currentOffset = offset + resp.steps.length;
     this.steps.set(resp.steps);
-    this.more = resp.more;
   }
 
   public async updateMore(count: number = 10) {
@@ -41,15 +43,11 @@ class StepsStore {
       }
     );
     const moreSteps = await res.json();
-    console.log(moreSteps);
     this.currentOffset += moreSteps.steps.length;
-    this.more = moreSteps.more;
-    this.steps.update((steps) => [...steps, ...moreSteps.steps]);
-  }
-
-  public hasMore(): boolean {
-    console.log(this.more)
-    return this.more;
+    this.steps.update((steps) => ({
+      more: moreSteps.more,
+      steps: [...steps.steps, ...moreSteps.steps],
+    }));
   }
 }
 
