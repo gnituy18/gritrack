@@ -1,7 +1,6 @@
 package step
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/satori/go.uuid"
@@ -38,9 +37,15 @@ func (im *impl) GetByMissionId(ctx context.Context, missionId string, offset, li
 		return nil, false, err
 	}
 
-	fmt.Println("steps", steps)
+	if len(steps) == 0 {
+		return steps, false, nil
+	}
 
-	return steps[:len(steps)-1], int64(len(steps)) > limit, nil
+	if int64(len(steps)) > limit {
+		return steps[:len(steps)-1], true, nil
+	}
+
+	return steps, false, nil
 }
 
 func (im *impl) Create(ctx context.Context, s *Step) (string, error) {
