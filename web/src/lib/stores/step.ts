@@ -10,10 +10,11 @@ class StepsStore {
 
   public subscribe = this.steps.subscribe;
 
-  public set(missionId: string, steps: Array<Step>, currentOffset: number) {
+  public set(missionId: string, steps: Array<Step>, more: boolean, currentOffset: number) {
     this.missionId = missionId;
     this.currentOffset = currentOffset;
     this.steps.set(steps);
+    this.more = more;
   }
 
   public async setRange(missionId: string, offset: number, limit: number) {
@@ -23,10 +24,11 @@ class StepsStore {
         credentials: "include",
       }
     );
-    const steps = await res.json();
+    const resp = await res.json();
     this.missionId = missionId;
-    this.currentOffset = offset + steps.length;
-    this.steps.set(steps);
+    this.currentOffset = offset + resp.steps.length;
+    this.steps.set(resp.steps);
+    this.more = resp.more;
   }
 
   public async updateMore(count: number = 10) {
@@ -39,14 +41,14 @@ class StepsStore {
       }
     );
     const moreSteps = await res.json();
-    this.currentOffset += moreSteps.length;
-    if (moreSteps.length < count) {
-      this.more = false;
-    }
-    this.steps.update((steps) => [...steps, ...moreSteps]);
+    console.log(moreSteps);
+    this.currentOffset += moreSteps.steps.length;
+    this.more = moreSteps.more;
+    this.steps.update((steps) => [...steps, ...moreSteps.steps]);
   }
 
   public hasMore(): boolean {
+    console.log(this.more)
     return this.more;
   }
 }

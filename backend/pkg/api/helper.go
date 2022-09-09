@@ -40,6 +40,22 @@ func userToRepr(u *user.User) *userRepr {
 	}
 }
 
+type stepsRepr struct {
+	Steps []*stepRepr `json:"steps"`
+	More  bool        `json:"more"`
+}
+
+func stepsToRepr(ss []*step.Step, more bool) *stepsRepr {
+	steps := make([]*stepRepr, len(ss))
+	for i, s := range ss {
+		steps[i] = stepToRepr(s)
+	}
+	return &stepsRepr{
+		Steps: steps,
+		More:  more,
+	}
+}
+
 type stepRepr struct {
 	Id        string     `json:"id"`
 	Time      int64      `json:"time"`

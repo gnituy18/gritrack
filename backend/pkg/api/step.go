@@ -55,13 +55,10 @@ func (sh *stepHandler) getByMissionId(rctx *routing.Context) error {
 		JSON(rctx, http.StatusBadRequest, nil)
 	}
 
-	steps, err := sh.stepStore.GetByMissionId(ctx, missionId, offset, limit)
-	reprs := []*stepRepr{}
-	for _, s := range steps {
-		reprs = append(reprs, stepToRepr(s))
-	}
+	steps, more, err := sh.stepStore.GetByMissionId(ctx, missionId, offset, limit)
+	repr := stepsToRepr(steps, more)
 
-	JSON(rctx, http.StatusOK, reprs)
+	JSON(rctx, http.StatusOK, repr)
 	return nil
 }
 
