@@ -68,7 +68,6 @@
       }
     }
 
-    // TODO fix update / create and miss all loaded steps
     await steps.setRange(mission.id, 0, 10);
     editing = false;
   }
