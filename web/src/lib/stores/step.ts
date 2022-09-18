@@ -30,7 +30,7 @@ class StepsStore {
     const resp = await res.json();
     this.missionId = missionId;
     this.currentOffset = offset + resp.steps.length;
-    this.steps.set(resp.steps);
+    this.steps.set(resp);
   }
 
   public async updateMore(count: number = 10) {
