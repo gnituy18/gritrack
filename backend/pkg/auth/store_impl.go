@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"go.uber.org/zap"
+	"google.golang.org/api/idtoken"
 	"google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
 
@@ -34,15 +35,13 @@ func (im *impl) Auth(ctx context.Context, info *Info) (*Result, error) {
 }
 
 func (im *impl) authWithGoogle(ctx context.Context, info *InfoGoogle) (*Result, error) {
-	oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(im.httpClient))
-	tokenInfoCall := oauth2Service.Tokeninfo()
-	tokenInfoCall.AccessToken(info.AccessToken)
-	tokenInfo, err := tokenInfoCall.Do()
-	if tokenInfo.Audience != os.Getenv("GOOGLE_CLIENT_ID") {
+	// validate google id token
+	_, err := idtoken.Validate(ctx, info.AccessToken, os.Getenv("GOOGLE_CLIENT_ID"))
+	if err != nil {
 		return nil, ErrTokenAudienceInvalid
-	} else if err != nil {
-		return nil, err
 	}
+
+	oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(im.httpClient))
 
 	userInfoCall := oauth2Service.Userinfo.Get()
 	userInfoCall.Header().Set("Authorization", "Bearer "+info.AccessToken)
