@@ -6,8 +6,6 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/api/idtoken"
-	"google.golang.org/api/oauth2/v2"
-	"google.golang.org/api/option"
 
 	"gritter/pkg/context"
 )
@@ -35,25 +33,15 @@ func (im *impl) Auth(ctx context.Context, info *Info) (*Result, error) {
 }
 
 func (im *impl) authWithGoogle(ctx context.Context, info *InfoGoogle) (*Result, error) {
-	// validate google id token
-	_, err := idtoken.Validate(ctx, info.AccessToken, os.Getenv("GOOGLE_CLIENT_ID"))
+	payload, err := idtoken.Validate(ctx, info.IdToken, os.Getenv("GOOGLE_CLIENT_ID"))
 	if err != nil {
 		return nil, ErrTokenAudienceInvalid
-	}
-
-	oauth2Service, err := oauth2.NewService(ctx, option.WithHTTPClient(im.httpClient))
-
-	userInfoCall := oauth2Service.Userinfo.Get()
-	userInfoCall.Header().Set("Authorization", "Bearer "+info.AccessToken)
-	userInfo, err := userInfoCall.Do()
-	if err != nil {
-		return nil, err
 	}
 
 	return &Result{
 		Type: TypeGoogle,
 		Google: &ResultGoogle{
-			UserInfo: userInfo,
+			Payload: payload,
 		},
 	}, nil
 }

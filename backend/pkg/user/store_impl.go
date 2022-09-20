@@ -63,10 +63,10 @@ func (im *impl) CreateByAuthResult(ctx context.Context, result *auth.Result) (st
 
 func (im *impl) authGoogleToUser(ctx context.Context, result *auth.ResultGoogle) *User {
 	return &User{
-		Email:        result.UserInfo.Email,
-		Name:         result.UserInfo.GivenName,
-		Picture:      result.UserInfo.Picture,
-		GoogleUserId: result.UserInfo.Id,
+		Email:        result.Payload.Claims["email"].(string),
+		Name:         result.Payload.Claims["given_name"].(string),
+		Picture:      result.Payload.Claims["picture"].(string),
+		GoogleUserId: result.Payload.Subject,
 	}
 }
 
@@ -113,7 +113,7 @@ func (im *impl) GetByAuthResult(ctx context.Context, result *auth.Result) (*User
 
 func (im *impl) getQueryByGoogle(ctx context.Context, result *auth.ResultGoogle) bson.M {
 	return bson.M{
-		"googleUserId": result.UserInfo.Id,
+		"googleUserId": result.Payload.Subject,
 	}
 }
 

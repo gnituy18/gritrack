@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"encoding/json"
+
 	"go.uber.org/zap/zapcore"
-	"google.golang.org/api/oauth2/v2"
+	"google.golang.org/api/idtoken"
 )
 
 type Type int
@@ -18,7 +20,7 @@ type Info struct {
 }
 
 type InfoGoogle struct {
-	AccessToken string `json:"accessToken"`
+	IdToken string `json:"idToken"`
 }
 
 type Result struct {
@@ -34,15 +36,15 @@ func (r *Result) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
 }
 
 type ResultGoogle struct {
-	UserInfo *oauth2.Userinfo
+	Payload *idtoken.Payload
 }
 
 func (rg *ResultGoogle) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
-	bytes, err := rg.UserInfo.MarshalJSON()
+	bytes, err := json.Marshal(rg.Payload)
 	if err != nil {
 		return err
 	}
 
-	encoder.AddString("accessToken", string(bytes))
+	encoder.AddString("payload", string(bytes))
 	return nil
 }

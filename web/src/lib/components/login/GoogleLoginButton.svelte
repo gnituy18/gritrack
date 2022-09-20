@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { afterUpdate, onMount } from "svelte";
   import { env } from "$env/dynamic/public";
   import v1 from "$lib/apis/v1";
   import { goto } from "$app/navigation";
+  import * as google from "google-one-tap";
 
   async function handleCredentialResponse(response) {
-
     try {
       const resp = await fetch(v1("/auth"), {
         method: "POST",
@@ -18,7 +18,7 @@
         },
         body: JSON.stringify({
           type: 1,
-          google: { accessToken: response.credential },
+          google: { idToken: response.credential },
         }),
       });
       if (resp.type === "opaqueredirect") {
@@ -34,15 +34,14 @@
       client_id: env.PUBLIC_GOOGLE_CLIENT_ID,
       callback: handleCredentialResponse,
     });
+  });
+
+  afterUpdate(() => {
     google.accounts.id.renderButton(
       document.getElementById("googleSignInButton"),
-      { theme: "outline", size: "large" } // customization attributes
+      { theme: "outline", size: "large" }
     );
   });
 </script>
-
-<svelte:head>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-</svelte:head>
 
 <div id="googleSignInButton" />
