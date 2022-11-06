@@ -11,7 +11,7 @@
   {#if data.user}
     <Button href="/login" value={`Continue with ${data.user.name}`} reload />
   {:else}
-    <Button href="/login" value="Try Gritter free" />
+    <Button href="/login" value="Try Gritrack free" />
   {/if}
 </header>
 <main>
