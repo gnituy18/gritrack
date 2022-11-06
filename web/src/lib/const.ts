@@ -1,1 +1,1 @@
-export const appName = "Gritter";
+export const appName = "Gritrack";

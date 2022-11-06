@@ -3,5 +3,5 @@
 </script>
 
 <a {href} class="inline-block">
-  <h1>Gritter</h1>
+  <h1>Gritrack</h1>
 </a>
