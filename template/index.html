@@ -1,19 +1,23 @@
 {{define "main"}}
+{{ if .User }}
 <div hx-get="/snippet/track/" hx-vals="js:{currentDate: getCurrentDateFormatted()}" hx-trigger="load">
 </div>
 <script>
 
-function getCurrentDateFormatted() {
-  const today = new Date();
-  const year = today.getFullYear();
-  let month = today.getMonth() + 1;
-  let day = today.getDate();
+  function getCurrentDateFormatted() {
+    const today = new Date();
+    const year = today.getFullYear();
+    let month = today.getMonth() + 1;
+    let day = today.getDate();
 
-  month = month < 10 ? '0' + month : month;
-  day = day < 10 ? '0' + day : day;
+    month = month < 10 ? '0' + month : month;
+    day = day < 10 ? '0' + day : day;
 
-  return `${year}-${month}-${day}`;
-}
+    return `${year}-${month}-${day}`;
+  }
 
 </script>
+{{ else }}
+<h1>Welcome to Gritrack!</h1>
+{{end}}
 {{end}}

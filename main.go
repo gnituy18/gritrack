@@ -11,6 +11,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -23,7 +24,7 @@ import (
 var (
 	loc  = time.UTC
 	port = "8080"
-	host = "http://localhost"
+	host = "http://localhost:8080"
 
 	ErrUserNotLoggedIn = errors.New("user not logged in")
 )
@@ -31,6 +32,11 @@ var (
 type User struct {
 	Username string
 	Birthday string
+}
+
+type TmplPayload struct {
+	User  *User
+	Query *url.Values
 }
 
 func main() {
@@ -65,35 +71,32 @@ func main() {
 		}
 	}()
 
-	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		tmpl, err := template.ParseFiles("./template/layout.html", "./template/index.html")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err = tmpl.Execute(w, nil); err != nil {
-			log.Panic(err)
-		}
-	})
-
-	http.HandleFunc("GET /snippet/{snippet}/{$}", func(w http.ResponseWriter, r *http.Request) {
-		snippet := r.PathValue("snippet")
-		if snippet == "" {
+	http.HandleFunc("GET /snippet/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		name := r.PathValue("name")
+		if name == "" {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
-		tmpl, err := template.ParseFiles(fmt.Sprintf("./template/snippet/%s.html", snippet))
-		if err != nil {
-			log.Fatal(err)
+		tmpl := snippet(name)
+		if err := tmpl.Execute(w, r.URL.Query()); err != nil {
+			log.Panic(err)
 		}
-		tmpl, err = tmpl.Parse(fmt.Sprintf(`{{template "%s" . }}`, snippet))
-		if err != nil {
-			log.Fatal(err)
+	})
+
+	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
+		user, err := getSessionUser(r)
+		if err != nil && err != ErrUserNotLoggedIn {
+			log.Panic(err)
 		}
 
-		query := r.URL.Query()
-		if err = tmpl.Execute(w, query); err != nil {
+		payload := TmplPayload{
+			User: user,
+		}
+
+		tmpl := template.Must(template.ParseFiles("./template/layout.html", "./template/index.html"))
+		if err := tmpl.Execute(w, payload); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
 	})
@@ -105,12 +108,8 @@ func main() {
 			return
 		}
 
-		tmpl, err := template.ParseFiles("./template/layout.html", "./template/sign-up.html", "./template/snippet/sign-up-form.html")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err = tmpl.Execute(w, nil); err != nil {
+		tmpl := template.Must(template.ParseFiles("./template/layout.html", "./template/sign-up.html", "./template/snippet/sign-up-form.html"))
+		if err := tmpl.Execute(w, nil); err != nil {
 			log.Panic(err)
 		}
 	})
@@ -129,38 +128,19 @@ func main() {
 			log.Panic(err)
 		}
 
-		rows, err := tx.Query("SELECT username, email FROM user WHERE username = ? OR email = ?", username, email)
-		if err != nil {
+		var count int
+		if err = tx.QueryRow("SELECT count(*) FROM user WHERE username = ? OR email = ?", username, email).Scan(&count); err == sql.ErrNoRows {
 			tx.Rollback()
-			log.Panic(err)
-		}
 
-		for rows.Next() {
-			u, e := "", ""
-			if err = rows.Scan(&u, &e); err != nil {
-				tx.Rollback()
+			if err = snippet("sign-up-form").Execute(w, "Username or Email already exist."); err != nil {
 				log.Panic(err)
 			}
 
-			if u == username || e == email {
-				tmpl, err := template.ParseFiles("./template/snippet/sign-up-form.html")
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				tmpl, err = tmpl.Parse(`{{template "sign-up-form" . }}`)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				if err = tmpl.Execute(w, "Username or Email already exist."); err != nil {
-					log.Panic(err)
-				}
-
-				tx.Rollback()
-				return
-			}
-
+			return
+		} else if err != nil {
+			tx.Rollback()
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		if _, err := tx.Exec("INSERT INTO user (username, email, birthday, public) VALUES (?, ?, ?, ?)", username, email, birthday, false); err != nil {
@@ -206,8 +186,9 @@ func main() {
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		db := openDB()
-		username := ""
+		var username string
 		if err := db.QueryRow("SELECT username FROM user WHERE email = ?", email).Scan(&username); err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("user not exist"))
 			return
 		} else if err != nil {
@@ -238,7 +219,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		link := fmt.Sprintf("http://localhost:8080/log-in-with-token/?token=%s", id)
+		link := fmt.Sprintf("%s/log-in-with-token/?token=%s", host, id)
 		err = tmpl.Execute(&htmlBuffer, link)
 		if err != nil {
 			log.Panic(err)
@@ -280,7 +261,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		cookie := http.Cookie{Name: "session", Value: token, Path: "/"}
+		cookie := http.Cookie{Name: "session", Value: token, Path: "/", Expires: time.Now().Add(7 * 24 * time.Hour)}
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
@@ -309,6 +290,11 @@ func openDB() *sql.DB {
 	}
 
 	return db
+}
+
+func snippet(name string) *template.Template {
+	tmpl := template.Must(template.ParseFiles(fmt.Sprintf("./template/snippet/%s.html", name)))
+	return template.Must(tmpl.Parse(fmt.Sprintf(`{{template "%s" . }}`, name)))
 }
 
 func getSessionUser(r *http.Request) (*User, error) {

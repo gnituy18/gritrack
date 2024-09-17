@@ -14,15 +14,13 @@
   <header class="flex items-baseline justify-between p-4">
     <a class="text-2xl font-bold" href="/"> Gritrack </a>
     <nav class="flex gap-2">
-      <!--
       <a href="/help/">說明</a>
       <a href="mailto:me@hsuyuting.com">意見回饋</a>
-      {{if .user}}
-      <a href="/setting/">{{.user.Name}}</a>
+      {{if .User}}
+      <a href="/setting/">{{.User.Username}}</a>
       {{else}}
-      <a href="/login/">登入</a>
+      <a href="/log-in/">登入</a>
       {{end}}
-      -->
     </nav>
   </header>
   <main class="max-w-lg mx-auto p-2">
