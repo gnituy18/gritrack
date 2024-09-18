@@ -34,9 +34,16 @@ type User struct {
 	Birthday string
 }
 
+type Track struct {
+	Birthday time.Time
+	Today    time.Time
+	Days     [][]time.Time
+}
+
 type TmplPayload struct {
 	User  *User
 	Query *url.Values
+	Track *Track
 }
 
 func main() {
@@ -78,8 +85,46 @@ func main() {
 			return
 		}
 
+		query := r.URL.Query()
+
 		tmpl := snippet(name)
-		if err := tmpl.Execute(w, r.URL.Query()); err != nil {
+		var data any
+		switch name {
+		case "track":
+			today, err := time.Parse(time.DateOnly, query.Get("today"))
+			if err != nil {
+				log.Panic(err)
+			}
+
+			birthday, err := time.Parse(time.DateOnly, "1993-12-20")
+			if err != nil {
+				log.Panic(err)
+			}
+
+			startDate := time.Date(birthday.Year(), birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+			endDate := time.Date(birthday.Year()+90, birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+			currentDate := startDate
+			days := [][]time.Time{}
+			for currentDate.Before(endDate) {
+				if currentDate.Day() == 1 {
+					days = append(days, []time.Time{})
+				}
+
+				days[len(days)-1] = append(days[len(days)-1], currentDate)
+				currentDate = currentDate.Add(24 * time.Hour)
+			}
+
+			data = Track{
+				Today:    today,
+				Birthday: birthday,
+				Days:     days,
+			}
+
+		default:
+			data = struct{}{}
+		}
+
+		if err := tmpl.Execute(w, data); err != nil {
 			log.Panic(err)
 		}
 	})
