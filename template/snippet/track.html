@@ -1,10 +1,24 @@
 {{define "track"}}
-<div class="flex flex-col gap-2">
-  {{ range .Days }}
-  <div class="flex gap-1">
-    {{ range $i, $t := . }}
-    <div
-      class="flex-none w-4 h-4 rounded {{ if $t.Before $.Today }} bg-slate-400 {{ else if $t.After $.Today }} bg-slate-100 {{ else }} bg-orange-200 {{ end }}">
+
+<div class="flex flex-col gap-4 justify-center">
+  {{ range .Years }}
+  <div class="grid grid-flow-row grid-cols-track gap-2 justify-center">
+    {{ range .Months }}
+    <div class="grid grid-cols-subgrid col-span-full items-baseline ">
+      <time datetime="{{ (index .Days 0).Date.Format " 2006-01" }}"> {{ (index .Days 0).Date.Format "2006-01" }} </time>
+      {{ range .Days}}
+      <div hx-swap="beforeend" hx-get="/snippet/day-dialog/" class="text-slate-200 flex justify-center items-center w-5 h-5 self-center rounded cursor-pointer
+        {{- if .Date.Before $.Birthday }} 
+        {{- else if .Date.Before $.Today }} bg-slate-100 
+        {{- else if .Date.After $.Today }} border border-slate-200 
+        {{- else }} bg-orange-200 
+        {{ end }}">
+
+        {{ if or (.Date.After $.Birthday) (.Date.Equal $.Birthday) }}
+        {{.Date.Day}}
+        {{ end }}
+      </div>
+      {{end}}
     </div>
     {{end}}
   </div>

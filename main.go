@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/rand"
 	"database/sql"
@@ -13,11 +14,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
+	"github.com/tdewolff/minify/v2"
+	minhtml "github.com/tdewolff/minify/v2/html"
 	_ "modernc.org/sqlite"
 )
 
@@ -37,7 +41,29 @@ type User struct {
 type Track struct {
 	Birthday time.Time
 	Today    time.Time
-	Days     [][]time.Time
+
+	Years []Year
+}
+
+type TimePeriod int
+
+const (
+	Past TimePeriod = iota
+	Today
+	Future
+)
+
+type Year struct {
+	Months []Month
+}
+
+type Month struct {
+	Days []Day
+}
+
+type Day struct {
+	Date time.Time
+	Item string
 }
 
 type TmplPayload struct {
@@ -102,30 +128,73 @@ func main() {
 			}
 
 			startDate := time.Date(birthday.Year(), birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
-			endDate := time.Date(birthday.Year()+90, birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+			endDate := time.Date(birthday.Year()+91, birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
 			currentDate := startDate
-			days := [][]time.Time{}
+			years := []Year{
+				{
+					Months: []Month{},
+				},
+			}
+			var yi, mi int
 			for currentDate.Before(endDate) {
 				if currentDate.Day() == 1 {
-					days = append(days, []time.Time{})
+					if currentDate.Month() == 1 {
+						years = append(years, Year{
+							Months: []Month{},
+						})
+						yi = len(years) - 1
+						mi = 0
+					}
+
+					years[yi].Months = append(years[yi].Months, Month{Days: []Day{}})
+					mi = len(years[yi].Months) - 1
 				}
 
-				days[len(days)-1] = append(days[len(days)-1], currentDate)
+				years[yi].Months[mi].Days = append(years[yi].Months[mi].Days, Day{
+					Date: currentDate,
+				})
+
 				currentDate = currentDate.Add(24 * time.Hour)
 			}
 
 			data = Track{
 				Today:    today,
 				Birthday: birthday,
-				Days:     days,
+				Years:    years,
 			}
 
 		default:
 			data = struct{}{}
 		}
 
-		if err := tmpl.Execute(w, data); err != nil {
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, data); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
+		}
+
+		m := minify.New()
+		m.AddFunc("text/html", minhtml.Minify)
+		minifiedHTML, err := m.Bytes("text/html", buf.Bytes())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			w.Header().Set("Content-Encoding", "gzip")
+			gzipWriter := gzip.NewWriter(w)
+			defer gzipWriter.Close()
+
+			if _, err := gzipWriter.Write(minifiedHTML); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				log.Panic(err)
+			}
+		} else {
+			if _, err := w.Write(minifiedHTML); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				log.Panic(err)
+			}
 		}
 	})
 

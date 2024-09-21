@@ -1,6 +1,6 @@
 {{define "main"}}
 {{ if .User }}
-<div hx-get="/snippet/track/" hx-vals="js:{today: todayFormattedDate()}" hx-trigger="load">
+<div hx-get="/snippet/track/" hx-vals="js:{today: todayFormattedDate()}" hx-trigger="load" hx-swap="outerHTML">
 </div>
 <script>
 
