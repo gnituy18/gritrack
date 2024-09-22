@@ -26,83 +26,49 @@ import (
 )
 
 var (
-	loc  = time.UTC
 	port = "8080"
-	host = "http://localhost:8080"
+	host = "http://localhost"
 
 	ErrUserNotLoggedIn = errors.New("user not logged in")
 )
 
-type User struct {
-	Username string
-	Birthday string
-}
-
-type Track struct {
-	Birthday time.Time
-	Today    time.Time
-
-	Years []Year
-}
-
-type TimePeriod int
-
-const (
-	Past TimePeriod = iota
-	Today
-	Future
-)
-
-type Year struct {
-	Months []Month
-}
-
-type Month struct {
-	Days []Day
-}
-
-type Day struct {
-	Date time.Time
-	Item string
-}
-
-type TmplPayload struct {
-	User  *User
-	Query *url.Values
-	Track *Track
-}
-
 func main() {
-	if lf, ok := os.LookupEnv("LOG_FILE"); ok {
-		logFile, err := os.OpenFile(lf, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if v, ok := os.LookupEnv("LOG_FILE"); ok {
+		logFile, err := os.OpenFile(v, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.SetOutput(logFile)
 	}
 
-	if p, ok := os.LookupEnv("PORT"); ok {
-		port = p
+	if v, ok := os.LookupEnv("PORT"); ok {
+		port = v
 	}
 
-	if h, ok := os.LookupEnv("HOST"); ok {
-		host = h
+	if v, ok := os.LookupEnv("HOST"); ok {
+		host = v
 	}
+
+	db, err := sql.Open("sqlite", "./db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
 	go func() {
 		for {
-			db := openDB()
 			t := time.Now().Add(-7 * 24 * time.Hour)
 			if _, err := db.Exec("DELETE FROM session WHERE created_at < ?", t.Format(time.DateTime)); err != nil {
-				db.Close()
 				time.Sleep(time.Minute)
 				continue
 			}
 
-			db.Close()
 			time.Sleep(time.Hour)
 		}
 	}()
+
+	_ = template.Must(template.ParseGlob("./template/*.html"))
+
 
 	http.HandleFunc("GET /snippet/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("name")
@@ -233,9 +199,6 @@ func main() {
 		email := r.FormValue("email")
 		birthday := r.FormValue("birthday")
 
-		db := openDB()
-		defer db.Close()
-
 		ctx := context.Background()
 		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {
@@ -299,7 +262,6 @@ func main() {
 
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
-		db := openDB()
 		var username string
 		if err := db.QueryRow("SELECT username FROM user WHERE email = ?", email).Scan(&username); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -333,7 +295,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		link := fmt.Sprintf("%s/log-in-with-token/?token=%s", host, id)
+
+		portStr := ""
+		if port != "80" {
+			portStr = ":" + port
+		}
+
+		link := fmt.Sprintf("%s%s/log-in-with-token/?token=%s", host, portStr, id)
 		err = tmpl.Execute(&htmlBuffer, link)
 		if err != nil {
 			log.Panic(err)
@@ -367,7 +335,6 @@ func main() {
 		token := query.Get("token")
 		username := query.Get("username")
 
-		db := openDB()
 		if err := db.QueryRow("SELECT * FROM session WHERE id = ? AND username = ?", token, username).Err(); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -380,8 +347,8 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 
-	http.HandleFunc("GET /styles.css/{$}", func(w http.ResponseWriter, r *http.Request) {
-		asset, err := os.ReadFile("assets/styles.css")
+	http.HandleFunc("GET /style.css/{$}", func(w http.ResponseWriter, r *http.Request) {
+		asset, err := os.ReadFile("asset/style.css")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -397,13 +364,51 @@ func main() {
 	}
 }
 
-func openDB() *sql.DB {
-	db, err := sql.Open("sqlite", "./db")
-	if err != nil {
-		log.Panic(err)
-	}
+type User struct {
+	Username string
+	Birthday string
+}
 
-	return db
+type Track struct {
+	Birthday time.Time
+	Today    time.Time
+
+	Years []Year
+}
+
+type TimePeriod int
+
+const (
+	Past TimePeriod = iota
+	Today
+	Future
+)
+
+type Year struct {
+	Months []Month
+}
+
+type Month struct {
+	Days []Day
+}
+
+type Day struct {
+	Date time.Time
+	Item string
+}
+
+func (d Day) DateString() string {
+	return d.Date.Format(time.DateOnly)
+}
+
+func (d Day) YearMonthString() string {
+	return d.Date.Format(time.DateOnly)[:7]
+}
+
+type TmplPayload struct {
+	User  *User
+	Query *url.Values
+	Track *Track
 }
 
 func snippet(name string) *template.Template {
@@ -416,9 +421,6 @@ func getSessionUser(r *http.Request) (*User, error) {
 	if err != nil {
 		return nil, ErrUserNotLoggedIn
 	}
-
-	db := openDB()
-	defer db.Close()
 
 	user := User{}
 	if err := db.QueryRow("SELECT user.username, user.birthday FROM session JOIN user ON session.username = user.username WHERE session.id = ?", cookie.Value).Scan(&user.Username, &user.Birthday); err == sql.ErrNoRows {

@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html lang="zh-Hans-TW">
+  <head>
+    <title>Gritrack</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+    <link href="/style.css/" rel="stylesheet" />
+  </head>
+
+  <body hx-on:custom="console.log(event)" class="text-slate-700">
+    <header class="flex items-baseline justify-between p-4">
+      <a class="text-2xl font-bold" href="/"> Gritrack </a>
+      <nav class="flex gap-2">
+        <a href="mailto:hsuyuting@gritrack.com">Feedback</a>
+        {{ if .User }}
+        {{ else }}
+          <a href="/log-in/">Log In</a>
+        {{ end }}
+      </nav>
+    </header>
+    <main class="mx-auto p-2">
+      {{ template "main" . }}
+    </main>
+  </body>
+</html>

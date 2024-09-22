@@ -1,0 +1,20 @@
+{{ define "main" }}
+  <h2 class="font-bold text-2xl">Enter your email to log in</h2>
+  <form class="pt-4 flex flex-col gap-8" hx-post="/send-log-in-email/">
+    <label class="flex gap-4 items-baseline">
+      <strong>Email</strong>
+      <input
+        class="flex-1 rounded p-2"
+        name="email"
+        type="email"
+        required
+        placeholder="you@example.com"
+      />
+    </label>
+    <input
+      class="px-6 font-bold py-2 rounded bg-blue-300 cursor-pointer"
+      value="Continue"
+      type="submit"
+    />
+  </form>
+{{ end }}
