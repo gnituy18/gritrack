@@ -29,6 +29,9 @@ var (
 	port = "8080"
 	host = "http://localhost"
 
+	db   *sql.DB
+	tmpl *template.Template
+
 	ErrUserNotLoggedIn = errors.New("user not logged in")
 )
 
@@ -49,8 +52,8 @@ func main() {
 		host = v
 	}
 
-	db, err := sql.Open("sqlite", "./db")
-	if err != nil {
+	var err error
+	if db, err = sql.Open("sqlite", "./db"); err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -67,10 +70,9 @@ func main() {
 		}
 	}()
 
-	_ = template.Must(template.ParseGlob("./template/*.html"))
+	tmpl = template.Must(template.ParseGlob("./template/*.gotmpl"))
 
-
-	http.HandleFunc("GET /snippet/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("GET /template/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		name := r.PathValue("name")
 		if name == "" {
 			w.WriteHeader(http.StatusNotFound)
@@ -79,7 +81,6 @@ func main() {
 
 		query := r.URL.Query()
 
-		tmpl := snippet(name)
 		var data any
 		switch name {
 		case "track":
@@ -134,7 +135,7 @@ func main() {
 		}
 
 		var buf bytes.Buffer
-		if err := tmpl.Execute(&buf, data); err != nil {
+		if err := template.Must(tmpl.Clone()).ExecuteTemplate(&buf, name, data); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -170,15 +171,9 @@ func main() {
 			log.Panic(err)
 		}
 
-		payload := TmplPayload{
+		executePage(w, "index", PageData{
 			User: user,
-		}
-
-		tmpl := template.Must(template.ParseFiles("./template/layout.html", "./template/index.html"))
-		if err := tmpl.Execute(w, payload); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Panic(err)
-		}
+		})
 	})
 
 	http.HandleFunc("GET /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -188,10 +183,7 @@ func main() {
 			return
 		}
 
-		tmpl := template.Must(template.ParseFiles("./template/layout.html", "./template/sign-up.html", "./template/snippet/sign-up-form.html"))
-		if err := tmpl.Execute(w, nil); err != nil {
-			log.Panic(err)
-		}
+		executePage(w, "sign-up", nil)
 	})
 
 	http.HandleFunc("POST /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -209,7 +201,7 @@ func main() {
 		if err = tx.QueryRow("SELECT count(*) FROM user WHERE username = ? OR email = ?", username, email).Scan(&count); err == sql.ErrNoRows {
 			tx.Rollback()
 
-			if err = snippet("sign-up-form").Execute(w, "Username or Email already exist."); err != nil {
+			if err = template.Must(tmpl.Clone()).ExecuteTemplate(w, "sign-up-form", "Username or Email already exist."); err != nil {
 				log.Panic(err)
 			}
 
@@ -233,14 +225,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		tmpl, err := template.ParseFiles("./template/account-created.html")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err = tmpl.Execute(w, nil); err != nil {
-			log.Panic(err)
-		}
+		template.Must(tmpl.Clone()).ExecuteTemplate(w, "account-created", nil)
 	})
 
 	http.HandleFunc("GET /log-in/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -250,14 +235,7 @@ func main() {
 			return
 		}
 
-		tmpl, err := template.ParseFiles("./template/layout.html", "./template/log-in.html")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err = tmpl.Execute(w, nil); err != nil {
-			log.Panic(err)
-		}
+		executePage(w, "log-in", nil)
 	})
 
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -291,10 +269,6 @@ func main() {
 		from := "no-reply@gritrack.com"
 		title := "Log in to Gritrack"
 		var htmlBuffer bytes.Buffer
-		tmpl, err := template.ParseFiles("./template/log-in-email.html")
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		portStr := ""
 		if port != "80" {
@@ -302,7 +276,7 @@ func main() {
 		}
 
 		link := fmt.Sprintf("%s%s/log-in-with-token/?token=%s", host, portStr, id)
-		err = tmpl.Execute(&htmlBuffer, link)
+		err = template.Must(tmpl.Clone()).ExecuteTemplate(&htmlBuffer, "log-in-email", link)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -376,14 +350,6 @@ type Track struct {
 	Years []Year
 }
 
-type TimePeriod int
-
-const (
-	Past TimePeriod = iota
-	Today
-	Future
-)
-
 type Year struct {
 	Months []Month
 }
@@ -405,15 +371,17 @@ func (d Day) YearMonthString() string {
 	return d.Date.Format(time.DateOnly)[:7]
 }
 
-type TmplPayload struct {
+type PageData struct {
 	User  *User
 	Query *url.Values
-	Track *Track
 }
 
-func snippet(name string) *template.Template {
-	tmpl := template.Must(template.ParseFiles(fmt.Sprintf("./template/snippet/%s.html", name)))
-	return template.Must(tmpl.Parse(fmt.Sprintf(`{{template "%s" . }}`, name)))
+func executePage(w http.ResponseWriter, name string, pageData any) {
+	page := template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s.gotmpl", name)))
+	if err := page.ExecuteTemplate(w, "page", pageData); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Panic(err)
+	}
 }
 
 func getSessionUser(r *http.Request) (*User, error) {

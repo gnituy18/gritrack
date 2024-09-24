@@ -1,7 +1,7 @@
 {{ define "main" }}
   {{ if .User }}
     <div
-      hx-get="/snippet/track/"
+      hx-get="/template/track/"
       hx-vals="js:{today: todayFormattedDate()}"
       hx-trigger="load"
       hx-swap="outerHTML"
