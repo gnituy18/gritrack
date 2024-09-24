@@ -73,6 +73,12 @@ func main() {
 	tmpl = template.Must(template.ParseGlob("./template/*.gotmpl"))
 
 	http.HandleFunc("GET /template/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		_, err := getSessionUser(r)
+		if err != nil && err != ErrUserNotLoggedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 		name := r.PathValue("name")
 		if name == "" {
 			w.WriteHeader(http.StatusNotFound)
@@ -128,6 +134,17 @@ func main() {
 				Today:    today,
 				Birthday: birthday,
 				Years:    years,
+			}
+
+		case "day-detail":
+			date, err := time.Parse(time.DateOnly, query.Get("date"))
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			data = Day{
+				Date: date,
 			}
 
 		default:
@@ -216,7 +233,7 @@ func main() {
 			tx.Rollback()
 			log.Panic(err)
 		}
-		if _, err := tx.Exec("INSERT INTO goal (username, name) VALUES (?, ?)", username, "Your Goal!"); err != nil {
+		if _, err := tx.Exec("INSERT INTO tracker (username, name) VALUES (?, ?)", username, "Your First Tracker"); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}

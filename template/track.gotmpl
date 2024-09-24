@@ -2,11 +2,11 @@
   <dialog
     id="day-detail"
     hx-trigger="day-click from:body"
-    hx-get="/template/day/"
+    hx-get="/template/day-detail/"
     hx-vals="js:{date: event.detail.date}"
   ></dialog>
 
-  <div class="flex flex-col gap-4 justify-center">
+  <div class="grid grid-cols-[auto] gap-4 justify-center">
     {{ range .Years }}
       <div class="grid grid-flow-row grid-cols-track gap-2 justify-center">
         {{ range .Months }}
