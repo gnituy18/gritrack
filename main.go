@@ -110,26 +110,25 @@ func main() {
 			}
 
 			startDate := time.Date(birthday.Year(), birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
-			endDate := time.Date(birthday.Year()+91, birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+			// endDate := time.Date(birthday.Year()+91, birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+			endOfYear := time.Date(today.Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)
 			currentDate := startDate
 			years := []Year{
 				{
 					Months: []Month{},
 				},
 			}
-			var yi, mi int
-			for currentDate.Before(endDate) {
+			for currentDate.Before(endOfYear) {
 				if currentDate.Day() == 1 {
 					if currentDate.Month() == 1 {
-						years = append(years, Year{
-							Months: []Month{},
-						})
-						yi = len(years) - 1
-						mi = 0
+						years = append([]Year{
+							{
+								Months: []Month{},
+							},
+						}, years...)
 					}
 
-					years[yi].Months = append(years[yi].Months, Month{Days: []Day{}})
-					mi = len(years[yi].Months) - 1
+					years[0].Months = append([]Month{{Days: []Day{}}}, years[0].Months...)
 				}
 
 				content := ""
@@ -137,7 +136,7 @@ func main() {
 					content = c
 				}
 
-				years[yi].Months[mi].Days = append(years[yi].Months[mi].Days, Day{
+				years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
 					Date:    currentDate,
 					Content: content,
 				})
