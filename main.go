@@ -80,12 +80,31 @@ func main() {
 		var data any
 		switch name {
 		case "track":
+			user, nil := getSessionUser(r)
+			if err != nil && err != ErrUserNotLoggedIn {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			rows, err := db.Query("SELECT date, content FROM day WHERE username = ?", user.Username)
+			if err != nil {
+				log.Panic(err)
+			}
+
+			m := map[string]string{}
+			for rows.Next() {
+				var date string
+				var content string
+				rows.Scan(&date, &content)
+				m[date] = content
+			}
+
 			today, err := time.Parse(time.DateOnly, query.Get("today"))
 			if err != nil {
 				log.Panic(err)
 			}
 
-			birthday, err := time.Parse(time.DateOnly, "1993-12-20")
+			birthday, err := time.Parse(time.DateOnly, user.Birthday)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -113,8 +132,14 @@ func main() {
 					mi = len(years[yi].Months) - 1
 				}
 
+				content := ""
+				if c, ok := m[currentDate.Format(time.DateOnly)]; ok {
+					content = c
+				}
+
 				years[yi].Months[mi].Days = append(years[yi].Months[mi].Days, Day{
-					Date: currentDate,
+					Date:    currentDate,
+					Content: content,
 				})
 
 				currentDate = currentDate.Add(24 * time.Hour)
@@ -422,6 +447,10 @@ func (d Day) DateString() string {
 
 func (d Day) YearMonthString() string {
 	return d.Date.Format(time.DateOnly)[:7]
+}
+
+func (d Day) SameDate(t time.Time) bool {
+	return d.Date.Format(time.DateOnly) == t.Format(time.DateOnly)
 }
 
 type PageData struct {

@@ -1,5 +1,5 @@
 {{ define "track" }}
-  <dialog class="rounded p-4" id="day-detail"></dialog>
+  <dialog class="w-80 rounded p-4" id="day-detail"></dialog>
   <div class="grid grid-cols-[auto] justify-center gap-4">
     {{ range .Years }}
       <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
@@ -11,18 +11,21 @@
             {{ range .Days }}
               {{ if or (.Date.After $.Birthday) (.Date.Equal $.Birthday) }}
                 <time
-                  hx-get="/template/day-detail/?date={{ .DateString }}"
-                  hx-target="#day-detail"
+                  {{ if or (.Date.Before $.Today) (.Date.Equal $.Today) }}
+                    hx-get="/template/day-detail/?date={{ .DateString }}"
+                    hx-target="#day-detail"
+                  {{ end }}
                   datetime="{{ .DateString }}"
                   id="{{ .DateString }}"
-                  class="{{ if .Date.Before $.Birthday -}}
+                  class="{{- if .Content -}}
+                    bg-lime-300 text-lime-600
                   {{- else if .Date.Before $.Today -}}
-                    bg-slate-100
+                    bg-slate-100 text-slate-300
                   {{- else if .Date.After $.Today -}}
-                    border border-slate-200
-                  {{- else -}}
-                    bg-orange-200
-                  {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center self-center rounded text-slate-200"
+                    border border-slate-200 text-slate-300
+                  {{- else if .SameDate $.Today -}}
+                    bg-orange-200 text-slate-300
+                  {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center self-center rounded"
                 >
                   <small>
                     {{ .Date.Day }}
