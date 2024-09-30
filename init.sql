@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE user(
 	username VARCHAR(64) NOT NULL PRIMARY KEY,
 	email VARCHAR(320) NOT NULL UNIQUE,
@@ -6,13 +8,13 @@ CREATE TABLE user(
 );
 
 CREATE TABLE session(
-	username REFFERENCES user,
+	username REFERENCES user,
 	id VARCHAR(256),
 	created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tracker(
-	username REFFERENCES user,
+	username REFERENCES user,
 	name VARCHAR(64) NOT NULL,
 	PRIMARY KEY (username, name)
 );

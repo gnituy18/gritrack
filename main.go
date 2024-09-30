@@ -56,6 +56,7 @@ func main() {
 	if db, err = sql.Open("sqlite", "./db"); err != nil {
 		log.Fatal(err)
 	}
+	db.Exec("PRAGMA foreign_keys = ON")
 	defer db.Close()
 
 	go func() {
@@ -73,18 +74,7 @@ func main() {
 	tmpl = template.Must(template.ParseGlob("./template/*.gotmpl"))
 
 	http.HandleFunc("GET /template/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
-		_, err := getSessionUser(r)
-		if err != nil && err != ErrUserNotLoggedIn {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
 		name := r.PathValue("name")
-		if name == "" {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-
 		query := r.URL.Query()
 
 		var data any
@@ -137,18 +127,30 @@ func main() {
 			}
 
 		case "day-detail":
+			user, err := getSessionUser(r)
+			if err != nil && err != ErrUserNotLoggedIn {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
 			date, err := time.Parse(time.DateOnly, query.Get("date"))
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 
+			var trackerName, content string
+			if err = db.QueryRow("SELECT tracker_name, content FROM day WHERE username = ? AND date = ?", user.Username, date.Format(time.DateOnly)).Scan(&trackerName, &content); err == sql.ErrNoRows {
+			}
+
 			data = Day{
-				Date: date,
+				Date:    date,
+				Content: content,
 			}
 
 		default:
-			data = struct{}{}
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 
 		var buf bytes.Buffer
@@ -191,6 +193,40 @@ func main() {
 		executePage(w, "index", PageData{
 			User: user,
 		})
+	})
+
+	http.HandleFunc("PUT /day/{date}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		user, err := getSessionUser(r)
+		if err == ErrUserNotLoggedIn {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		} else if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
+
+		t, err := time.Parse(time.DateOnly, r.PathValue("date"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		tracker := r.FormValue("tracker")
+		content := r.FormValue("content")
+
+		if _, err := db.Exec("INSERT INTO day (username, tracker_name, date, content) VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET content = ?", user.Username, tracker, t.Format(time.DateOnly), content, content); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
+
+		data := Day{
+			Date:    t,
+			Content: content,
+		}
+		template.Must(tmpl.Clone()).ExecuteTemplate(w, "day-detail", data)
+		return
 	})
 
 	http.HandleFunc("GET /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -376,8 +412,8 @@ type Month struct {
 }
 
 type Day struct {
-	Date time.Time
-	Item string
+	Date    time.Time
+	Content string
 }
 
 func (d Day) DateString() string {

@@ -1,48 +1,40 @@
 {{ define "track" }}
-  <dialog
-    id="day-detail"
-    hx-trigger="day-click from:body"
-    hx-get="/template/day-detail/"
-    hx-vals="js:{date: event.detail.date}"
-  ></dialog>
-
-  <div class="grid grid-cols-[auto] gap-4 justify-center">
+  <dialog class="rounded p-4" id="day-detail"></dialog>
+  <div class="grid grid-cols-[auto] justify-center gap-4">
     {{ range .Years }}
-      <div class="grid grid-flow-row grid-cols-track gap-2 justify-center">
+      <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
         {{ range .Months }}
-          <div class="grid grid-cols-subgrid col-span-full items-baseline ">
+          <div class="col-span-full grid grid-cols-subgrid items-baseline">
             <time datetime="{{ (index .Days 0).YearMonthString }}">
               {{ (index .Days 0).YearMonthString }}
             </time>
             {{ range .Days }}
-              <div
-                id="{{ .DateString }}"
-                hx-on:click="handleDayClick(this.id)"
-                class="text-slate-200 flex justify-center items-center w-5 h-5 self-center rounded cursor-pointer {{ if .Date.Before $.Birthday -}}
-                {{- else if .Date.Before $.Today -}}
-                  bg-slate-100
-                {{- else if .Date.After $.Today -}}
-                  border border-slate-200
-                {{- else -}}
-                  bg-orange-200
-                {{- end }}"
-              >
-                {{ if or (.Date.After $.Birthday) (.Date.Equal $.Birthday) }}
+              {{ if or (.Date.After $.Birthday) (.Date.Equal $.Birthday) }}
+                <time
+                  hx-get="/template/day-detail/?date={{ .DateString }}"
+                  hx-target="#day-detail"
+                  datetime="{{ .DateString }}"
+                  id="{{ .DateString }}"
+                  class="{{ if .Date.Before $.Birthday -}}
+                  {{- else if .Date.Before $.Today -}}
+                    bg-slate-100
+                  {{- else if .Date.After $.Today -}}
+                    border border-slate-200
+                  {{- else -}}
+                    bg-orange-200
+                  {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center self-center rounded text-slate-200"
+                >
                   <small>
                     {{ .Date.Day }}
                   </small>
-                {{ end }}
-              </div>
+                </time>
+              {{ else }}
+                <span> </span>
+              {{ end }}
             {{ end }}
           </div>
         {{ end }}
       </div>
     {{ end }}
   </div>
-  <script>
-    function handleDayClick(id) {
-      document.getElementById("day-detail").showModal();
-      htmx.trigger("body", "day-click", { date: id });
-    }
-  </script>
 {{ end }}
