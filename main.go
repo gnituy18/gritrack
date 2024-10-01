@@ -136,9 +136,19 @@ func main() {
 					content = c
 				}
 
+				var timeRelation TimeRelation
+				if currentDate.Before(today) {
+					timeRelation = Past
+				} else if currentDate.After(today) {
+					timeRelation = Future
+				} else {
+					timeRelation = Today
+				}
+
 				years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
-					Date:    currentDate,
-					Content: content,
+					Date:         currentDate,
+					Content:      content,
+					TimeRelation: timeRelation,
 				})
 
 				currentDate = currentDate.Add(24 * time.Hour)
@@ -150,6 +160,48 @@ func main() {
 				Years:    years,
 			}
 
+		case "day":
+			user, nil := getSessionUser(r)
+			if err != nil && err != ErrUserNotLoggedIn {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
+			date, err := time.Parse(time.DateOnly, query.Get("date"))
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			today, err := time.Parse(time.DateOnly, query.Get("today"))
+			if err != nil {
+				log.Panic(err)
+			}
+
+			row := db.QueryRow("SELECT content FROM day WHERE username = ? AND date = ?", user.Username, date.Format(time.DateOnly))
+			if row.Err() != nil {
+				log.Panic(err)
+			}
+
+			var content string
+			if err := row.Scan(&content); err != nil {
+				log.Panic(err)
+			}
+
+			var timeRelation TimeRelation
+			if date.Before(today) {
+				timeRelation = Past
+			} else if date.After(today) {
+				timeRelation = Future
+			} else {
+				timeRelation = Today
+			}
+
+			data = Day{
+				Date:         date,
+				Content:      content,
+				TimeRelation: timeRelation,
+			}
 		case "day-detail":
 			user, err := getSessionUser(r)
 			if err != nil && err != ErrUserNotLoggedIn {
@@ -435,9 +487,18 @@ type Month struct {
 	Days []Day
 }
 
+type TimeRelation string
+
+const (
+	Past   TimeRelation = "Past"
+	Today  TimeRelation = "Today"
+	Future TimeRelation = "Future"
+)
+
 type Day struct {
-	Date    time.Time
-	Content string
+	Date         time.Time
+	Content      string
+	TimeRelation TimeRelation
 }
 
 func (d Day) DateString() string {
@@ -448,8 +509,16 @@ func (d Day) YearMonthString() string {
 	return d.Date.Format(time.DateOnly)[:7]
 }
 
-func (d Day) SameDate(t time.Time) bool {
-	return d.Date.Format(time.DateOnly) == t.Format(time.DateOnly)
+func (d Day) Past() bool {
+	return d.TimeRelation == Past
+}
+
+func (d Day) Today() bool {
+	return d.TimeRelation == Today
+}
+
+func (d Day) Future() bool {
+	return d.TimeRelation == Future
 }
 
 type PageData struct {

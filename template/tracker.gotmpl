@@ -1,5 +1,16 @@
 {{ define "tracker" }}
   <dialog class="w-80 rounded p-4" id="day-detail"></dialog>
+  <script>
+    htmx.on("htmx:afterRequest", (e) => {
+      if (
+        e.detail.requestConfig.verb === "put" &&
+        e.detail.requestConfig.path.startsWith("/day/")
+      ) {
+        const date = e.detail.requestConfig.path.substring(5, 15);
+        htmx.ajax("GET", `/template/day/?date=${date}&today={{$.Today.Format "2006-01-02"}}`, `#d-${date}`);
+      }
+    });
+  </script>
   <div class="grid grid-cols-[auto] justify-center gap-4">
     {{ range .Years }}
       <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
@@ -10,27 +21,7 @@
             </time>
             {{ range .Days }}
               {{ if or (.Date.After $.Birthday) (.Date.Equal $.Birthday) }}
-                <time
-                  {{ if or (.Date.Before $.Today) (.Date.Equal $.Today) }}
-                    hx-get="/template/day-detail/?date={{ .DateString }}"
-                    hx-target="#day-detail"
-                  {{ end }}
-                  datetime="{{ .DateString }}"
-                  id="{{ .DateString }}"
-                  class="{{- if .Content -}}
-                    bg-lime-300 text-lime-600
-                  {{- else if .Date.Before $.Today -}}
-                    bg-slate-100 text-slate-300
-                  {{- else if .Date.After $.Today -}}
-                    border border-slate-200 text-slate-300
-                  {{- else if .SameDate $.Today -}}
-                    bg-orange-200 text-slate-300
-                  {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center self-center rounded"
-                >
-                  <small>
-                    {{ .Date.Day }}
-                  </small>
-                </time>
+                {{ template "day" . }}
               {{ else }}
                 <span> </span>
               {{ end }}

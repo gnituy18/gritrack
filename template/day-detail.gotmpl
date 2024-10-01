@@ -8,13 +8,17 @@
     <input type="text" name="tracker" value="Your First Tracker" readonly />
     <textarea autofocus name="content">{{ .Content }}</textarea>
     <button
-      class="rounded bg-slate-200 p-2"
+      class="cursor-pointer rounded bg-slate-200 p-2"
       type="button"
       hx-on:click="document.getElementById('day-detail').close()"
     >
       Close
     </button>
-    <input class="rounded bg-blue-200 p-2" type="submit" value="Submit" />
+    <input
+      class="cursor-pointer rounded bg-blue-200 p-2"
+      type="submit"
+      value="Submit"
+    />
   </form>
   <script>
     document.getElementById("day-detail").showModal();
