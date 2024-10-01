@@ -79,7 +79,7 @@ func main() {
 
 		var data any
 		switch name {
-		case "track":
+		case "tracker":
 			user, nil := getSessionUser(r)
 			if err != nil && err != ErrUserNotLoggedIn {
 				w.WriteHeader(http.StatusUnauthorized)
