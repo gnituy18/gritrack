@@ -3,8 +3,10 @@
   {{ $day := get . "day" }}
   <button
     {{ if or $day.IsToday $day.IsPast }}
+      title="{{ $day.Content }}"
       hx-get="/template/app/day-detail/?tracker={{ $tracker }}&date={{ $day }}"
       hx-target="#day-detail"
+      hx-on:click="document.getElementById('day-detail').showModal()"
     {{ end }}
     class="{{- if $day.Content -}}
       bg-lime-300 text-lime-600
@@ -13,8 +15,10 @@
     {{- else if $day.IsFuture -}}
       border border-slate-200 text-slate-300
     {{- else if $day.IsToday -}}
-      bg-orange-200 text-slate-300
-    {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center self-center rounded"
+      bg-amber-300 text-amber-500
+    {{- end }} {{ if $day.IsToday -}}
+      font-bold
+    {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center rounded"
   >
     <time class="text-sm" datetime="{{ $day.String }}">
       {{ $day.Date.Day }}

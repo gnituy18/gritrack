@@ -1,12 +1,12 @@
 {{ define "main" }}
-  <div class="mx-auto flex w-fit flex-col justify-center">
-    <h1>{{ .Tracker }}</h1>
+  <div class="mx-auto flex w-fit flex-col justify-center gap-2">
+    <h1 class="text-xl font-bold">{{ .Tracker }}</h1>
     <div class="grid grid-cols-[auto] justify-center gap-4">
       {{ range .Years }}
         <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
           {{ range .Months }}
             <div class="col-span-full grid grid-cols-subgrid items-baseline">
-              <time datetime="{{ .String }}">
+              <time class="text-slate-500" datetime="{{ .String }}">
                 {{ .String }}
               </time>
               {{ range .Days }}
@@ -29,6 +29,5 @@
     </div>
   </div>
 
-  <dialog id="day-detail" class="w-80 rounded p-4"></dialog>
-  <script></script>
+  <dialog class="rounded" id="day-detail"></dialog>
 {{ end }}
