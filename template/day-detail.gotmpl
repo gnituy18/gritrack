@@ -1,23 +1,26 @@
 {{ define "day-detail" }}
-  <time datetime="{{ .DateString }}"> {{ .DateString }}</time>
+  {{ $tracker := get . "tracker" }}
+  {{ $day := get . "day" }}
+  <h1 class="font-bold">{{ $tracker }}</h1>
+  <time datetime="{{ $day.String }}"> {{ $day.String }}</time>
   <form
     class="flex flex-col gap-4"
-    hx-put="/day/{{ .DateString }}/"
+    hx-put="/{{ $tracker }}/{{ $day.String }}/"
     hx-target="#day-detail"
+    hx-on::after-request="alert('a')"
   >
-    <input type="text" name="tracker" value="Your First Tracker" readonly />
-    <textarea autofocus name="content">{{ .Content }}</textarea>
+    <input autofocus type="text" name="content" value="{{ $day.Content }}" />
     <button
       class="cursor-pointer rounded bg-slate-200 p-2"
       type="button"
       hx-on:click="document.getElementById('day-detail').close()"
     >
-      Close
+      Cancel
     </button>
     <input
       class="cursor-pointer rounded bg-blue-200 p-2"
       type="submit"
-      value="Submit"
+      value="Update"
     />
   </form>
   <script>

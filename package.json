@@ -1,7 +1,7 @@
 {
   "scripts": {
     "tailwindcss-watch": "tailwindcss -i ./style.css -o ./asset/style.css --watch",
-    "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}"
+    "prettier-watch": "onchange \"**/*.gotmpl\" -- prettier --write {{changed}}"
   },
   "devDependencies": {
     "onchange": "^7.1.0",

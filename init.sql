@@ -4,7 +4,7 @@ CREATE TABLE user(
 	username VARCHAR(64) NOT NULL PRIMARY KEY,
 	email VARCHAR(320) NOT NULL UNIQUE,
 	birthday TEXT NOT NULL,
-	public INTEGER NOT NULL DEFAULT 0
+	timezone TEXT NOT NULL
 );
 
 CREATE TABLE session(
@@ -16,6 +16,8 @@ CREATE TABLE session(
 CREATE TABLE tracker(
 	username REFERENCES user,
 	name VARCHAR(64) NOT NULL,
+	position INTEGER NOT NULL,
+	public INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY (username, name)
 );
 

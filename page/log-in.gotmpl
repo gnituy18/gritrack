@@ -1,10 +1,11 @@
 {{ define "main" }}
-  <h2 class="text-center text-xl font-bold">Enter Your Email To Log In</h2>
-  <div
-    class="mx-auto mt-2 flex w-fit flex-col items-center gap-4 rounded bg-slate-100 p-4"
-  >
-    <form class="flex flex-col gap-4" hx-post="/send-log-in-email/">
-      <label class="flex items-baseline gap-4">
+  <div class="flex flex-col items-center gap-4">
+    <h2 class="text-xl font-bold">Enter Your Email to Log In</h2>
+    <form
+      class="flex w-80 flex-col gap-4 rounded bg-slate-100 p-4"
+      hx-post="/send-log-in-email/"
+    >
+      <label class="flex flex-col">
         <strong>Email</strong>
         <input
           class="flex-1 rounded p-2"
@@ -15,15 +16,15 @@
         />
       </label>
       <input
-        class="cursor-pointer rounded-md bg-indigo-300 px-6 py-2 font-bold"
+        class="cursor-pointer rounded bg-indigo-300 py-2 font-bold text-slate-700"
         value="Continue"
         type="submit"
       />
+      <hr class="w-full border border-slate-300" />
+      <p>
+        Not a member yet?
+        <a href="/sign-up/" class="font-bold underline"> Sign Up </a>
+      </p>
     </form>
-    <hr class="w-full border border-slate-300" />
-    <p>
-      Not a member yet?
-      <a href="/sign-up/" class="font-bold underline"> Sign Up </a>
-    </p>
   </div>
 {{ end }}

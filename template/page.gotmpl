@@ -15,7 +15,7 @@
       <link href="/style.css/" rel="stylesheet" />
     </head>
 
-    <body class="text-slate-700">
+    <body hx-headers="js:{today: todayFormattedDate()}" class="text-slate-700">
       <header class="flex items-baseline justify-between p-4">
         <a class="text-2xl font-bold" href="/"> Gritrack </a>
         <nav class="flex gap-2">
@@ -30,5 +30,19 @@
         {{ template "main" . }}
       </main>
     </body>
+    <script>
+      function todayFormattedDate() {
+        const today = new Date();
+
+        const year = today.getFullYear();
+        let month = today.getMonth() + 1;
+        let day = today.getDate();
+
+        month = month < 10 ? "0" + month : month;
+        day = day < 10 ? "0" + day : day;
+
+        return `${year}-${month}-${day}`;
+      }
+    </script>
   </html>
 {{ end }}

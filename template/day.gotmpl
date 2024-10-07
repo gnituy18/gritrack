@@ -1,23 +1,23 @@
 {{ define "day" }}
-  <time
-    id="d-{{ .DateString }}"
-    {{ if or .Today .Past }}
-      hx-get="/template/day-detail/?date={{ .DateString }}"
+  {{ $tracker := get . "tracker" }}
+  {{ $day := get . "day" }}
+  <button
+    {{ if or $day.IsToday $day.IsPast }}
+      hx-get="/template/app/day-detail/?tracker={{ $tracker }}&date={{ $day }}"
       hx-target="#day-detail"
     {{ end }}
-    datetime="{{ .DateString }}"
-    class="{{- if .Content -}}
+    class="{{- if $day.Content -}}
       bg-lime-300 text-lime-600
-    {{- else if .Past -}}
+    {{- else if $day.IsPast -}}
       bg-slate-100 text-slate-300
-    {{- else if .Future -}}
+    {{- else if $day.IsFuture -}}
       border border-slate-200 text-slate-300
-    {{- else if .Today -}}
+    {{- else if $day.IsToday -}}
       bg-orange-200 text-slate-300
     {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center self-center rounded"
   >
-    <small>
-      {{ .Date.Day }}
-    </small>
-  </time>
+    <time class="text-sm" datetime="{{ $day.String }}">
+      {{ $day.Date.Day }}
+    </time>
+  </button>
 {{ end }}

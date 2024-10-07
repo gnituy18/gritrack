@@ -12,11 +12,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
@@ -56,8 +56,8 @@ func main() {
 	if db, err = sql.Open("sqlite", "./db"); err != nil {
 		log.Fatal(err)
 	}
-	db.Exec("PRAGMA foreign_keys = ON")
 	defer db.Close()
+	db.Exec("PRAGMA foreign_keys = ON")
 
 	go func() {
 		for {
@@ -71,166 +71,56 @@ func main() {
 		}
 	}()
 
-	tmpl = template.Must(template.ParseGlob("./template/*.gotmpl"))
+	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
 
-	http.HandleFunc("GET /template/{name}/{$}", func(w http.ResponseWriter, r *http.Request) {
-		name := r.PathValue("name")
+	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
+		tmplName := r.PathValue("template_name")
+
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		var data any
-		switch name {
-		case "tracker":
-			user, nil := getSessionUser(r)
-			if err != nil && err != ErrUserNotLoggedIn {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			rows, err := db.Query("SELECT date, content FROM day WHERE username = ?", user.Username)
-			if err != nil {
-				log.Panic(err)
-			}
-
-			m := map[string]string{}
-			for rows.Next() {
-				var date string
-				var content string
-				rows.Scan(&date, &content)
-				m[date] = content
-			}
-
-			today, err := time.Parse(time.DateOnly, query.Get("today"))
-			if err != nil {
-				log.Panic(err)
-			}
-
-			birthday, err := time.Parse(time.DateOnly, user.Birthday)
-			if err != nil {
-				log.Panic(err)
-			}
-
-			startDate := time.Date(birthday.Year(), birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
-			// endDate := time.Date(birthday.Year()+91, birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
-			endOfYear := time.Date(today.Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)
-			currentDate := startDate
-			years := []Year{
-				{
-					Months: []Month{},
-				},
-			}
-			for currentDate.Before(endOfYear) {
-				if currentDate.Day() == 1 {
-					if currentDate.Month() == 1 {
-						years = append([]Year{
-							{
-								Months: []Month{},
-							},
-						}, years...)
-					}
-
-					years[0].Months = append([]Month{{Days: []Day{}}}, years[0].Months...)
-				}
-
-				content := ""
-				if c, ok := m[currentDate.Format(time.DateOnly)]; ok {
-					content = c
-				}
-
-				var timeRelation TimeRelation
-				if currentDate.Before(today) {
-					timeRelation = Past
-				} else if currentDate.After(today) {
-					timeRelation = Future
-				} else {
-					timeRelation = Today
-				}
-
-				years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
-					Date:         currentDate,
-					Content:      content,
-					TimeRelation: timeRelation,
-				})
-
-				currentDate = currentDate.Add(24 * time.Hour)
-			}
-
-			data = Track{
-				Today:    today,
-				Birthday: birthday,
-				Years:    years,
-			}
-
+		switch tmplName {
 		case "day":
-			user, nil := getSessionUser(r)
-			if err != nil && err != ErrUserNotLoggedIn {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			date, err := time.Parse(time.DateOnly, query.Get("date"))
+			fallthrough
+		case "day-detail":
+			tracker := query.Get("tracker")
+			date := query.Get("date")
+			t, err := time.Parse(time.DateOnly, date)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				return
-			}
-
-			today, err := time.Parse(time.DateOnly, query.Get("today"))
-			if err != nil {
-				log.Panic(err)
-			}
-
-			row := db.QueryRow("SELECT content FROM day WHERE username = ? AND date = ?", user.Username, date.Format(time.DateOnly))
-			if row.Err() != nil {
-				log.Panic(err)
 			}
 
 			var content string
-			if err := row.Scan(&content); err != nil {
+			if err := db.QueryRow("SELECT content FROM day WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&content); err != nil && err != sql.ErrNoRows {
+				w.WriteHeader(http.StatusInternalServerError)
 				log.Panic(err)
 			}
 
-			var timeRelation TimeRelation
-			if date.Before(today) {
-				timeRelation = Past
-			} else if date.After(today) {
-				timeRelation = Future
-			} else {
-				timeRelation = Today
-			}
-
-			data = Day{
-				Date:         date,
-				Content:      content,
-				TimeRelation: timeRelation,
-			}
-		case "day-detail":
-			user, err := getSessionUser(r)
-			if err != nil && err != ErrUserNotLoggedIn {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			date, err := time.Parse(time.DateOnly, query.Get("date"))
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			var trackerName, content string
-			if err = db.QueryRow("SELECT tracker_name, content FROM day WHERE username = ? AND date = ?", user.Username, date.Format(time.DateOnly)).Scan(&trackerName, &content); err == sql.ErrNoRows {
-			}
-
-			data = Day{
-				Date:    date,
-				Content: content,
+			data = map[string]any{
+				"tracker": tracker,
+				"day": Day{
+					Date:         t,
+					Content:      content,
+					TimeRelation: sessionUser.TimeRelation(t),
+				},
 			}
 
 		default:
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
 		var buf bytes.Buffer
-		if err := template.Must(tmpl.Clone()).ExecuteTemplate(&buf, name, data); err != nil {
+		if err := template.Must(tmpl.Clone()).ExecuteTemplate(&buf, tmplName, data); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -261,52 +151,172 @@ func main() {
 	})
 
 	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		user, err := getSessionUser(r)
-		if err != nil && err != ErrUserNotLoggedIn {
-			log.Panic(err)
+		cookie, err := r.Cookie("session")
+		if err != nil {
+			executePage(w, "index", nil)
+			return
 		}
 
-		executePage(w, "index", PageData{
-			User: user,
-		})
-	})
-
-	http.HandleFunc("PUT /day/{date}/{$}", func(w http.ResponseWriter, r *http.Request) {
-		user, err := getSessionUser(r)
-		if err == ErrUserNotLoggedIn {
-			w.WriteHeader(http.StatusUnauthorized)
+		var username, tracker string
+		if err := db.QueryRow("SELECT user.username, tracker.name FROM user JOIN session ON user.username = session.username JOIN tracker ON user.username = tracker.username WHERE session.id = ? AND tracker.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
+			executePage(w, "index", nil)
 			return
 		} else if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			log.Println(err)
+			log.Panic(err)
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/%s/%s/", username, tracker), http.StatusTemporaryRedirect)
+	})
+
+	http.HandleFunc("GET /{username}/{tracker}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		username := r.PathValue("username")
+		tracker := r.PathValue("tracker")
+
+		var isPublic bool
+		var birthday string
+		user := User{}
+		if err := db.QueryRow("SELECT user.email, user.birthday, user.timezone, tracker.public FROM user JOIN tracker ON user.username = tracker.username WHERE user.username = ? AND tracker.name = ?", username, tracker).Scan(&user.Email, &birthday, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		} else if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+		user.Username = username
+		t, _ := time.Parse(time.DateOnly, birthday)
+		user.Birthday = t
+
+		if !isPublic {
+			if !ok {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			if username != sessionUser.Username {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+		}
+
+		rows, err := db.Query("SELECT date, content FROM day WHERE username = ? AND tracker_name = ?", username, tracker)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		m := map[string]string{}
+		for rows.Next() {
+			var date string
+			var content string
+			rows.Scan(&date, &content)
+			m[date] = content
+		}
+
+		today := user.Today()
+		startDate := time.Date(user.Birthday.Year(), user.Birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+		endOfYear := time.Date(today.Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)
+		currentDate := startDate
+		years := []Year{
+			{
+				Months: []Month{},
+			},
+		}
+		for currentDate.Before(endOfYear) {
+			if currentDate.Day() == 1 {
+				if currentDate.Month() == 1 {
+					years = append([]Year{
+						{
+							Months: []Month{},
+						},
+					}, years...)
+				}
+
+				years[0].Months = append([]Month{{Days: []Day{}}}, years[0].Months...)
+			}
+
+			content := ""
+			if c, ok := m[currentDate.Format(time.DateOnly)]; ok {
+				content = c
+			}
+
+			timeRelation := user.TimeRelation(currentDate)
+
+			years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
+				Date:         currentDate,
+				Content:      content,
+				TimeRelation: timeRelation,
+			})
+
+			currentDate = currentDate.Add(24 * time.Hour)
+		}
+
+		executePage(w, "app", App{
+			SessionUser: sessionUser,
+			User:        &user,
+			Tracker:     tracker,
+			Years:       years,
+		})
+	})
+
+	http.HandleFunc("PUT /{tracker}/{date}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		t, err := time.Parse(time.DateOnly, r.PathValue("date"))
+		tracker := r.PathValue("tracker")
+		date := r.PathValue("date")
+		content := r.FormValue("content")
+
+		if !sessionUser.HasTracker(tracker) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		t, err := time.Parse(time.DateOnly, date)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		tracker := r.FormValue("tracker")
-		content := r.FormValue("content")
-
-		if _, err := db.Exec("INSERT INTO day (username, tracker_name, date, content) VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET content = ?", user.Username, tracker, t.Format(time.DateOnly), content, content); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Println(err)
+		if t.After(sessionUser.Today()) {
+			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
-		data := Day{
-			Date:    t,
-			Content: content,
+		if _, err := db.Exec("INSERT INTO day (username, tracker_name, date, content) VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET content = ?", sessionUser.Username, tracker, date, content, content); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
 		}
-		template.Must(tmpl.Clone()).ExecuteTemplate(w, "day-detail", data)
+
+		executeTemplate(w, "day-detail", map[string]any{
+			"tracker": tracker,
+			"day": Day{
+				Date:         t,
+				Content:      content,
+				TimeRelation: sessionUser.TimeRelation(t),
+			},
+		},
+			fmt.Sprintf("update-d-%s", date),
+		)
 		return
 	})
 
 	http.HandleFunc("GET /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := getSessionUser(r); err == nil {
+		if _, ok, err := getSessionUser(r); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if ok {
 			w.Header().Add("location", "/")
 			w.WriteHeader(http.StatusFound)
 			return
@@ -319,6 +329,7 @@ func main() {
 		username := r.FormValue("username")
 		email := r.FormValue("email")
 		birthday := r.FormValue("birthday")
+		tz := r.FormValue("timezone")
 
 		ctx := context.Background()
 		tx, err := db.BeginTx(ctx, nil)
@@ -327,25 +338,27 @@ func main() {
 		}
 
 		var count int
-		if err = tx.QueryRow("SELECT count(*) FROM user WHERE username = ? OR email = ?", username, email).Scan(&count); err == sql.ErrNoRows {
-			tx.Rollback()
-
-			if err = template.Must(tmpl.Clone()).ExecuteTemplate(w, "sign-up-form", "Username or Email already exist."); err != nil {
-				log.Panic(err)
-			}
-
-			return
-		} else if err != nil {
+		if err := tx.QueryRow("SELECT count(*) FROM user WHERE username = ? OR email = ?", username, email).Scan(&count); err != nil && err != sql.ErrNoRows {
 			tx.Rollback()
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		if _, err := tx.Exec("INSERT INTO user (username, email, birthday, public) VALUES (?, ?, ?, ?)", username, email, birthday, false); err != nil {
+		if count != 0 {
+			tx.Rollback()
+
+			if err := template.Must(tmpl.Clone()).ExecuteTemplate(w, "sign-up-form", "Username or Email already exist."); err != nil {
+				log.Panic(err)
+			}
+
+			return
+		}
+
+		if _, err := tx.Exec("INSERT INTO user (username, email, birthday, timezone) VALUES (?, ?, ?, ?)", username, email, birthday, tz); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}
-		if _, err := tx.Exec("INSERT INTO tracker (username, name) VALUES (?, ?)", username, "Your First Tracker"); err != nil {
+		if _, err := tx.Exec("INSERT INTO tracker (username, name, position) VALUES (?, ?, 1)", username, "Your_First_Tracker"); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}
@@ -358,7 +371,10 @@ func main() {
 	})
 
 	http.HandleFunc("GET /log-in/{$}", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := getSessionUser(r); err == nil {
+		if _, ok, err := getSessionUser(r); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if ok {
 			w.Header().Add("location", "/")
 			w.WriteHeader(http.StatusFound)
 			return
@@ -430,7 +446,7 @@ func main() {
 			Source: &from,
 		})
 
-		w.Write([]byte("log in email sent."))
+		w.Write([]byte("Log in email sent. Check your email."))
 	})
 
 	http.HandleFunc("GET /log-in-with-token/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -467,16 +483,103 @@ func main() {
 	}
 }
 
-type User struct {
-	Username string
-	Birthday string
+func executePage(w http.ResponseWriter, name string, pageData any) {
+	page := template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s.gotmpl", name)))
+	if err := page.ExecuteTemplate(w, "page", pageData); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Panic(err)
+	}
 }
 
-type Track struct {
-	Birthday time.Time
-	Today    time.Time
+func executeTemplate(w http.ResponseWriter, name string, data any, trigger string) {
+	w.Header().Add("HX-Trigger", trigger)
+	if err := template.Must(tmpl.Clone()).ExecuteTemplate(w, name, data); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Panic(err)
+	}
+}
 
-	Years []Year
+type User struct {
+	Username string
+	Birthday time.Time
+	Email    string
+	TimeZone string
+
+	Trackers []string
+}
+
+func (u *User) HasTracker(tracker string) bool {
+	for _, t := range u.Trackers {
+		if t == tracker {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (u *User) Today() time.Time {
+	return DayStartUTC(u.TimeZone)
+}
+
+func (u *User) TimeRelation(date time.Time) TimeRelation {
+	if date.Before(u.Birthday) {
+		return Prenatal
+	} else if date.Before(u.Today()) {
+		return Past
+	} else if date.After(u.Today()) {
+		return Future
+	} else {
+		return Today
+	}
+}
+
+func DayStartUTC(tz string) time.Time {
+	loc, _ := time.LoadLocation(tz)
+	y, m, d := time.Now().In(loc).Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+}
+
+func getSessionUser(r *http.Request) (*User, bool, error) {
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		return nil, false, nil
+	}
+
+	user := User{Trackers: []string{}}
+	var birthday string
+	if err := db.QueryRow("SELECT user.username, user.email, user.birthday, user.timezone FROM user JOIN session ON session.username = user.username WHERE session.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &birthday, &user.TimeZone); err == sql.ErrNoRows {
+		return nil, false, nil
+	} else if err != nil {
+		return nil, false, err
+	}
+
+	t, _ := time.Parse(time.DateOnly, birthday)
+	user.Birthday = t
+
+	rows, err := db.Query("SELECT name FROM tracker WHERE tracker.username = ? ORDER BY position", user.Username)
+	if err != nil {
+		return nil, false, err
+	}
+
+	for rows.Next() {
+		var tracker string
+		if err := rows.Scan(&tracker); err != nil {
+			return nil, false, err
+		}
+
+		user.Trackers = append(user.Trackers, tracker)
+	}
+
+	return &user, true, nil
+}
+
+type App struct {
+	SessionUser *User
+
+	User    *User
+	Tracker string
+	Years   []Year
 }
 
 type Year struct {
@@ -487,65 +590,42 @@ type Month struct {
 	Days []Day
 }
 
+func (m Month) String() string {
+	return m.Days[0].String()[:7]
+}
+
 type TimeRelation string
 
 const (
-	Past   TimeRelation = "Past"
-	Today  TimeRelation = "Today"
-	Future TimeRelation = "Future"
+	Prenatal TimeRelation = "Prenatal"
+	Past     TimeRelation = "Past"
+	Today    TimeRelation = "Today"
+	Future   TimeRelation = "Future"
 )
 
 type Day struct {
-	Date         time.Time
-	Content      string
+	Date    time.Time
+	Content string
+
 	TimeRelation TimeRelation
 }
 
-func (d Day) DateString() string {
+func (d Day) String() string {
 	return d.Date.Format(time.DateOnly)
 }
 
-func (d Day) YearMonthString() string {
-	return d.Date.Format(time.DateOnly)[:7]
+func (d Day) IsPrenatal() bool {
+	return d.TimeRelation == Prenatal
 }
 
-func (d Day) Past() bool {
+func (d Day) IsPast() bool {
 	return d.TimeRelation == Past
 }
 
-func (d Day) Today() bool {
+func (d Day) IsToday() bool {
 	return d.TimeRelation == Today
 }
 
-func (d Day) Future() bool {
+func (d Day) IsFuture() bool {
 	return d.TimeRelation == Future
-}
-
-type PageData struct {
-	User  *User
-	Query *url.Values
-}
-
-func executePage(w http.ResponseWriter, name string, pageData any) {
-	page := template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s.gotmpl", name)))
-	if err := page.ExecuteTemplate(w, "page", pageData); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Panic(err)
-	}
-}
-
-func getSessionUser(r *http.Request) (*User, error) {
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		return nil, ErrUserNotLoggedIn
-	}
-
-	user := User{}
-	if err := db.QueryRow("SELECT user.username, user.birthday FROM session JOIN user ON session.username = user.username WHERE session.id = ?", cookie.Value).Scan(&user.Username, &user.Birthday); err == sql.ErrNoRows {
-		return nil, ErrUserNotLoggedIn
-	} else if err != nil {
-		return nil, err
-	}
-
-	return &user, nil
 }
