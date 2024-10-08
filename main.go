@@ -7,9 +7,9 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +21,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
 	"github.com/tdewolff/minify/v2"
-	minhtml "github.com/tdewolff/minify/v2/html"
+	"github.com/tdewolff/minify/v2/css"
+	"github.com/tdewolff/minify/v2/html"
 	_ "modernc.org/sqlite"
 )
 
@@ -29,10 +30,9 @@ var (
 	port = "8080"
 	host = "http://localhost"
 
-	db   *sql.DB
-	tmpl *template.Template
-
-	ErrUserNotLoggedIn = errors.New("user not logged in")
+	db       *sql.DB
+	tmpl     *template.Template
+	minifier *minify.M
 )
 
 func main() {
@@ -73,10 +73,11 @@ func main() {
 
 	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
 
-	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
-		query := r.URL.Query()
-		tmplName := r.PathValue("template_name")
+	minifier = minify.New()
+	minifier.AddFunc("text/html", html.Minify)
+	minifier.AddFunc("text/css", css.Minify)
 
+	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -85,6 +86,9 @@ func main() {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+
+		query := r.URL.Query()
+		tmplName := r.PathValue("template_name")
 
 		var data any
 		switch tmplName {
@@ -119,47 +123,19 @@ func main() {
 			return
 		}
 
-		var buf bytes.Buffer
-		if err := template.Must(tmpl.Clone()).ExecuteTemplate(&buf, tmplName, data); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Panic(err)
-		}
-
-		m := minify.New()
-		m.AddFunc("text/html", minhtml.Minify)
-		minifiedHTML, err := m.Bytes("text/html", buf.Bytes())
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Panic(err)
-		}
-
-		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			w.Header().Set("Content-Encoding", "gzip")
-			gzipWriter := gzip.NewWriter(w)
-			defer gzipWriter.Close()
-
-			if _, err := gzipWriter.Write(minifiedHTML); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				log.Panic(err)
-			}
-		} else {
-			if _, err := w.Write(minifiedHTML); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				log.Panic(err)
-			}
-		}
+		executeTemplate(w, tmplName, data, "")
 	})
 
 	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err != nil {
-			executePage(w, "index", nil)
+			executePage(w, r, "index", nil)
 			return
 		}
 
 		var username, tracker string
 		if err := db.QueryRow("SELECT user.username, tracker.name FROM user JOIN session ON user.username = session.username JOIN tracker ON user.username = tracker.username WHERE session.id = ? AND tracker.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
-			executePage(w, "index", nil)
+			executePage(w, r, "index", nil)
 			return
 		} else if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -219,7 +195,7 @@ func main() {
 		}
 
 		today := user.Today()
-		startDate := time.Date(user.Birthday.Year(), user.Birthday.Month(), 1, 0, 0, 0, 0, time.UTC)
+		startDate := time.Date(today.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
 		endOfYear := time.Date(today.Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)
 		currentDate := startDate
 		years := []Year{
@@ -256,7 +232,7 @@ func main() {
 			currentDate = currentDate.Add(24 * time.Hour)
 		}
 
-		executePage(w, "app", App{
+		executePage(w, r, "app", App{
 			SessionUser: sessionUser,
 			User:        &user,
 			Tracker:     tracker,
@@ -322,7 +298,7 @@ func main() {
 			return
 		}
 
-		executePage(w, "sign-up", nil)
+		executePage(w, r, "sign-up", nil)
 	})
 
 	http.HandleFunc("POST /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -380,7 +356,7 @@ func main() {
 			return
 		}
 
-		executePage(w, "log-in", nil)
+		executePage(w, r, "log-in", nil)
 	})
 
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -472,8 +448,22 @@ func main() {
 			log.Fatal(err)
 		}
 
+		var writer io.Writer = w
+
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			w.Header().Set("Content-Encoding", "gzip")
+			gzipWriter := gzip.NewWriter(w)
+			defer gzipWriter.Close()
+
+			writer = gzipWriter
+		}
+
+		minifyWriter := minifier.Writer("text/css", writer)
+		defer minifyWriter.Close()
+
 		w.Header().Add("Content-Type", "text/css")
-		if _, err := w.Write(asset); err != nil {
+		w.Header().Add("Cache-Control", "public, max-age=60")
+		if _, err := minifyWriter.Write(asset); err != nil {
 			log.Panic(err)
 		}
 	})
@@ -483,17 +473,36 @@ func main() {
 	}
 }
 
-func executePage(w http.ResponseWriter, name string, pageData any) {
+func executePage(w http.ResponseWriter, r *http.Request, name string, data any) {
+	var writer io.Writer = w
+
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		gzipWriter := gzip.NewWriter(w)
+		defer gzipWriter.Close()
+
+		writer = gzipWriter
+	}
+
+	minifyWriter := minifier.Writer("text/html", writer)
+	defer minifyWriter.Close()
+
 	page := template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s.gotmpl", name)))
-	if err := page.ExecuteTemplate(w, "page", pageData); err != nil {
+	if err := page.ExecuteTemplate(minifyWriter, "page", data); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Panic(err)
 	}
 }
 
 func executeTemplate(w http.ResponseWriter, name string, data any, trigger string) {
-	w.Header().Add("HX-Trigger", trigger)
-	if err := template.Must(tmpl.Clone()).ExecuteTemplate(w, name, data); err != nil {
+	minifyWriter := minifier.Writer("text/html", w)
+	defer minifyWriter.Close()
+
+	if len(trigger) > 0 {
+		w.Header().Add("HX-Trigger", trigger)
+	}
+
+	if err := template.Must(tmpl.Clone()).ExecuteTemplate(minifyWriter, name, data); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Panic(err)
 	}

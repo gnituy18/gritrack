@@ -11,17 +11,15 @@
     class="{{- if $day.Content -}}
       bg-lime-300 text-lime-600
     {{- else if $day.IsPast -}}
-      bg-slate-100 text-slate-300
+      bg-slate-100 text-slate-400
     {{- else if $day.IsFuture -}}
       border border-slate-200 text-slate-300
     {{- else if $day.IsToday -}}
       bg-amber-300 text-amber-500
     {{- end }} {{ if $day.IsToday -}}
       font-bold
-    {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center rounded"
+    {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center rounded text-sm"
   >
-    <time class="text-sm" datetime="{{ $day.String }}">
-      {{ $day.Date.Day }}
-    </time>
+    {{- $day.Date.Day -}}
   </button>
 {{ end }}
