@@ -2,7 +2,7 @@
   {{ $tracker := get . "tracker" }}
   {{ $day := get . "day" }}
   <button
-    {{ if or $day.IsToday $day.IsPast }}
+    {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
       title="{{ $day.Content }}"
       hx-get="/template/app/day-detail/?tracker={{ $tracker }}&date={{ $day }}"
       hx-target="#day-detail"
@@ -10,13 +10,13 @@
     {{ end }}
     class="{{- if $day.Content -}}
       bg-lime-300 text-lime-600
-    {{- else if $day.IsPast -}}
+    {{- else if $day.TimeRelation.IsPast -}}
       bg-slate-100 text-slate-400
-    {{- else if $day.IsFuture -}}
+    {{- else if $day.TimeRelation.IsFuture -}}
       border border-slate-200 text-slate-300
-    {{- else if $day.IsToday -}}
+    {{- else if $day.TimeRelation.IsToday -}}
       bg-amber-300 text-amber-500
-    {{- end }} {{ if $day.IsToday -}}
+    {{- end }} {{ if $day.TimeRelation.IsToday -}}
       font-bold
     {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center rounded text-sm"
   >

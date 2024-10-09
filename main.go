@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +34,7 @@ var (
 	db       *sql.DB
 	tmpl     *template.Template
 	minifier *minify.M
+	pageTmpl map[string]*template.Template
 )
 
 func main() {
@@ -72,6 +74,12 @@ func main() {
 	}()
 
 	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
+	pageTmpl = map[string]*template.Template{
+		"index":   template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
+		"app":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
+		"log-in":  template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
+		"sign-up": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
+	}
 
 	minifier = minify.New()
 	minifier.AddFunc("text/html", html.Minify)
@@ -88,10 +96,10 @@ func main() {
 		}
 
 		query := r.URL.Query()
-		tmplName := r.PathValue("template_name")
-
 		var data any
-		switch tmplName {
+
+		tmplateName := r.PathValue("template_name")
+		switch tmplateName {
 		case "day":
 			fallthrough
 		case "day-detail":
@@ -123,7 +131,7 @@ func main() {
 			return
 		}
 
-		executeTemplate(w, tmplName, data, "")
+		executeTemplate(w, tmplateName, data, "")
 	})
 
 	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -156,9 +164,9 @@ func main() {
 		tracker := r.PathValue("tracker")
 
 		var isPublic bool
-		var birthday string
+		var b string
 		user := User{}
-		if err := db.QueryRow("SELECT user.email, user.birthday, user.timezone, tracker.public FROM user JOIN tracker ON user.username = tracker.username WHERE user.username = ? AND tracker.name = ?", username, tracker).Scan(&user.Email, &birthday, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT user.email, user.birthday, user.timezone, tracker.public FROM user JOIN tracker ON user.username = tracker.username WHERE user.username = ? AND tracker.name = ?", username, tracker).Scan(&user.Email, &b, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -166,8 +174,8 @@ func main() {
 			log.Panic(err)
 		}
 		user.Username = username
-		t, _ := time.Parse(time.DateOnly, birthday)
-		user.Birthday = t
+		birthday, _ := time.Parse(time.DateOnly, b)
+		user.Birthday = birthday
 
 		if !isPublic {
 			if !ok {
@@ -180,11 +188,16 @@ func main() {
 			}
 		}
 
-		rows, err := db.Query("SELECT date, content FROM day WHERE username = ? AND tracker_name = ?", username, tracker)
+		y := sessionUser.Today().Year()
+		startDate := time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC).Format(time.DateOnly)
+		endDate := time.Date(y+1, time.January, 1, 0, 0, 0, 0, time.UTC).Format(time.DateOnly)
+
+		rows, err := db.Query("SELECT date, content FROM day WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", username, tracker, startDate, endDate)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
+		defer rows.Close()
 
 		m := map[string]string{}
 		for rows.Next() {
@@ -194,49 +207,11 @@ func main() {
 			m[date] = content
 		}
 
-		today := user.Today()
-		startDate := time.Date(today.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
-		endOfYear := time.Date(today.Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)
-		currentDate := startDate
-		years := []Year{
-			{
-				Months: []Month{},
-			},
-		}
-		for currentDate.Before(endOfYear) {
-			if currentDate.Day() == 1 {
-				if currentDate.Month() == 1 {
-					years = append([]Year{
-						{
-							Months: []Month{},
-						},
-					}, years...)
-				}
-
-				years[0].Months = append([]Month{{Days: []Day{}}}, years[0].Months...)
-			}
-
-			content := ""
-			if c, ok := m[currentDate.Format(time.DateOnly)]; ok {
-				content = c
-			}
-
-			timeRelation := user.TimeRelation(currentDate)
-
-			years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
-				Date:         currentDate,
-				Content:      content,
-				TimeRelation: timeRelation,
-			})
-
-			currentDate = currentDate.Add(24 * time.Hour)
-		}
-
 		executePage(w, r, "app", App{
 			SessionUser: sessionUser,
 			User:        &user,
 			Tracker:     tracker,
-			Years:       years,
+			Years:       sessionUser.Years(y, y, m),
 		})
 	})
 
@@ -322,11 +297,7 @@ func main() {
 
 		if count != 0 {
 			tx.Rollback()
-
-			if err := template.Must(tmpl.Clone()).ExecuteTemplate(w, "sign-up-form", "Username or Email already exist."); err != nil {
-				log.Panic(err)
-			}
-
+			executeTemplate(w, "sign-up-form", "Username or Email already exist.", "")
 			return
 		}
 
@@ -343,7 +314,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		template.Must(tmpl.Clone()).ExecuteTemplate(w, "account-created", nil)
+		executeTemplate(w, "account-created", nil, "")
 	})
 
 	http.HandleFunc("GET /log-in/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -397,7 +368,7 @@ func main() {
 		}
 
 		link := fmt.Sprintf("%s%s/log-in-with-token/?token=%s", host, portStr, id)
-		err = template.Must(tmpl.Clone()).ExecuteTemplate(&htmlBuffer, "log-in-email", link)
+		err = tmpl.ExecuteTemplate(&htmlBuffer, "log-in-email", link)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -442,28 +413,23 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 
+	style, err := os.ReadFile("asset/style.css")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var cssBuf bytes.Buffer
+	minifyWriter := minifier.Writer("text/css", &cssBuf)
+	if _, err := minifyWriter.Write(style); err != nil {
+		log.Fatal(err)
+	}
+	minifyWriter.Close()
+	css := cssBuf.Bytes()
+
 	http.HandleFunc("GET /style.css/{$}", func(w http.ResponseWriter, r *http.Request) {
-		asset, err := os.ReadFile("asset/style.css")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		var writer io.Writer = w
-
-		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-			w.Header().Set("Content-Encoding", "gzip")
-			gzipWriter := gzip.NewWriter(w)
-			defer gzipWriter.Close()
-
-			writer = gzipWriter
-		}
-
-		minifyWriter := minifier.Writer("text/css", writer)
-		defer minifyWriter.Close()
-
 		w.Header().Add("Content-Type", "text/css")
 		w.Header().Add("Cache-Control", "public, max-age=60")
-		if _, err := minifyWriter.Write(asset); err != nil {
+		if _, err := w.Write(css); err != nil {
 			log.Panic(err)
 		}
 	})
@@ -487,7 +453,7 @@ func executePage(w http.ResponseWriter, r *http.Request, name string, data any) 
 	minifyWriter := minifier.Writer("text/html", writer)
 	defer minifyWriter.Close()
 
-	page := template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s.gotmpl", name)))
+	page := pageTmpl[name]
 	if err := page.ExecuteTemplate(minifyWriter, "page", data); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Panic(err)
@@ -502,7 +468,7 @@ func executeTemplate(w http.ResponseWriter, name string, data any, trigger strin
 		w.Header().Add("HX-Trigger", trigger)
 	}
 
-	if err := template.Must(tmpl.Clone()).ExecuteTemplate(minifyWriter, name, data); err != nil {
+	if err := tmpl.ExecuteTemplate(minifyWriter, name, data); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Panic(err)
 	}
@@ -528,7 +494,9 @@ func (u *User) HasTracker(tracker string) bool {
 }
 
 func (u *User) Today() time.Time {
-	return DayStartUTC(u.TimeZone)
+	loc, _ := time.LoadLocation(u.TimeZone)
+	y, m, d := time.Now().In(loc).Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 }
 
 func (u *User) TimeRelation(date time.Time) TimeRelation {
@@ -543,10 +511,48 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 	}
 }
 
-func DayStartUTC(tz string) time.Time {
-	loc, _ := time.LoadLocation(tz)
-	y, m, d := time.Now().In(loc).Date()
-	return time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+func (u *User) Years(startYear, endYear int, m map[string]string) (years []Year) {
+	if startYear < endYear {
+		startYear, endYear = endYear, startYear
+	}
+
+	for y := startYear; y >= endYear; y-- {
+		startDate := time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC)
+		endDate := time.Date(y+1, time.January, 1, 0, 0, 0, 0, time.UTC)
+		currentDate := startDate
+
+		year := Year{
+			Value:  y,
+			Months: []Month{},
+		}
+		for currentDate.Before(endDate) {
+			if currentDate.Day() == 1 {
+				year.Months = append([]Month{{
+					Value: currentDate.Month(),
+					Days:  []Day{},
+				}}, year.Months...)
+			}
+
+			content := ""
+			if c, ok := m[currentDate.Format(time.DateOnly)]; ok {
+				content = c
+			}
+
+			timeRelation := u.TimeRelation(currentDate)
+
+			year.Months[0].Days = append(year.Months[0].Days, Day{
+				Date:         currentDate,
+				Content:      content,
+				TimeRelation: timeRelation,
+			})
+
+			currentDate = currentDate.Add(24 * time.Hour)
+		}
+
+		years = append(years, year)
+	}
+
+	return
 }
 
 func getSessionUser(r *http.Request) (*User, bool, error) {
@@ -556,20 +562,21 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 	}
 
 	user := User{Trackers: []string{}}
-	var birthday string
-	if err := db.QueryRow("SELECT user.username, user.email, user.birthday, user.timezone FROM user JOIN session ON session.username = user.username WHERE session.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &birthday, &user.TimeZone); err == sql.ErrNoRows {
+	var b string
+	if err := db.QueryRow("SELECT user.username, user.email, user.birthday, user.timezone FROM user JOIN session ON session.username = user.username WHERE session.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &b, &user.TimeZone); err == sql.ErrNoRows {
 		return nil, false, nil
 	} else if err != nil {
 		return nil, false, err
 	}
 
-	t, _ := time.Parse(time.DateOnly, birthday)
-	user.Birthday = t
+	birthday, _ := time.Parse(time.DateOnly, b)
+	user.Birthday = birthday
 
 	rows, err := db.Query("SELECT name FROM tracker WHERE tracker.username = ? ORDER BY position", user.Username)
 	if err != nil {
 		return nil, false, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var tracker string
@@ -585,25 +592,38 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 
 type App struct {
 	SessionUser *User
-
-	User    *User
-	Tracker string
-	Years   []Year
+	User        *User
+	Tracker     string
+	Years       []Year
 }
 
 type Year struct {
+	Value  int
 	Months []Month
 }
 
+func (y Year) String() string {
+	return strconv.Itoa(y.Value)
+}
+
 type Month struct {
-	Days []Day
+	Value time.Month
+	Days  []Day
 }
 
 func (m Month) String() string {
-	return m.Days[0].String()[:7]
+	return m.Value.String()[:3]
 }
 
-type TimeRelation string
+type Day struct {
+	Date         time.Time
+	Content      string
+	TimeRelation TimeRelation
+}
+
+func (d Day) String() string {
+	return d.Date.Format(time.DateOnly)
+}
 
 const (
 	Prenatal TimeRelation = "Prenatal"
@@ -612,29 +632,20 @@ const (
 	Future   TimeRelation = "Future"
 )
 
-type Day struct {
-	Date    time.Time
-	Content string
+type TimeRelation string
 
-	TimeRelation TimeRelation
+func (tr TimeRelation) IsPrenatal() bool {
+	return tr == Prenatal
 }
 
-func (d Day) String() string {
-	return d.Date.Format(time.DateOnly)
+func (tr TimeRelation) IsPast() bool {
+	return tr == Past
 }
 
-func (d Day) IsPrenatal() bool {
-	return d.TimeRelation == Prenatal
+func (tr TimeRelation) IsToday() bool {
+	return tr == Today
 }
 
-func (d Day) IsPast() bool {
-	return d.TimeRelation == Past
-}
-
-func (d Day) IsToday() bool {
-	return d.TimeRelation == Today
-}
-
-func (d Day) IsFuture() bool {
-	return d.TimeRelation == Future
+func (tr TimeRelation) IsFuture() bool {
+	return tr == Future
 }

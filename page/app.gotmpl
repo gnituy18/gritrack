@@ -1,29 +1,32 @@
 {{ define "main" }}
   <div class="mx-auto flex w-fit flex-col justify-center gap-2">
     <h1 class="text-xl font-bold">{{ .Tracker }}</h1>
-    <div class="grid grid-cols-[auto] justify-center gap-4">
+    <div class="grid grid-cols-[auto] justify-center gap-5">
       {{ range .Years }}
-        <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
-          {{ range .Months }}
-            <div class="col-span-full grid grid-cols-subgrid items-baseline">
-              <time class="text-slate-500" datetime="{{ .String }}">
-                {{ .String }}
-              </time>
-              {{ range .Days }}
-                {{ if .IsPrenatal }}
-                  <span> </span>
-                {{ else }}
-                  <div
-                    id="d-{{ .String }}"
-                    hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
-                    hx-trigger="update-d-{{ .String }} from:body"
-                  >
-                    {{ template "day" dict "tracker" $.Tracker "day" . }}
-                  </div>
+        <div class="flex flex-col gap-2">
+          <time class="font-bold" datetime="{{ .String }}">{{ .String }}</time>
+          <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
+            {{ range .Months }}
+              <div class="col-span-full grid grid-cols-subgrid items-baseline">
+                <time class="text-slate-500" datetime="{{ .String }}">
+                  {{ .String }}
+                </time>
+                {{ range .Days }}
+                  {{ if .TimeRelation.IsPrenatal }}
+                    <span> </span>
+                  {{ else }}
+                    <div
+                      id="day-{{ .String }}"
+                      hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
+                      hx-trigger="update-day-{{ .String }} from:body"
+                    >
+                      {{ template "day" dict "tracker" $.Tracker "day" . }}
+                    </div>
+                  {{ end }}
                 {{ end }}
-              {{ end }}
-            </div>
-          {{ end }}
+              </div>
+            {{ end }}
+          </div>
         </div>
       {{ end }}
     </div>
