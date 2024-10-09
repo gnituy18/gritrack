@@ -9,16 +9,14 @@
       hx-on:click="document.getElementById('day-detail').showModal()"
     {{ end }}
     class="{{- if $day.Content -}}
-      bg-lime-300 text-lime-600
+      bg-lime-300 text-lime-500 hover:text-lime-600 hover:bg-lime-400
     {{- else if $day.TimeRelation.IsPast -}}
-      bg-slate-100 text-slate-400
+      bg-slate-100 text-slate-300 hover:text-slate-400 hover:bg-slate-200
     {{- else if $day.TimeRelation.IsFuture -}}
-      border border-slate-200 text-slate-300
+      border border-slate-300 text-slate-300 cursor-not-allowed
     {{- else if $day.TimeRelation.IsToday -}}
-      bg-amber-300 text-amber-500
-    {{- end }} {{ if $day.TimeRelation.IsToday -}}
-      font-bold
-    {{- end }} flex h-5 w-5 cursor-pointer items-center justify-center rounded text-sm"
+      bg-amber-300 text-amber-500 hover:bg-amber-400 hover:text-amber-600
+    {{- end }} flex h-5 w-5 items-center justify-center rounded text-sm"
   >
     {{- $day.Date.Day -}}
   </button>

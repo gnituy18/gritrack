@@ -258,7 +258,7 @@ func main() {
 				TimeRelation: sessionUser.TimeRelation(t),
 			},
 		},
-			fmt.Sprintf("update-d-%s", date),
+			fmt.Sprintf("update-day-%s", date),
 		)
 		return
 	})
@@ -500,9 +500,7 @@ func (u *User) Today() time.Time {
 }
 
 func (u *User) TimeRelation(date time.Time) TimeRelation {
-	if date.Before(u.Birthday) {
-		return Prenatal
-	} else if date.Before(u.Today()) {
+	if date.Before(u.Today()) {
 		return Past
 	} else if date.After(u.Today()) {
 		return Future
@@ -626,17 +624,12 @@ func (d Day) String() string {
 }
 
 const (
-	Prenatal TimeRelation = "Prenatal"
-	Past     TimeRelation = "Past"
-	Today    TimeRelation = "Today"
-	Future   TimeRelation = "Future"
+	Past   TimeRelation = "Past"
+	Today  TimeRelation = "Today"
+	Future TimeRelation = "Future"
 )
 
 type TimeRelation string
-
-func (tr TimeRelation) IsPrenatal() bool {
-	return tr == Prenatal
-}
 
 func (tr TimeRelation) IsPast() bool {
 	return tr == Past

@@ -1,28 +1,33 @@
 {{ define "main" }}
-  <div class="mx-auto flex w-fit flex-col justify-center gap-2">
-    <h1 class="text-xl font-bold">{{ .Tracker }}</h1>
-    <div class="grid grid-cols-[auto] justify-center gap-5">
+  <div class="mx-auto flex w-fit flex-col justify-center gap-2 p-4">
+    <h1 class="text-xl font-bold text-slate-500">{{ .Tracker }}</h1>
+    <div class="grid grid-cols-[auto] justify-center gap-4">
       {{ range .Years }}
-        <div class="flex flex-col gap-2">
-          <time class="font-bold" datetime="{{ .String }}">{{ .String }}</time>
-          <div class="grid grid-flow-row grid-cols-track justify-center gap-2">
+        <div class="flex flex-col gap-1">
+          <time class="font-bold text-slate-500" datetime="{{ .String }}"
+            >{{ .String }}</time
+          >
+          <div
+            class="grid grid-flow-row grid-cols-track justify-center gap-x-2 gap-y-1"
+          >
             {{ range .Months }}
-              <div class="col-span-full grid grid-cols-subgrid items-baseline">
-                <time class="text-slate-500" datetime="{{ .String }}">
+              <div
+                class="group col-span-full grid grid-cols-subgrid items-baseline rounded"
+              >
+                <time
+                  class="pl-1 font-bold text-slate-300 group-hover:text-slate-500"
+                  datetime="{{ .String }}"
+                >
                   {{ .String }}
                 </time>
                 {{ range .Days }}
-                  {{ if .TimeRelation.IsPrenatal }}
-                    <span> </span>
-                  {{ else }}
-                    <div
-                      id="day-{{ .String }}"
-                      hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
-                      hx-trigger="update-day-{{ .String }} from:body"
-                    >
-                      {{ template "day" dict "tracker" $.Tracker "day" . }}
-                    </div>
-                  {{ end }}
+                  <div
+                    id="day-{{ .String }}"
+                    hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
+                    hx-trigger="update-day-{{ .String }} from:body"
+                  >
+                    {{ template "day" dict "tracker" $.Tracker "day" . }}
+                  </div>
                 {{ end }}
               </div>
             {{ end }}

@@ -11,14 +11,14 @@
         integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ"
         crossorigin="anonymous"
       ></script>
+      <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
       <link href="/style.css/" rel="stylesheet" />
     </head>
 
-    <body hx-headers="js:{today: todayFormattedDate()}" class="text-slate-700">
+    <body class="text-slate-700">
       <header class="flex items-baseline justify-between p-4">
         <a class="text-2xl font-bold" href="/"> Gritrack </a>
         <nav class="flex gap-2">
-          <a href="mailto:hsuyuting@gritrack.com">Feedback</a>
           {{ if .User }}
           {{ else }}
             <a href="/log-in/">Log In</a>
@@ -29,19 +29,5 @@
         {{ template "main" . }}
       </main>
     </body>
-    <script>
-      function todayFormattedDate() {
-        const today = new Date();
-
-        const year = today.getFullYear();
-        let month = today.getMonth() + 1;
-        let day = today.getDate();
-
-        month = month < 10 ? "0" + month : month;
-        day = day < 10 ? "0" + day : day;
-
-        return `${year}-${month}-${day}`;
-      }
-    </script>
   </html>
 {{ end }}
