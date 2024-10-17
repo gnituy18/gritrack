@@ -161,12 +161,12 @@ func main() {
 		}
 
 		username := r.PathValue("username")
-		tracker := r.PathValue("tracker")
+		trackerName := r.PathValue("tracker")
 
 		var isPublic bool
 		var b string
 		user := User{}
-		if err := db.QueryRow("SELECT user.email, user.birthday, user.timezone, tracker.public FROM user JOIN tracker ON user.username = tracker.username WHERE user.username = ? AND tracker.name = ?", username, tracker).Scan(&user.Email, &b, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT user.email, user.birthday, user.timezone, tracker.public FROM user JOIN tracker ON user.username = tracker.username WHERE user.username = ? AND tracker.name = ?", username, trackerName).Scan(&user.Email, &b, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -188,30 +188,20 @@ func main() {
 			}
 		}
 
-		y := sessionUser.Today().Year()
-		startDate := time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC).Format(time.DateOnly)
-		endDate := time.Date(y+1, time.January, 1, 0, 0, 0, 0, time.UTC).Format(time.DateOnly)
-
-		rows, err := db.Query("SELECT date, content FROM day WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", username, tracker, startDate, endDate)
+		endY := sessionUser.Today().Year()
+		endM := sessionUser.Today().Month()
+		startY := endY - 1
+		startM := endM + 1
+		tracker, err := sessionUser.Tracker(trackerName, startY, startM, endY, endM)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
-		}
-		defer rows.Close()
-
-		m := map[string]string{}
-		for rows.Next() {
-			var date string
-			var content string
-			rows.Scan(&date, &content)
-			m[date] = content
 		}
 
 		executePage(w, r, "app", App{
 			SessionUser: sessionUser,
 			User:        &user,
 			Tracker:     tracker,
-			Years:       sessionUser.Years(y, y, m),
 		})
 	})
 
@@ -509,48 +499,59 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 	}
 }
 
-func (u *User) Years(startYear, endYear int, m map[string]string) (years []Year) {
-	if startYear < endYear {
-		startYear, endYear = endYear, startYear
+func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYear int, endMonth time.Month) (*Tracker, error) {
+	startDate := time.Date(startYear, startMonth, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(endYear, endMonth+1, 1, 0, 0, 0, 0, time.UTC)
+	rows, err := db.Query("SELECT date, content FROM day WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	dayContentMap := map[string]string{}
+	for rows.Next() {
+		var date string
+		var content string
+		rows.Scan(&date, &content)
+		dayContentMap[date] = content
 	}
 
-	for y := startYear; y >= endYear; y-- {
-		startDate := time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC)
-		endDate := time.Date(y+1, time.January, 1, 0, 0, 0, 0, time.UTC)
-		currentDate := startDate
+	years := []Year{}
+	for d := startDate; d.Before(endDate); d = d.AddDate(0, 1, 0) {
 
-		year := Year{
-			Value:  y,
-			Months: []Month{},
+		if len(years) == 0 || d.Year() != years[0].Value {
+			years = append([]Year{{
+				Value:  d.Year(),
+				Months: []Month{},
+			}}, years...)
 		}
-		for currentDate.Before(endDate) {
-			if currentDate.Day() == 1 {
-				year.Months = append([]Month{{
-					Value: currentDate.Month(),
-					Days:  []Day{},
-				}}, year.Months...)
-			}
 
+		years[0].Months = append([]Month{{
+			Value: d.Month(),
+			Days:  []Day{},
+		}}, years[0].Months...)
+
+		nextMonth := d.AddDate(0, 1, 0)
+		for day := d; day.Before(nextMonth); day = day.AddDate(0, 0, 1) {
 			content := ""
-			if c, ok := m[currentDate.Format(time.DateOnly)]; ok {
+			if c, ok := dayContentMap[day.Format(time.DateOnly)]; ok {
 				content = c
 			}
 
-			timeRelation := u.TimeRelation(currentDate)
+			timeRelation := u.TimeRelation(day)
 
-			year.Months[0].Days = append(year.Months[0].Days, Day{
-				Date:         currentDate,
+			years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
+				Date:         day,
 				Content:      content,
 				TimeRelation: timeRelation,
 			})
-
-			currentDate = currentDate.Add(24 * time.Hour)
 		}
-
-		years = append(years, year)
 	}
 
-	return
+	return &Tracker{
+		Name:  name,
+		Years: years,
+	}, nil
 }
 
 func getSessionUser(r *http.Request) (*User, bool, error) {
@@ -591,8 +592,17 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 type App struct {
 	SessionUser *User
 	User        *User
-	Tracker     string
-	Years       []Year
+
+	Tracker *Tracker
+}
+
+type Tracker struct {
+	Name  string
+	Years []Year
+}
+
+func (t *Tracker) String() string {
+	return t.Name
 }
 
 type Year struct {
@@ -610,13 +620,22 @@ type Month struct {
 }
 
 func (m Month) String() string {
-	return m.Value.String()[:3]
+	return m.Value.String()
 }
 
 type Day struct {
 	Date         time.Time
 	Content      string
 	TimeRelation TimeRelation
+}
+
+func (d Day) Week() int {
+	firstWeekday := int(time.Date(d.Date.Year(), d.Date.Month(), 1, 0, 0, 0, 0, time.UTC).Weekday())
+	return (firstWeekday+d.Date.Day()-1)/7 + 1
+}
+
+func (d Day) Weekday() int {
+	return int(d.Date.Weekday()) + 1
 }
 
 func (d Day) String() string {

@@ -1,41 +1,46 @@
 {{ define "main" }}
-  <div class="mx-auto flex w-fit flex-col justify-center gap-2 p-4">
-    <h1 class="text-xl font-bold text-slate-500">{{ .Tracker }}</h1>
-    <div class="grid grid-cols-[auto] justify-center gap-4">
-      {{ range .Years }}
-        <div class="flex flex-col gap-1">
-          <time class="font-bold text-slate-500" datetime="{{ .String }}"
-            >{{ .String }}</time
+  <div class="flex">
+    <ul class="px-2">
+      {{ range .SessionUser.Trackers }}
+        <li>
+          <a
+            href="/{{ $.User.Username }}/{{ . }}/"
+            class="{{ if eq . $.Tracker.Name }}
+              font-bold bg-slate-100 hover:bg-slate-200
+            {{- end }} block rounded p-2"
+            >{{ . }}</a
           >
-          <div
-            class="grid grid-flow-row grid-cols-track justify-center gap-x-2 gap-y-1"
-          >
-            {{ range .Months }}
-              <div
-                class="group col-span-full grid grid-cols-subgrid items-baseline rounded"
-              >
-                <time
-                  class="pl-1 font-bold text-slate-300 group-hover:text-slate-500"
-                  datetime="{{ .String }}"
+        </li>
+      {{ end }}
+    </ul>
+    <div class="grid grow justify-center gap-1 pb-20">
+      {{ range .Tracker.Years }}
+        <div
+          class="grid grid-cols-[auto_max-content] justify-stretch gap-x-4 gap-y-1"
+        >
+          {{ range .Months }}
+            <h2 class="font-semibold text-slate-300">{{ .String }}</h2>
+            <div
+              class="{{ if ne (index .Days 0).Weekday 1 -}}
+                -mb-6
+              {{- end }} grid grid-cols-7 gap-1"
+            >
+              {{ range $i, $e :=  .Days }}
+                <div
+                  id="day-{{ .String }}"
+                  hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
+                  class="z-10"
+                  hx-trigger="update-day-{{ .String }} from:body"
+                  style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
                 >
-                  {{ .String }}
-                </time>
-                {{ range .Days }}
-                  <div
-                    id="day-{{ .String }}"
-                    hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
-                    hx-trigger="update-day-{{ .String }} from:body"
-                  >
-                    {{ template "day" dict "tracker" $.Tracker "day" . }}
-                  </div>
-                {{ end }}
-              </div>
-            {{ end }}
-          </div>
+                  {{ template "day" dict "tracker" $.Tracker "day" $e }}
+                </div>
+              {{ end }}
+            </div>
+          {{ end }}
         </div>
       {{ end }}
     </div>
   </div>
-
   <dialog class="rounded" id="day-detail"></dialog>
 {{ end }}
