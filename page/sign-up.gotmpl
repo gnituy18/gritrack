@@ -1,7 +1,10 @@
+{{ define "header" }}
+{{ end }}
+
 {{ define "main" }}
-  <div class="flex flex-col items-center gap-4">
-    <h2 class="text-2xl font-bold">Create An Account to Join Gritrack!</h2>
-    <div id="sign-up-form">
+  <div class="mt-12 flex flex-col items-center gap-4">
+    <h2 class="text-2xl font-bold">Sign Up</h2>
+    <div id="sign-up-form" class="flex flex-col gap-3">
       {{ template "sign-up-form" }}
     </div>
   </div>

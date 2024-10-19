@@ -1,40 +1,44 @@
 {{ define "sign-up-form" }}
   <form
-    class="flex w-80 flex-col gap-4 rounded bg-slate-100 p-4"
+    class="flex w-96 flex-col gap-4 rounded"
     hx-target="#sign-up-form"
     hx-post="/sign-up/"
   >
     {{ with . }}
       <p class="text-red-500">{{ . }}</p>
     {{ end }}
-    <label class="flex flex-col">
-      <strong>Email</strong>
+    <div class="flex flex-col gap-1">
+      <label for="email" class="text-sm text-slate-900">Email address</label>
       <input
-        class="rounded p-2"
+        id="email"
+        autocomplete="email"
+        class="border-1 rounded border-slate-300 py-1"
         name="email"
         type="email"
         required
         placeholder="you@example.com"
       />
-    </label>
-    <label class="flex flex-col">
-      <strong>Username</strong>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label for="username" class="text-sm text-slate-900">Username</label>
       <input
-        class="rounded p-2"
+        id="username"
+        autocomplete="username"
+        class="border-1 rounded border-slate-300 py-1"
         name="username"
         type="text"
         required
         placeholder="username"
       />
-    </label>
-    <label class="flex flex-col">
-      <strong>Birthday</strong>
-      <input class="rounded p-2" name="birthday" type="date" required />
-    </label>
+    </div>
 
-    <label id="timezone" class="flex flex-col">
-      <strong>Time Zone</strong>
-      <select class="rounded p-2" name="timezone">
+    <div class="flex flex-col gap-1">
+      <label class="text-sm text-slate-900" for="timezone">Time Zone</label>
+      <select
+        id="timezone"
+        class="border-1 rounded border-slate-300 py-1"
+        name="timezone"
+      >
         <option value="Africa/Abidjan">Africa/Abidjan</option>
         <option value="Africa/Accra">Africa/Accra</option>
         <option value="Africa/Addis_Ababa">Africa/Addis_Ababa</option>
@@ -493,18 +497,23 @@
         <option value="Pacific/Wake">Pacific/Wake</option>
         <option value="Pacific/Wallis">Pacific/Wallis</option>
       </select>
-    </label>
+    </div>
 
-    <hr class="border border-slate-300" />
-    <ul class="list-inside list-disc">
-      <li>Your <strong>Email</strong> will always be hidden.</li>
-    </ul>
+    <p class="list-inside list-disc text-slate-600">
+      📌 Your <strong class="font-semibold">Email address</strong> will always
+      be hidden.
+    </p>
     <input
-      class="cursor-pointer rounded bg-indigo-300 py-2 font-bold text-slate-700"
-      value="Create"
+      class="rounded bg-indigo-600 py-2 font-semibold text-white"
+      value="Create Account"
       type="submit"
     />
   </form>
+  <hr />
+  <p class="text-center text-slate-600">
+    Already have an account?
+    <a href="/log-in/" class="font-bold text-indigo-600 underline">Log In</a>
+  </p>
   <script>
     Array.from(document.getElementsByTagName("option"))
       .find((e) => e.value === Intl.DateTimeFormat().resolvedOptions().timeZone)

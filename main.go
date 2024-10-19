@@ -34,8 +34,8 @@ var (
 
 	db       *sql.DB
 	tmpl     *template.Template
-	minifier *minify.M
 	pageTmpl map[string]*template.Template
+	minifier *minify.M
 )
 
 func main() {
@@ -65,7 +65,7 @@ func main() {
 	go func() {
 		for {
 			t := time.Now().Add(-7 * 24 * time.Hour)
-			if _, err := db.Exec("DELETE FROM session WHERE created_at < ?", t.Format(time.DateTime)); err != nil {
+			if _, err := db.Exec("DELETE FROM user_sessions WHERE created_at < ?", t.Format(time.DateTime)); err != nil {
 				time.Sleep(time.Minute)
 				continue
 			}
@@ -112,7 +112,7 @@ func main() {
 
 			var emoji string
 			var content string
-			if err := db.QueryRow("SELECT emoji, content FROM day WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
+			if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
 				w.WriteHeader(http.StatusInternalServerError)
 				log.Panic(err)
 			}
@@ -143,7 +143,7 @@ func main() {
 		}
 
 		var username, tracker string
-		if err := db.QueryRow("SELECT user.username, tracker.name FROM user JOIN session ON user.username = session.username JOIN tracker ON user.username = tracker.username WHERE session.id = ? AND tracker.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT users.username, trackers.tracker_name FROM users JOIN user_sessions ON users.username = user_sessions.username JOIN trackers ON users.username = trackers.username WHERE user_sessions.id = ? AND trackers.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
 			executePage(w, r, "index", nil)
 			return
 		} else if err != nil {
@@ -165,9 +165,8 @@ func main() {
 		trackerName := r.PathValue("tracker")
 
 		var isPublic bool
-		var b string
 		user := User{}
-		if err := db.QueryRow("SELECT user.email, user.birthday, user.timezone, tracker.public FROM user JOIN tracker ON user.username = tracker.username WHERE user.username = ? AND tracker.name = ?", username, trackerName).Scan(&user.Email, &b, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.tracker_name = ?", username, trackerName).Scan(&user.Email, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -175,8 +174,6 @@ func main() {
 			log.Panic(err)
 		}
 		user.Username = username
-		birthday, _ := time.Parse(time.DateOnly, b)
-		user.Birthday = birthday
 
 		if !isPublic {
 			if !ok {
@@ -231,7 +228,7 @@ func main() {
 
 		var emoji string
 		var content string
-		if err := db.QueryRow("SELECT emoji, content FROM day WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
+		if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -267,6 +264,7 @@ func main() {
 
 		t, err := time.Parse(time.DateOnly, date)
 		if err != nil {
+
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -276,7 +274,7 @@ func main() {
 			return
 		}
 
-		if _, err := db.Exec("INSERT INTO day (username, tracker_name, date, emoji, content) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET emoji = ?, content = ?", sessionUser.Username, tracker, date, emoji, content, emoji, content); err != nil {
+		if _, err := db.Exec("INSERT INTO tracker_entries (username, tracker_name, date, emoji, content) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET emoji = ?, content = ?", sessionUser.Username, tracker, date, emoji, content, emoji, content); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -301,7 +299,6 @@ func main() {
 	http.HandleFunc("POST /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		email := r.FormValue("email")
-		birthday := r.FormValue("birthday")
 		tz := r.FormValue("timezone")
 
 		ctx := context.Background()
@@ -311,7 +308,7 @@ func main() {
 		}
 
 		var count int
-		if err := tx.QueryRow("SELECT count(*) FROM user WHERE username = ? OR email = ?", username, email).Scan(&count); err != nil && err != sql.ErrNoRows {
+		if err := tx.QueryRow("SELECT count(*) FROM users WHERE username = ? OR email = ?", username, email).Scan(&count); err != nil && err != sql.ErrNoRows {
 			tx.Rollback()
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -323,11 +320,11 @@ func main() {
 			return
 		}
 
-		if _, err := tx.Exec("INSERT INTO user (username, email, birthday, timezone) VALUES (?, ?, ?, ?)", username, email, birthday, tz); err != nil {
+		if _, err := tx.Exec("INSERT INTO users (username, email, timezone) VALUES (?, ?, ?)", username, email, tz); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}
-		if _, err := tx.Exec("INSERT INTO tracker (username, name, position) VALUES (?, ?, 1)", username, "Your_First_Tracker"); err != nil {
+		if _, err := tx.Exec("INSERT INTO trackers (username, tracker_name, position) VALUES (?, ?, 1)", username, "Your_First_Tracker"); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}
@@ -355,7 +352,7 @@ func main() {
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		var username string
-		if err := db.QueryRow("SELECT username FROM user WHERE email = ?", email).Scan(&username); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT username FROM users WHERE email = ?", email).Scan(&username); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("user not exist"))
 			return
@@ -376,7 +373,7 @@ func main() {
 		}
 		id := base64.URLEncoding.EncodeToString(bs)
 
-		if _, err := db.Exec("INSERT INTO session (id, username) VALUES (?, ?)", id, username); err != nil {
+		if _, err := db.Exec("INSERT INTO user_sessions (id, username) VALUES (?, ?)", id, username); err != nil {
 			log.Panic(err)
 		}
 
@@ -423,7 +420,7 @@ func main() {
 		token := query.Get("token")
 		username := query.Get("username")
 
-		if err := db.QueryRow("SELECT * FROM session WHERE id = ? AND username = ?", token, username).Err(); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT * FROM user_sessions WHERE id = ? AND username = ?", token, username).Err(); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -498,7 +495,6 @@ func executeTemplate(w http.ResponseWriter, name string, data any, trigger strin
 
 type User struct {
 	Username string
-	Birthday time.Time
 	Email    string
 	TimeZone string
 
@@ -534,7 +530,7 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYear int, endMonth time.Month) (*Tracker, error) {
 	startDate := time.Date(startYear, startMonth, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(endYear, endMonth+1, 1, 0, 0, 0, 0, time.UTC)
-	rows, err := db.Query("SELECT date, emoji, content FROM day WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
+	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
@@ -603,17 +599,13 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 	}
 
 	user := User{Trackers: []string{}}
-	var b string
-	if err := db.QueryRow("SELECT user.username, user.email, user.birthday, user.timezone FROM user JOIN session ON session.username = user.username WHERE session.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &b, &user.TimeZone); err == sql.ErrNoRows {
+	if err := db.QueryRow("SELECT users.username, users.email, users.timezone FROM users JOIN user_sessions ON user_sessions.username = users.username WHERE user_sessions.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &user.TimeZone); err == sql.ErrNoRows {
 		return nil, false, nil
 	} else if err != nil {
 		return nil, false, err
 	}
 
-	birthday, _ := time.Parse(time.DateOnly, b)
-	user.Birthday = birthday
-
-	rows, err := db.Query("SELECT name FROM tracker WHERE tracker.username = ? ORDER BY position", user.Username)
+	rows, err := db.Query("SELECT name FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
 	if err != nil {
 		return nil, false, err
 	}
