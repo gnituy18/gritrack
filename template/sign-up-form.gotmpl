@@ -8,11 +8,11 @@
       <p class="text-red-500">{{ . }}</p>
     {{ end }}
     <div class="flex flex-col gap-1">
-      <label for="email" class="text-sm text-slate-900">Email address</label>
+      <label for="email" class="text-sm">Email address</label>
       <input
         id="email"
         autocomplete="email"
-        class="border-1 rounded border-slate-300 py-1"
+        class="border-1 rounded border-slate-300 py-2"
         name="email"
         type="email"
         required
@@ -20,23 +20,24 @@
       />
     </div>
     <div class="flex flex-col gap-1">
-      <label for="username" class="text-sm text-slate-900">Username</label>
+      <label for="username" class="text-sm">Username</label>
       <input
         id="username"
         autocomplete="username"
-        class="border-1 rounded border-slate-300 py-1"
+        class="border-1 rounded border-slate-300 py-2"
         name="username"
         type="text"
         required
+        pattern="[a-zA-Z0-9\-._]{3,32}"
         placeholder="username"
       />
     </div>
 
     <div class="flex flex-col gap-1">
-      <label class="text-sm text-slate-900" for="timezone">Time Zone</label>
+      <label class="text-sm" for="timezone">Time Zone</label>
       <select
         id="timezone"
-        class="border-1 rounded border-slate-300 py-1"
+        class="border-1 rounded border-slate-300 py-2"
         name="timezone"
       >
         <option value="Africa/Abidjan">Africa/Abidjan</option>
@@ -504,7 +505,7 @@
       be hidden.
     </p>
     <input
-      class="rounded bg-indigo-600 py-2 font-semibold text-white"
+      class="cursor-pointer rounded bg-indigo-600 py-2 font-semibold text-white"
       value="Create Account"
       type="submit"
     />

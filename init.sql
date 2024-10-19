@@ -1,7 +1,7 @@
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE users(
-	username VARCHAR(64) NOT NULL PRIMARY KEY,
+	username VARCHAR(32) NOT NULL PRIMARY KEY,
 	email VARCHAR(320) NOT NULL UNIQUE,
 	timezone TEXT NOT NULL
 );
