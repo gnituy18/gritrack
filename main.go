@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -101,8 +102,6 @@ func main() {
 		tmplateName := r.PathValue("template_name")
 		switch tmplateName {
 		case "day":
-			fallthrough
-		case "day-detail":
 			tracker := query.Get("tracker")
 			date := query.Get("date")
 			t, err := time.Parse(time.DateOnly, date)
@@ -111,8 +110,9 @@ func main() {
 				return
 			}
 
+			var emoji string
 			var content string
-			if err := db.QueryRow("SELECT content FROM day WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&content); err != nil && err != sql.ErrNoRows {
+			if err := db.QueryRow("SELECT emoji, content FROM day WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
 				w.WriteHeader(http.StatusInternalServerError)
 				log.Panic(err)
 			}
@@ -122,6 +122,7 @@ func main() {
 				"day": Day{
 					Date:         t,
 					Content:      content,
+					Emoji:        emoji,
 					TimeRelation: sessionUser.TimeRelation(t),
 				},
 			}
@@ -204,8 +205,7 @@ func main() {
 			Tracker:     tracker,
 		})
 	})
-
-	http.HandleFunc("PUT /{tracker}/{date}/{$}", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -215,8 +215,49 @@ func main() {
 			return
 		}
 
-		tracker := r.PathValue("tracker")
-		date := r.PathValue("date")
+		query := r.URL.Query()
+		tracker := query.Get("tracker")
+		date := query.Get("date")
+
+		if !sessionUser.HasTracker(tracker) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		if _, err := time.Parse(time.DateOnly, date); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		var emoji string
+		var content string
+		if err := db.QueryRow("SELECT emoji, content FROM day WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		m := map[string]string{
+			"emoji":   emoji,
+			"content": content,
+		}
+
+		json.NewEncoder(w).Encode(m)
+	})
+
+	http.HandleFunc("PUT /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		tracker := r.FormValue("tracker")
+		date := r.FormValue("date")
+		emoji := r.FormValue("emoji")
 		content := r.FormValue("content")
 
 		if !sessionUser.HasTracker(tracker) {
@@ -235,21 +276,12 @@ func main() {
 			return
 		}
 
-		if _, err := db.Exec("INSERT INTO day (username, tracker_name, date, content) VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET content = ?", sessionUser.Username, tracker, date, content, content); err != nil {
+		if _, err := db.Exec("INSERT INTO day (username, tracker_name, date, emoji, content) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET emoji = ?, content = ?", sessionUser.Username, tracker, date, emoji, content, emoji, content); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
 
-		executeTemplate(w, "day-detail", map[string]any{
-			"tracker": tracker,
-			"day": Day{
-				Date:         t,
-				Content:      content,
-				TimeRelation: sessionUser.TimeRelation(t),
-			},
-		},
-			fmt.Sprintf("update-day-%s", date),
-		)
+		w.WriteHeader(http.StatusNoContent)
 		return
 	})
 
@@ -502,18 +534,25 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYear int, endMonth time.Month) (*Tracker, error) {
 	startDate := time.Date(startYear, startMonth, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(endYear, endMonth+1, 1, 0, 0, 0, 0, time.UTC)
-	rows, err := db.Query("SELECT date, content FROM day WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
+	rows, err := db.Query("SELECT date, emoji, content FROM day WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	dayContentMap := map[string]string{}
+	daysMap := map[string]struct {
+		Content string
+		Emoji   string
+	}{}
 	for rows.Next() {
 		var date string
 		var content string
-		rows.Scan(&date, &content)
-		dayContentMap[date] = content
+		var emoji string
+		rows.Scan(&date, &emoji, &content)
+		daysMap[date] = struct {
+			Content string
+			Emoji   string
+		}{Emoji: emoji, Content: content}
 	}
 
 	years := []Year{}
@@ -534,8 +573,10 @@ func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYea
 		nextMonth := d.AddDate(0, 1, 0)
 		for day := d; day.Before(nextMonth); day = day.AddDate(0, 0, 1) {
 			content := ""
-			if c, ok := dayContentMap[day.Format(time.DateOnly)]; ok {
-				content = c
+			emoji := ""
+			if data, ok := daysMap[day.Format(time.DateOnly)]; ok {
+				content = data.Content
+				emoji = data.Emoji
 			}
 
 			timeRelation := u.TimeRelation(day)
@@ -543,6 +584,7 @@ func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYea
 			years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
 				Date:         day,
 				Content:      content,
+				Emoji:        emoji,
 				TimeRelation: timeRelation,
 			})
 		}
@@ -625,6 +667,7 @@ func (m Month) String() string {
 
 type Day struct {
 	Date         time.Time
+	Emoji        string
 	Content      string
 	TimeRelation TimeRelation
 }

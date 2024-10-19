@@ -3,21 +3,29 @@
   {{ $day := get . "day" }}
   <button
     {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
-      title="{{ $day.Content }}"
-      hx-get="/template/app/day-detail/?tracker={{ $tracker }}&date={{ $day }}"
-      hx-target="#day-detail"
-      hx-on:click="document.getElementById('day-detail').showModal()"
+      title="{{ $day.Content }}" hx-on:click="getDayDetail('{{ $tracker }}',
+      '{{ $day.String }}')"
     {{ end }}
-    class="{{- if $day.Content -}}
+    class="{{- if $day.Emoji -}}
+      hover:bg-slate-200
+    {{- else if $day.Content -}}
       bg-lime-300 text-lime-500 hover:text-lime-600 hover:bg-lime-400
+      group-hover:text-lime-600
     {{- else if $day.TimeRelation.IsPast -}}
-      bg-slate-100 text-slate-300 hover:text-slate-400 hover:bg-slate-200
+      text-slate-300 hover:text-slate-400 hover:bg-slate-200
+      group-hover:text-slate-500
     {{- else if $day.TimeRelation.IsFuture -}}
-      text-slate-300 cursor-not-allowed
+      text-slate-300 cursor-not-allowed group-hover:text-slate-500
     {{- else if $day.TimeRelation.IsToday -}}
       bg-amber-300 text-amber-500 hover:bg-amber-400 hover:text-amber-600
-    {{- end }} flex h-5 w-5 items-center justify-center rounded text-sm"
+    {{- end }} flex h-5 w-5 items-center justify-center rounded"
   >
-    {{- $day.Date.Day -}}
+    {{ if $day.Emoji }}
+      {{ $day.Emoji }}
+    {{ else }}
+      <small>
+        {{ $day.Date.Day }}
+      </small>
+    {{ end }}
   </button>
 {{ end }}

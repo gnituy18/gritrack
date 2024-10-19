@@ -25,7 +25,8 @@ CREATE TABLE day(
 	username,
 	tracker_name, 
 	date TEXT NOT NULL,
-	content TEXT,
+	emoji TEXT NOT NULL DEFAULT "",
+	content TEXT NOT NULL DEFAULT "",
 	FOREIGN KEY(username, tracker_name) REFERENCES tracker(username, name),
 	PRIMARY KEY (username, tracker_name, date DESC)
 );

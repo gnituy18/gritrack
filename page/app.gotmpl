@@ -1,25 +1,20 @@
+{{ define "header" }}
+  <select class="font-semibold text-slate-600">
+    {{ range $.SessionUser.Trackers }}
+      <option value="{{ . }}">{{ . }}</option>
+    {{ end }}
+  </select>
+{{ end }}
+
 {{ define "main" }}
-  <div class="flex">
-    <ul class="px-2">
-      {{ range .SessionUser.Trackers }}
-        <li>
-          <a
-            href="/{{ $.User.Username }}/{{ . }}/"
-            class="{{ if eq . $.Tracker.Name }}
-              font-bold bg-slate-100 hover:bg-slate-200
-            {{- end }} block rounded p-2"
-            >{{ . }}</a
-          >
-        </li>
-      {{ end }}
-    </ul>
-    <div class="grid grow justify-center gap-1 pb-20">
-      {{ range .Tracker.Years }}
-        <div
-          class="grid grid-cols-[auto_max-content] justify-stretch gap-x-4 gap-y-1"
-        >
-          {{ range .Months }}
-            <h2 class="font-semibold text-slate-300">{{ .String }}</h2>
+  <div class="grid justify-center gap-1 p-4 pb-20">
+    {{ range .Tracker.Years }}
+      <div class="grid grid-cols-[auto_max-content] gap-x-4 gap-y-1">
+        {{ range .Months }}
+          <div class="group col-span-2 grid grid-cols-subgrid items-center">
+            <h2 class="font-semibold text-slate-300 group-hover:text-slate-600">
+              {{ .String }}
+            </h2>
             <div
               class="{{ if ne (index .Days 0).Weekday 1 -}}
                 -mb-6
@@ -30,17 +25,104 @@
                   id="day-{{ .String }}"
                   hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
                   class="z-10"
-                  hx-trigger="update-day-{{ .String }} from:body"
+                  hx-trigger="update-day-{{ .String }}"
                   style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
                 >
                   {{ template "day" dict "tracker" $.Tracker "day" $e }}
                 </div>
               {{ end }}
             </div>
-          {{ end }}
-        </div>
-      {{ end }}
-    </div>
+          </div>
+        {{ end }}
+      </div>
+    {{ end }}
   </div>
-  <dialog class="rounded" id="day-detail"></dialog>
+
+  <dialog id="day-detail" class="p-4">
+    <div class="flex flex-col gap-2">
+      <div class="flex flex-col">
+        <div class="flex justify-between">
+          <h1 class="font-bold">
+            {{ $.Tracker.Name }}
+          </h1>
+          <button
+            class="cursor-pointer font-bold"
+            hx-on:click="document.getElementById('day-detail').close()"
+          >
+            ✖️
+          </button>
+        </div>
+        <time class="text-sm" datetime=""> </time>
+      </div>
+      <input
+        readonly
+        id="emoji"
+        name="emoji"
+        type="text"
+        value=""
+        class="w-8 cursor-pointer rounded bg-slate-100 p-2 focus:outline-none"
+        hx-on:click="document.getElementById('ep').classList.remove('hidden')"
+      />
+      <emoji-picker
+        hx-on:emoji-click="document.getElementById('emoji').value = event.detail.unicode;document.getElementById('ep').classList.add('hidden')"
+        id="ep"
+        class="hidden w-full"
+      ></emoji-picker>
+      <input
+        id="content"
+        autofocus
+        placeholder="What have you achieved today?"
+        type="text"
+        name="content"
+        value=""
+        class="rounded bg-slate-100 p-2 focus:bg-white"
+      />
+      <button
+        hx-on:click="updateDayDetail()"
+        class="cursor-pointer rounded bg-blue-200 p-2"
+      >
+        Save
+      </button>
+    </div>
+  </dialog>
+  <div class="hidden" id="tracker" data-tracker="{{ $.Tracker.Name }}"></div>
+  <script>
+    const tracker = document.getElementById("tracker").dataset.tracker;
+    const dayDetail = document.getElementById("day-detail");
+    const inputEmoji = document.getElementById("emoji");
+    const inputContent = document.getElementById("content");
+    let currentDate = "";
+
+    async function getDayDetail(tracker, date) {
+      try {
+        const res = await fetch(
+          "/day-detail/?" +
+            new URLSearchParams({ tracker: tracker, date: date }),
+        );
+        const { emoji, content } = await res.json();
+        inputEmoji.value = emoji;
+        inputContent.value = content;
+        currentDate = date;
+        dayDetail.showModal();
+      } catch (err) {
+        alert("Something went wrong.");
+        console.error(err);
+      }
+    }
+
+    async function updateDayDetail() {
+      const formData = new FormData();
+      formData.set("tracker", tracker);
+      formData.set("date", currentDate);
+      formData.set("emoji", inputEmoji.value);
+      formData.set("content", inputContent.value);
+
+      const res = await fetch("/day-detail/", {
+        method: "PUT",
+        body: formData,
+      });
+      htmx.trigger(`#day-${currentDate}`, `update-day-${currentDate}`);
+      dayDetail.close();
+    }
+  </script>
 {{ end }}
