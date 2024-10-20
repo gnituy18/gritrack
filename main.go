@@ -76,10 +76,11 @@ func main() {
 
 	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
 	pageTmpl = map[string]*template.Template{
-		"index":   template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
-		"app":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
-		"log-in":  template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
-		"sign-up": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
+		"index":      template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
+		"app":        template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
+		"log-in":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
+		"sign-up":    template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
+		"email-sent": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
 	}
 
 	minifier = minify.New()
@@ -151,7 +152,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/%s/%s/", username, tracker), http.StatusTemporaryRedirect)
+		http.Redirect(w, r, fmt.Sprintf("/%s/%s/", username, tracker), http.StatusFound)
 	})
 
 	http.HandleFunc("GET /{username}/{tracker}/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -316,7 +317,7 @@ func main() {
 
 		if count != 0 {
 			tx.Rollback()
-			executeTemplate(w, "sign-up-form", "Username or Email already exist.", "")
+			w.Write([]byte("⚠️ Username or Email already exist."))
 			return
 		}
 
@@ -333,7 +334,13 @@ func main() {
 			log.Panic(err)
 		}
 
-		executeTemplate(w, "account-created", nil, "")
+		if _, err := sendLogInEmail(email, username); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		w.Header().Add("HX-Location", "/account-created")
+		w.WriteHeader(http.StatusSeeOther)
 	})
 
 	http.HandleFunc("GET /log-in/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -353,66 +360,28 @@ func main() {
 		email := r.FormValue("email")
 		var username string
 		if err := db.QueryRow("SELECT username FROM users WHERE email = ?", email).Scan(&username); err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("user not exist"))
+			w.Write([]byte("You don't have an account yet."))
 			return
 		} else if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
 
-		ctx := context.Background()
-		cfg, err := config.LoadDefaultConfig(ctx)
-		if err != nil {
-			log.Panic(err)
-			return
-		}
-
-		bs := make([]byte, 32)
-		if _, err = rand.Read(bs); err != nil {
-			log.Panic(err)
-		}
-		id := base64.URLEncoding.EncodeToString(bs)
-
-		if _, err := db.Exec("INSERT INTO user_sessions (id, username) VALUES (?, ?)", id, username); err != nil {
+		if _, err := sendLogInEmail(email, username); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
 
-		from := "no-reply@gritrack.com"
-		title := "Log in to Gritrack"
-		var htmlBuffer bytes.Buffer
+		w.Header().Add("HX-Location", "/log-in-email-sent")
+		w.WriteHeader(http.StatusSeeOther)
+	})
 
-		portStr := ""
-		if port != "80" {
-			portStr = ":" + port
-		}
+	http.HandleFunc("GET /account-created/{$}", func(w http.ResponseWriter, r *http.Request) {
+		executePage(w, r, "email-sent", "🎉 Account Successfully Created! 🎉")
+	})
 
-		link := fmt.Sprintf("%s%s/log-in-with-token/?token=%s", host, portStr, id)
-		err = tmpl.ExecuteTemplate(&htmlBuffer, "log-in-email", link)
-		if err != nil {
-			log.Panic(err)
-		}
-
-		body := htmlBuffer.String()
-
-		client := ses.NewFromConfig(cfg)
-		_, err = client.SendEmail(ctx, &ses.SendEmailInput{
-			Destination: &types.Destination{
-				ToAddresses: []string{email},
-			},
-			Message: &types.Message{
-				Subject: &types.Content{
-					Data: &title,
-				},
-				Body: &types.Body{
-					Html: &types.Content{
-						Data: &body,
-					},
-				},
-			},
-			Source: &from,
-		})
-
-		w.Write([]byte("Log in email sent. Check your email."))
+	http.HandleFunc("GET /log-in-email-sent/{$}", func(w http.ResponseWriter, r *http.Request) {
+		executePage(w, r, "email-sent", "📧 Log In Email Sent! 📧")
 	})
 
 	http.HandleFunc("GET /log-in-with-token/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -429,7 +398,7 @@ func main() {
 
 		cookie := http.Cookie{Name: "session", Value: token, Path: "/", Expires: time.Now().Add(7 * 24 * time.Hour)}
 		http.SetCookie(w, &cookie)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/", http.StatusFound)
 	})
 
 	style, err := os.ReadFile("asset/style.css")
@@ -491,6 +460,89 @@ func executeTemplate(w http.ResponseWriter, name string, data any, trigger strin
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Panic(err)
 	}
+}
+
+func sendLogInEmail(email, username string) (*ses.SendEmailOutput, error) {
+	ctx := context.Background()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	bs := make([]byte, 32)
+	if _, err = rand.Read(bs); err != nil {
+		log.Panic(err)
+	}
+	sessionId := base64.URLEncoding.EncodeToString(bs)
+
+	if _, err := db.Exec("INSERT INTO user_sessions (id, username) VALUES (?, ?)", sessionId, username); err != nil {
+		log.Panic(err)
+	}
+
+	from := "no-reply@gritrack.com"
+	title := "Log in to Gritrack"
+	var htmlBuffer bytes.Buffer
+	body := htmlBuffer.String()
+
+	portStr := ""
+	if port != "80" {
+		portStr = ":" + port
+	}
+
+	link := fmt.Sprintf("%s%s/log-in-with-token/?token=%s", host, portStr, sessionId)
+	err = tmpl.ExecuteTemplate(&htmlBuffer, "log-in-email", link)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	client := ses.NewFromConfig(cfg)
+	return client.SendEmail(ctx, &ses.SendEmailInput{
+		Destination: &types.Destination{
+			ToAddresses: []string{email},
+		},
+		Message: &types.Message{
+			Subject: &types.Content{
+				Data: &title,
+			},
+			Body: &types.Body{
+				Html: &types.Content{
+					Data: &body,
+				},
+			},
+		},
+		Source: &from,
+	})
+}
+
+func getSessionUser(r *http.Request) (*User, bool, error) {
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		return nil, false, nil
+	}
+
+	user := User{Trackers: []string{}}
+	if err := db.QueryRow("SELECT users.username, users.email, users.timezone FROM users JOIN user_sessions ON user_sessions.username = users.username WHERE user_sessions.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &user.TimeZone); err == sql.ErrNoRows {
+		return nil, false, nil
+	} else if err != nil {
+		return nil, false, err
+	}
+
+	rows, err := db.Query("SELECT name FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var tracker string
+		if err := rows.Scan(&tracker); err != nil {
+			return nil, false, err
+		}
+
+		user.Trackers = append(user.Trackers, tracker)
+	}
+
+	return &user, true, nil
 }
 
 type User struct {
@@ -590,37 +642,6 @@ func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYea
 		Name:  name,
 		Years: years,
 	}, nil
-}
-
-func getSessionUser(r *http.Request) (*User, bool, error) {
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		return nil, false, nil
-	}
-
-	user := User{Trackers: []string{}}
-	if err := db.QueryRow("SELECT users.username, users.email, users.timezone FROM users JOIN user_sessions ON user_sessions.username = users.username WHERE user_sessions.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &user.TimeZone); err == sql.ErrNoRows {
-		return nil, false, nil
-	} else if err != nil {
-		return nil, false, err
-	}
-
-	rows, err := db.Query("SELECT name FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
-	if err != nil {
-		return nil, false, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var tracker string
-		if err := rows.Scan(&tracker); err != nil {
-			return nil, false, err
-		}
-
-		user.Trackers = append(user.Trackers, tracker)
-	}
-
-	return &user, true, nil
 }
 
 type App struct {
