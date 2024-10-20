@@ -339,7 +339,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		w.Header().Add("HX-Location", "/account-created")
+		w.Header().Add("HX-Location", "/account-created/")
 		w.WriteHeader(http.StatusSeeOther)
 	})
 
@@ -372,7 +372,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		w.Header().Add("HX-Location", "/log-in-email-sent")
+		w.Header().Add("HX-Location", "/log-in-email-sent/")
 		w.WriteHeader(http.StatusSeeOther)
 	})
 
