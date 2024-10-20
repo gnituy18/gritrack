@@ -13,6 +13,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -61,6 +62,7 @@ func main() {
 	}
 	defer db.Close()
 	db.Exec("PRAGMA foreign_keys = ON")
+	db.Exec("PRAGMA journal_mode=WAL")
 
 	go func() {
 		for {
@@ -76,11 +78,13 @@ func main() {
 
 	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
 	pageTmpl = map[string]*template.Template{
-		"index":      template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
-		"app":        template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
-		"log-in":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
-		"sign-up":    template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
-		"email-sent": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
+		"index":          template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
+		"app":            template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
+		"create-tracker": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/create-tracker.gotmpl")),
+		"log-in":         template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
+		"sign-up":        template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
+		"settings":       template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/settings.gotmpl")),
+		"email-sent":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
 	}
 
 	minifier = minify.New()
@@ -191,16 +195,16 @@ func main() {
 		endM := sessionUser.Today().Month()
 		startY := endY - 1
 		startM := endM + 1
-		tracker, err := sessionUser.Tracker(trackerName, startY, startM, endY, endM)
+		trackerEntries, err := sessionUser.TrackerEntries(trackerName, startY, startM, endY, endM)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
 
 		executePage(w, r, "app", App{
-			SessionUser: sessionUser,
-			User:        &user,
-			Tracker:     tracker,
+			SessionUser:    sessionUser,
+			User:           &user,
+			TrackerEntries: trackerEntries,
 		})
 	})
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -282,6 +286,56 @@ func main() {
 
 		w.WriteHeader(http.StatusNoContent)
 		return
+	})
+
+	http.HandleFunc("GET /create-tracker/{$}", func(w http.ResponseWriter, r *http.Request) {
+		if _, ok, err := getSessionUser(r); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		executePage(w, r, "create-tracker", nil)
+	})
+
+	http.HandleFunc("POST /create-tracker/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		trackerName := r.FormValue("tracker_name")
+
+		if sessionUser.HasTracker(trackerName) {
+			w.Write([]byte("⚠️ A tracker with this name already exists. Please choose a different name."))
+			return
+		}
+
+		if _, err := db.Exec("INSERT INTO trackers (username, tracker_name, position) VALUES (?, ?, (SELECT COALESCE(MAX(position), 0) + 1 FROM trackers WHERE username = ?))", sessionUser.Username, trackerName, sessionUser.Username); err != nil {
+			log.Panic(err)
+		}
+
+		w.Header().Add("HX-Location", fmt.Sprintf("/%s/%s/", sessionUser.Username, url.QueryEscape(trackerName)))
+		w.WriteHeader(http.StatusSeeOther)
+	})
+
+	http.HandleFunc("GET /settings/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		executePage(w, r, "settings", sessionUser)
 	})
 
 	http.HandleFunc("GET /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -482,7 +536,6 @@ func sendLogInEmail(email, username string) (*ses.SendEmailOutput, error) {
 	from := "no-reply@gritrack.com"
 	title := "Log in to Gritrack"
 	var htmlBuffer bytes.Buffer
-	body := htmlBuffer.String()
 
 	portStr := ""
 	if port != "80" {
@@ -494,6 +547,7 @@ func sendLogInEmail(email, username string) (*ses.SendEmailOutput, error) {
 	if err != nil {
 		log.Panic(err)
 	}
+	body := htmlBuffer.String()
 
 	client := ses.NewFromConfig(cfg)
 	return client.SendEmail(ctx, &ses.SendEmailInput{
@@ -520,24 +574,26 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 		return nil, false, nil
 	}
 
-	user := User{Trackers: []string{}}
+	user := User{Trackers: []Tracker{}}
 	if err := db.QueryRow("SELECT users.username, users.email, users.timezone FROM users JOIN user_sessions ON user_sessions.username = users.username WHERE user_sessions.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &user.TimeZone); err == sql.ErrNoRows {
 		return nil, false, nil
 	} else if err != nil {
 		return nil, false, err
 	}
 
-	rows, err := db.Query("SELECT name FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
+	rows, err := db.Query("SELECT tracker_name, position, public FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
 	if err != nil {
 		return nil, false, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var tracker string
-		if err := rows.Scan(&tracker); err != nil {
+		tracker := Tracker{}
+		if err := rows.Scan(&tracker.TrackerName, &tracker.Position, &tracker.Public); err != nil {
 			return nil, false, err
 		}
+
+		fmt.Println(tracker)
 
 		user.Trackers = append(user.Trackers, tracker)
 	}
@@ -550,12 +606,12 @@ type User struct {
 	Email    string
 	TimeZone string
 
-	Trackers []string
+	Trackers []Tracker
 }
 
 func (u *User) HasTracker(tracker string) bool {
 	for _, t := range u.Trackers {
-		if t == tracker {
+		if t.TrackerName == tracker {
 			return true
 		}
 	}
@@ -579,7 +635,7 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 	}
 }
 
-func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYear int, endMonth time.Month) (*Tracker, error) {
+func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month, endYear int, endMonth time.Month) (*TrackerEntries, error) {
 	startDate := time.Date(startYear, startMonth, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(endYear, endMonth+1, 1, 0, 0, 0, 0, time.UTC)
 	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
@@ -638,9 +694,9 @@ func (u *User) Tracker(name string, startYear int, startMonth time.Month, endYea
 		}
 	}
 
-	return &Tracker{
-		Name:  name,
-		Years: years,
+	return &TrackerEntries{
+		TrackerName: name,
+		Years:       years,
 	}, nil
 }
 
@@ -648,16 +704,26 @@ type App struct {
 	SessionUser *User
 	User        *User
 
-	Tracker *Tracker
+	TrackerEntries *TrackerEntries
 }
 
 type Tracker struct {
-	Name  string
-	Years []Year
+	TrackerName string
+	Position    int
+	Public      bool
 }
 
 func (t *Tracker) String() string {
-	return t.Name
+	return t.TrackerName
+}
+
+type TrackerEntries struct {
+	TrackerName string
+	Years       []Year
+}
+
+func (t *TrackerEntries) String() string {
+	return t.TrackerName
 }
 
 type Year struct {

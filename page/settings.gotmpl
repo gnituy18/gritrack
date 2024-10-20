@@ -1,0 +1,16 @@
+{{ define "header" }}
+{{ end }}
+{{ define "main" }}
+  <div class="mx-auto mt-12 flex w-96 flex-col">
+    <h2 class="text-lg font-semibold">👤 {{ .Username }}</h2>
+    <h2 class="text-lg font-semibold">📧 {{ .Email }}</h2>
+    <h2 class="mt-12 text-lg font-semibold text-indigo-600">Trackers</h2>
+    <ol>
+      {{ range .Trackers }}
+        <li>
+          {{ .String }}
+        </li>
+      {{ end }}
+    </ol>
+  </div>
+{{ end }}
