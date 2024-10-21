@@ -593,8 +593,6 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 			return nil, false, err
 		}
 
-		fmt.Println(tracker)
-
 		user.Trackers = append(user.Trackers, tracker)
 	}
 
