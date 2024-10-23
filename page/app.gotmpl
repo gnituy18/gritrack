@@ -1,7 +1,7 @@
 {{ define "header" }}
   <select
-    hx-on:change=" onChangeTracker(this.options[this.selectedIndex].text)"
-    class="rounded border-slate-200 font-semibold text-slate-600"
+    hx-on:change="onChangeTracker(this.options[this.selectedIndex].text)"
+    class="rounded border-slate-200 font-semibold"
   >
     {{ range .SessionUser.Trackers }}
       <option
@@ -13,22 +13,22 @@
     {{ end }}
   </select>
 
-  <div class="flex items-baseline gap-2">
+  <nav class="flex items-baseline">
     <a
       href="/create-tracker/"
-      class="block w-10 rounded p-2 text-center text-xl font-semibold text-slate-600 hover:bg-slate-100"
-      >+</a
+      class="block w-10 rounded p-2 text-center font-bold hover:bg-slate-100"
+      >＋<a
     >
     <a
       href="/settings/"
-      class="rounded p-2 font-semibold text-slate-600 hover:bg-slate-100"
+      class="rounded p-2 font-semibold hover:bg-slate-100"
       >Settings</a
     >
-  </div>
+  </nav>
 {{ end }}
 
 {{ define "main" }}
-  <div class="grid justify-center gap-1 p-4 pb-20">
+  <div class="grid justify-center gap-1pb-20">
     {{ range .TrackerEntries.Years }}
       <div class="grid grid-cols-[auto_max-content] gap-x-4 gap-y-1">
         {{ range .Months }}
