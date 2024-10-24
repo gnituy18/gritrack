@@ -169,9 +169,9 @@ func main() {
 		username := r.PathValue("username")
 		trackerName := r.PathValue("tracker")
 
-		var isPublic bool
 		user := User{}
-		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.tracker_name = ?", username, trackerName).Scan(&user.Email, &user.TimeZone, &isPublic); err == sql.ErrNoRows {
+		tracker := Tracker{}
+		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.tracker_name = ?", username, trackerName).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -180,7 +180,7 @@ func main() {
 		}
 		user.Username = username
 
-		if !isPublic {
+		if !tracker.Public {
 			if !ok {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
@@ -201,10 +201,11 @@ func main() {
 			log.Panic(err)
 		}
 
+		tracker.Entries = trackerEntries
 		executePage(w, r, "app", App{
-			SessionUser:    sessionUser,
-			User:           &user,
-			TrackerEntries: trackerEntries,
+			SessionUser: sessionUser,
+			User:        &user,
+			Tracker:     &tracker,
 		})
 	})
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -581,7 +582,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 		return nil, false, err
 	}
 
-	rows, err := db.Query("SELECT tracker_name, position, public FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
+	rows, err := db.Query("SELECT tracker_name, description, position, public FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
 	if err != nil {
 		return nil, false, err
 	}
@@ -589,7 +590,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 
 	for rows.Next() {
 		tracker := Tracker{}
-		if err := rows.Scan(&tracker.TrackerName, &tracker.Position, &tracker.Public); err != nil {
+		if err := rows.Scan(&tracker.TrackerName, &tracker.Description, &tracker.Position, &tracker.Public); err != nil {
 			return nil, false, err
 		}
 
@@ -693,8 +694,7 @@ func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month,
 	}
 
 	return &TrackerEntries{
-		TrackerName: name,
-		Years:       years,
+		Years: years,
 	}, nil
 }
 
@@ -702,13 +702,16 @@ type App struct {
 	SessionUser *User
 	User        *User
 
-	TrackerEntries *TrackerEntries
+	Tracker *Tracker
 }
 
 type Tracker struct {
 	TrackerName string
+	Description string
 	Position    int
 	Public      bool
+
+	Entries *TrackerEntries
 }
 
 func (t *Tracker) String() string {
@@ -716,12 +719,7 @@ func (t *Tracker) String() string {
 }
 
 type TrackerEntries struct {
-	TrackerName string
-	Years       []Year
-}
-
-func (t *TrackerEntries) String() string {
-	return t.TrackerName
+	Years []Year
 }
 
 type Year struct {

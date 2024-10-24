@@ -1,11 +1,11 @@
 {{ define "header" }}
   <select
     hx-on:change="onChangeTracker(this.options[this.selectedIndex].text)"
-    class="rounded border-slate-200 font-semibold"
+    class="w-fit max-w-80 rounded border-slate-200 font-semibold"
   >
     {{ range .SessionUser.Trackers }}
       <option
-        {{ if eq .String $.TrackerEntries.TrackerName }}selected{{ end }}
+        {{ if eq .String $.Tracker.TrackerName }}selected{{ end }}
         value="{{ .String }}"
       >
         {{ .String }}
@@ -16,12 +16,12 @@
   <nav class="flex items-baseline">
     <a
       href="/create-tracker/"
-      class="block w-10 rounded p-2 text-center font-bold hover:bg-slate-100"
+      class="rounded w-10 p-2 text-center hover:bg-slate-100"
       >＋<a
     >
     <a
       href="/settings/"
-      class="rounded p-2 font-semibold hover:bg-slate-100"
+      class="rounded p-2 text-center font-semibold hover:bg-slate-100 text-slate-400 hover:text-slate-800"
       >Settings</a
     >
   </nav>
@@ -29,7 +29,8 @@
 
 {{ define "main" }}
   <div class="grid justify-center gap-1pb-20">
-    {{ range .TrackerEntries.Years }}
+    <p>{{.Tracker.Description}} </p>
+    {{ range .Tracker.Entries.Years }}
       <div class="grid grid-cols-[auto_max-content] gap-x-4 gap-y-1">
         {{ range .Months }}
           <div class="group col-span-2 grid grid-cols-subgrid items-center">
@@ -44,12 +45,12 @@
               {{ range $i, $e :=  .Days }}
                 <div
                   id="day-{{ .String }}"
-                  hx-get="/template/app/day/?tracker={{ $.TrackerEntries }}&date={{ .String }}"
+                  hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
                   class="z-10"
                   hx-trigger="update-day-{{ .String }}"
                   style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
                 >
-                  {{ template "day" dict "tracker" $.TrackerEntries "day" $e }}
+                  {{ template "day" dict "tracker" $.Tracker "day" $e }}
                 </div>
               {{ end }}
             </div>
@@ -64,7 +65,7 @@
       <div class="flex flex-col">
         <div class="flex justify-between text-slate-600">
           <h1 class="font-bold">
-            {{ .TrackerEntries.TrackerName }}
+            {{ .Tracker.TrackerName }}
           </h1>
           <button
             class="cursor-pointer font-semibold"
@@ -117,7 +118,7 @@
   <div
     class="hidden"
     id="tracker"
-    data-tracker="{{ .TrackerEntries.TrackerName }}"
+    data-tracker="{{ .Tracker.TrackerName }}"
   ></div>
   <div
     class="hidden"
