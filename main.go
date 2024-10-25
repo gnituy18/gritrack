@@ -179,6 +179,7 @@ func main() {
 			log.Panic(err)
 		}
 		user.Username = username
+		tracker.TrackerName = trackerName
 
 		if !tracker.Public {
 			if !ok {
@@ -737,7 +738,11 @@ type Month struct {
 }
 
 func (m Month) String() string {
-	return m.Value.String()
+	return m.Value.String()[0:3]
+}
+
+func (m Month) Val() string {
+	return fmt.Sprintf("%02d", m.Value)
 }
 
 type Day struct {

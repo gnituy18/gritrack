@@ -1,14 +1,14 @@
 {{ define "header" }}
   <select
     hx-on:change="onChangeTracker(this.options[this.selectedIndex].text)"
-    class="w-fit max-w-80 rounded border-slate-200 font-semibold"
+    class="max-w-xs rounded border-slate-200 font-semibold"
   >
     {{ range .SessionUser.Trackers }}
       <option
-        {{ if eq .String $.Tracker.TrackerName }}selected{{ end }}
-        value="{{ .String }}"
+        {{ if eq .TrackerName $.Tracker.TrackerName }}selected{{ end }}
+        value="{{ .TrackerName }}"
       >
-        {{ .String }}
+        {{ .TrackerName }}
       </option>
     {{ end }}
   </select>
@@ -16,48 +16,58 @@
   <nav class="flex items-baseline">
     <a
       href="/create-tracker/"
-      class="rounded w-10 p-2 text-center hover:bg-slate-100"
-      >＋<a
+      class="w-10 rounded p-2 text-center text-slate-400 hover:bg-slate-100 hover:text-slate-800"
+      >＋</a
     >
     <a
       href="/settings/"
-      class="rounded p-2 text-center font-semibold hover:bg-slate-100 text-slate-400 hover:text-slate-800"
+      class="rounded p-2 text-center font-semibold text-slate-400 hover:bg-slate-100 hover:text-slate-800"
       >Settings</a
     >
   </nav>
 {{ end }}
 
 {{ define "main" }}
-  <div class="grid justify-center gap-1pb-20">
-    <p>{{.Tracker.Description}} </p>
-    {{ range .Tracker.Entries.Years }}
-      <div class="grid grid-cols-[auto_max-content] gap-x-4 gap-y-1">
-        {{ range .Months }}
-          <div class="group col-span-2 grid grid-cols-subgrid items-center">
-            <h2 class="font-semibold text-slate-300 group-hover:text-slate-600">
-              {{ .String }}
-            </h2>
-            <div
-              class="{{ if ne (index .Days 0).Weekday 1 -}}
-                -mb-6
-              {{- end }} grid grid-cols-7 gap-1"
-            >
-              {{ range $i, $e :=  .Days }}
-                <div
-                  id="day-{{ .String }}"
-                  hx-get="/template/app/day/?tracker={{ $.Tracker }}&date={{ .String }}"
-                  class="z-10"
-                  hx-trigger="update-day-{{ .String }}"
-                  style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
-                >
-                  {{ template "day" dict "tracker" $.Tracker "day" $e }}
-                </div>
-              {{ end }}
-            </div>
-          </div>
-        {{ end }}
-      </div>
+  <div class="flex flex-col justify-center gap-8">
+    {{ if .Tracker.Description }}
+      <section class="left-0">
+        <p class="mx-auto w-fit max-w-sm">{{ .Tracker.Description }}</p>
+      </section>
     {{ end }}
+    <section class="grid grid-cols-[auto_max-content] justify-center">
+      {{ range $y := .Tracker.Entries.Years }}
+        <div class="col-span-2 grid grid-cols-subgrid gap-x-8">
+          {{ range $i, $m := $y.Months }}
+            <div class="group col-span-2 grid grid-cols-subgrid items-center">
+              <time
+                datetime="{{ $y.String }}-{{ .Val }}"
+                class="font-semibold text-slate-300 group-hover:text-slate-600"
+              >
+                {{ .String }}
+              </time>
+              <div
+                class="{{ if ne (index .Days 0).Weekday 1 -}}
+                  -mb-7
+                {{- end }} grid grid-cols-7"
+              >
+                {{ range $i, $e :=  .Days }}
+                  <time
+                    id="day-{{ .String }}"
+                    datetime="{{ .String }}"
+                    hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
+                    class="group/day z-10 flex h-7 w-7 items-center justify-center"
+                    hx-trigger="update-day-{{ .String }}"
+                    style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
+                  >
+                    {{ template "day" dict "tracker" $.Tracker "day" $e }}
+                  </time>
+                {{ end }}
+              </div>
+            </div>
+          {{ end }}
+        </div>
+      {{ end }}
+    </section>
   </div>
 
   <dialog id="day-detail" class="w-96 rounded p-4">
@@ -123,11 +133,11 @@
   <div
     class="hidden"
     id="username"
-    data-tracker="{{ .SessionUser.Username }}"
+    data-username="{{ .SessionUser.Username }}"
   ></div>
   <script>
     const tracker = document.getElementById("tracker").dataset.tracker;
-    const username = document.getElementById("username").dataset.tracker;
+    const username = document.getElementById("username").dataset.username;
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTime = document.getElementById("day-detail-time");
     const inputEmoji = document.getElementById("emoji");
