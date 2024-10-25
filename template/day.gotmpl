@@ -12,7 +12,11 @@
       bg-lime-300 text-lime-500 group-hover:text-lime-600
       group-hover/day:bg-lime-400
     {{- else if $day.TimeRelation.IsPast -}}
-      text-slate-300 group-hover:text-slate-600 group-hover/day:bg-slate-200
+      {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
+        text-rose-200 group-hover:text-rose-500 group-hover/day:bg-rose-100
+      {{ else }}
+        text-slate-300 group-hover:text-slate-600 group-hover/day:bg-slate-200
+      {{ end }}
     {{- else if $day.TimeRelation.IsFuture -}}
       text-slate-300 cursor-not-allowed
     {{- else if $day.TimeRelation.IsToday -}}

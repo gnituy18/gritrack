@@ -16,12 +16,12 @@
   <nav class="flex items-baseline">
     <a
       href="/create-tracker/"
-      class="w-10 rounded p-2 text-center text-slate-400 hover:bg-slate-100 hover:text-slate-800"
+      class="w-10 rounded p-2 text-center text-slate-800 hover:bg-slate-100"
       >＋</a
     >
     <a
       href="/settings/"
-      class="rounded p-2 text-center font-semibold text-slate-400 hover:bg-slate-100 hover:text-slate-800"
+      class="rounded p-2 text-center font-semibold text-slate-800 hover:bg-slate-100"
       >Settings</a
     >
   </nav>
@@ -70,23 +70,23 @@
     </section>
   </div>
 
-  <dialog id="day-detail" class="w-96 rounded p-4">
-    <div class="flex flex-col gap-2">
-      <div class="flex flex-col">
-        <div class="flex justify-between text-slate-600">
-          <h1 class="font-bold">
+  <dialog id="day-detail" class="w-full max-w-md rounded p-12">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-4">
+        <div class="flex justify-between gap-4 text-slate-800">
+          <h1 class="text-lg font-bold">
             {{ .Tracker.TrackerName }}
           </h1>
           <button
-            class="cursor-pointer font-semibold"
+            class="cursor-pointer"
             hx-on:click="document.getElementById('day-detail').close();document.getElementById('ep').classList.add('hidden')"
           >
-            ✖️
+            ✕
           </button>
         </div>
         <time
           id="day-detail-time"
-          class="text-sm font-semibold text-slate-400"
+          class="gap-4 font-semibold text-indigo-400"
           datetime=""
         >
         </time>
@@ -97,7 +97,7 @@
           id="emoji"
           name="emoji"
           type="text"
-          value=""
+          value="☺"
           class="w-10 cursor-pointer rounded border-slate-300 bg-slate-100 p-2 text-center focus:bg-white focus:outline-none"
           hx-on:click="document.getElementById('ep').classList.remove('hidden')"
         />
