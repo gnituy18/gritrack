@@ -28,13 +28,31 @@
 {{ end }}
 
 {{ define "main" }}
-  <div class="flex flex-col justify-center gap-8">
+  <div class="grid justify-center gap-8">
     {{ if .Tracker.Description }}
       <section class="left-0">
         <p class="mx-auto w-fit max-w-sm">{{ .Tracker.Description }}</p>
       </section>
     {{ end }}
     <section class="grid grid-cols-[auto_max-content] justify-center">
+      <div class="col-span-2 grid grid-cols-subgrid gap-x-8">
+        <div class="group col-span-2 grid grid-cols-subgrid items-center">
+          <div></div>
+          <div class="grid grid-cols-7">
+            <div class="place-self-center font-semibold text-indigo-600">
+              Su
+            </div>
+            <div class="place-self-center font-semibold text-slate-600">Mo</div>
+            <div class="place-self-center font-semibold text-slate-600">Tu</div>
+            <div class="place-self-center font-semibold text-slate-600">We</div>
+            <div class="place-self-center font-semibold text-slate-600">Th</div>
+            <div class="place-self-center font-semibold text-slate-600">Fr</div>
+            <div class="place-self-center font-semibold text-indigo-600">
+              Sa
+            </div>
+          </div>
+        </div>
+      </div>
       {{ range $y := .Tracker.Entries.Years }}
         <div class="col-span-2 grid grid-cols-subgrid gap-x-8">
           {{ range $i, $m := $y.Months }}
@@ -55,7 +73,7 @@
                     id="day-{{ .String }}"
                     datetime="{{ .String }}"
                     hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
-                    class="group/day z-10 flex h-7 w-7 items-center justify-center"
+                    class="group/day z-10 grid h-7 w-7 place-content-center"
                     hx-trigger="update-day-{{ .String }}"
                     style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
                   >

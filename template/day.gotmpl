@@ -13,16 +13,22 @@
       group-hover/day:bg-lime-400
     {{- else if $day.TimeRelation.IsPast -}}
       {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
-        text-rose-200 group-hover:text-rose-500 group-hover/day:bg-rose-100
+        text-indigo-300 group-hover:text-indigo-600
+        group-hover/day:bg-indigo-200
       {{ else }}
         text-slate-300 group-hover:text-slate-600 group-hover/day:bg-slate-200
       {{ end }}
     {{- else if $day.TimeRelation.IsFuture -}}
-      text-slate-300 cursor-not-allowed
+      cursor-not-allowed
+      {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
+        text-indigo-300
+      {{ else }}
+        text-slate-300
+      {{ end }}
     {{- else if $day.TimeRelation.IsToday -}}
       bg-amber-300 text-amber-500 group-hover/day:bg-amber-400
       group-hover:text-amber-600
-    {{- end }} flex h-6 w-6 items-center justify-center rounded"
+    {{- end }} place-center grid h-6 w-6 rounded"
   >
     {{ if $day.Emoji }}
       {{ $day.Emoji }}
