@@ -3,5 +3,20 @@
 @tailwind utilities;
 
 emoji-picker {
-	--emoji-padding: 0.25rem;
+	--num-columns: 10;
+	--border-color: theme('colors.slate.300');
+	--border-radius: theme('spacing.1');
+	--emoji-padding: theme('spacing.2');
+	--button-active-background: theme('colors.slate.300');
+	--button-hover-background: theme('colors.slate.200');
+	--category-emoji-padding: theme('spacing.2');
+	--indicator-color: theme('colors.indigo.600');
+
+	--input-border-color: theme('colors.slate.300');
+	--input-border-radius: theme('spacing.1');
+	--input-border-size: 1px;
+	--input-font-color: theme('colors.slate.800');
+	--input-padding: theme('spacing.2');
+
+	--outline-color: theme('colors.indigo.600');
 }

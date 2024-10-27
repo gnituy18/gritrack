@@ -88,11 +88,11 @@
     </section>
   </div>
 
-  <dialog id="day-detail" class="w-full max-w-md rounded p-12">
-    <div class="flex flex-col gap-4">
-      <div class="flex flex-col gap-4">
-        <div class="flex justify-between gap-4 text-slate-800">
-          <h1 class="text-lg font-bold">
+  <dialog id="day-detail" class="w-full max-w-md rounded px-8 py-6">
+    <div class="flex flex-col gap-6">
+      <div class="flex flex-col">
+        <div class="flex justify-between gap-2 text-slate-800">
+          <h1 class="text-xl font-semibold">
             {{ .Tracker.TrackerName }}
           </h1>
           <button
@@ -102,39 +102,37 @@
             ✕
           </button>
         </div>
-        <time
-          id="day-detail-time"
-          class="gap-4 font-semibold text-indigo-400"
-          datetime=""
-        >
+        <time id="day-detail-time" class="font-semibold text-indigo-600">
         </time>
       </div>
-      <div class="flex items-baseline gap-2">
-        <input
-          readonly
-          id="emoji"
-          name="emoji"
-          type="text"
-          value="☺"
-          class="w-10 cursor-pointer rounded border-slate-300 bg-slate-100 p-2 text-center focus:bg-white focus:outline-none"
-          hx-on:click="document.getElementById('ep').classList.remove('hidden')"
-        />
-        <span class="text-slate-400">(emoji of the day)</span>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex items-baseline gap-4">
+          <input
+            readonly
+            id="emoji"
+            name="emoji"
+            type="text"
+            value=""
+            class="w-10 cursor-pointer rounded border-slate-200 bg-slate-100 p-2 text-center focus:bg-white focus:outline-none"
+            hx-on:click="document.getElementById('ep').classList.remove('hidden')"
+          />
+          <input
+            autofocus
+            id="content"
+            type="text"
+            name="content"
+            value=""
+            placeholder="Notes about today's activities..."
+            class="flex-grow rounded border-slate-200 bg-slate-100 p-2 placeholder-slate-300 focus:bg-white"
+          />
+        </div>
+        <emoji-picker
+          hx-on:emoji-click="document.getElementById('emoji').value = event.detail.unicode;document.getElementById('ep').classList.add('hidden')"
+          id="ep"
+          class="hidden w-full"
+        ></emoji-picker>
       </div>
-      <emoji-picker
-        hx-on:emoji-click="document.getElementById('emoji').value = event.detail.unicode;document.getElementById('ep').classList.add('hidden')"
-        id="ep"
-        class="hidden w-full"
-      ></emoji-picker>
-      <input
-        autofocus
-        id="content"
-        type="text"
-        name="content"
-        value=""
-        placeholder="Notes about today's activities..."
-        class="rounded border-slate-400 bg-slate-100 p-2 placeholder-slate-300 focus:bg-white"
-      />
       <button
         hx-on:click="updateDayDetail()"
         class="cursor-pointer rounded bg-indigo-600 p-2 font-semibold text-white"
