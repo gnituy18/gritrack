@@ -37,18 +37,20 @@
     {{ end }}
   </button>
   <div
-    class="tooltip mt-8 flex max-w-xs flex-col rounded border border-indigo-600 bg-slate-50 p-2"
+    class="tooltip mt-8 flex max-w-xs flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm"
   >
     <time
       datetime="{{ $day.String }}"
-      class="min-w-max text-sm font-semibold text-slate-600"
+      class="min-w-max font-semibold text-slate-400"
       >{{ $day.String }}
-      <span class="text-indigo-600">
+      <span class="text-indigo-400">
         {{ $day.WeekdayString }}
       </span>
     </time>
-    <div>
-      {{ $day.Content }}
-    </div>
+    {{ if ne $day.Content "" }}
+      <div>
+        {{ $day.Content }}
+      </div>
+    {{ end }}
   </div>
 {{ end }}
