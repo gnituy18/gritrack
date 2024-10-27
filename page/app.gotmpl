@@ -59,9 +59,11 @@
             <div class="group col-span-2 grid grid-cols-subgrid items-center">
               <time
                 datetime="{{ $y.String }}-{{ .Val }}"
-                class="font-semibold text-slate-300 group-hover:text-slate-600"
+                class="text-center font-semibold text-slate-300 group-hover:text-slate-600"
               >
                 {{ .String }}
+                <br />
+                {{ $y.String }}
               </time>
               <div
                 class="{{ if ne (index .Days 0).Weekday 1 -}}
