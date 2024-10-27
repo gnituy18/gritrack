@@ -56,7 +56,10 @@
       {{ range $y := .Tracker.Entries.Years }}
         <div class="col-span-2 grid grid-cols-subgrid gap-x-8">
           {{ range $i, $m := $y.Months }}
-            <div class="group col-span-2 grid grid-cols-subgrid items-center">
+            <div
+              style="order:-{{ $m.Val }}"
+              class="group col-span-2 grid grid-cols-subgrid items-center"
+            >
               <time
                 datetime="{{ $y.String }}-{{ .Val }}"
                 class="text-center font-semibold text-slate-300 group-hover:text-slate-600"
@@ -75,7 +78,7 @@
                     id="day-{{ .String }}"
                     datetime="{{ .String }}"
                     hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
-                    class="has-tooltip group/day grid h-7 w-7 place-content-center"
+                    class="has-tooltip group/day relative z-10 grid h-7 w-7 place-content-center"
                     hx-trigger="update-day-{{ .String }}"
                     style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
                   >

@@ -669,10 +669,10 @@ func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month,
 			}}, years...)
 		}
 
-		years[0].Months = append([]Month{{
+		years[0].Months = append(years[0].Months, Month{
 			Value: d.Month(),
 			Days:  []Day{},
-		}}, years[0].Months...)
+		})
 
 		nextMonth := d.AddDate(0, 1, 0)
 		for day := d; day.Before(nextMonth); day = day.AddDate(0, 0, 1) {
@@ -685,7 +685,8 @@ func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month,
 
 			timeRelation := u.TimeRelation(day)
 
-			years[0].Months[0].Days = append(years[0].Months[0].Days, Day{
+			mi := len(years[0].Months) - 1
+			years[0].Months[mi].Days = append(years[0].Months[mi].Days, Day{
 				Date:         day,
 				Content:      content,
 				Emoji:        emoji,
