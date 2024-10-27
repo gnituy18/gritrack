@@ -75,7 +75,7 @@
                     id="day-{{ .String }}"
                     datetime="{{ .String }}"
                     hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
-                    class="group/day z-10 grid h-7 w-7 place-content-center"
+                    class="has-tooltip group/day grid h-7 w-7 place-content-center"
                     hx-trigger="update-day-{{ .String }}"
                     style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
                   >

@@ -20,3 +20,12 @@ emoji-picker {
 
 	--outline-color: theme('colors.indigo.600');
 }
+
+
+.tooltip {
+  @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible z-10;
+}

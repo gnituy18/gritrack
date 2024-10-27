@@ -36,4 +36,19 @@
       {{ $day.Date.Day }}
     {{ end }}
   </button>
+  <div
+    class="tooltip mt-8 flex max-w-xs flex-col rounded border border-indigo-600 bg-slate-50 p-2"
+  >
+    <time
+      datetime="{{ $day.String }}"
+      class="min-w-max text-sm font-semibold text-slate-600"
+      >{{ $day.String }}
+      <span class="text-indigo-600">
+        {{ $day.WeekdayString }}
+      </span>
+    </time>
+    <div>
+      {{ $day.Content }}
+    </div>
+  </div>
 {{ end }}

@@ -752,6 +752,10 @@ type Day struct {
 	TimeRelation TimeRelation
 }
 
+func (d Day) WeekdayString() string {
+	return d.Date.Weekday().String()[0:3]
+}
+
 func (d Day) Week() int {
 	firstWeekday := int(time.Date(d.Date.Year(), d.Date.Month(), 1, 0, 0, 0, 0, time.UTC).Weekday())
 	return (firstWeekday+d.Date.Day()-1)/7 + 1
