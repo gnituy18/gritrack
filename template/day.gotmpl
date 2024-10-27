@@ -8,12 +8,12 @@
     class="{{- if $day.Emoji -}}
       group-hover/day:bg-slate-200
     {{- else if $day.Content -}}
-      bg-lime-300 text-lime-500 group-hover:text-lime-600
-      group-hover/day:bg-lime-400
+      bg-indigo-200 text-indigo-500 group-hover:text-indigo-600
+      group-hover/day:bg-indigo-300
     {{- else if $day.TimeRelation.IsPast -}}
       {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
         text-indigo-300 group-hover:text-indigo-600
-        group-hover/day:bg-indigo-200
+        group-hover/day:bg-indigo-100
       {{ else }}
         text-slate-300 group-hover:text-slate-600 group-hover/day:bg-slate-200
       {{ end }}
