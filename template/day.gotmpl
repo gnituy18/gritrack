@@ -3,8 +3,7 @@
   {{ $day := get . "day" }}
   <button
     {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
-      title="{{ $day.Content }}" hx-on:click="getDayDetail('{{ $tracker }}',
-      '{{ $day.String }}')"
+      hx-on:click="getDayDetail('{{ $tracker }}', '{{ $day.String }}')"
     {{ end }}
     class="{{- if $day.Emoji -}}
       group-hover/day:bg-slate-200
@@ -37,7 +36,7 @@
     {{ end }}
   </button>
   <div
-    class="tooltip mt-8 flex max-w-xs flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm"
+    class="tooltip mt-10 flex max-w-xs flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm shadow-md"
   >
     <time
       datetime="{{ $day.String }}"
