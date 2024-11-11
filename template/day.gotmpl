@@ -6,7 +6,7 @@
       hx-on:click="getDayDetail('{{ $tracker }}', '{{ $day.String }}')"
     {{ end }}
     class="{{- if $day.Emoji -}}
-      group-hover/day:bg-slate-200
+      bg-indigo-200 group-hover/day:bg-indigo-300
     {{- else if $day.Content -}}
       bg-indigo-200 text-indigo-500 group-hover:text-indigo-600
       group-hover/day:bg-indigo-300
