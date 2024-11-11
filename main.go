@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -659,22 +658,14 @@ func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month,
 		}{Emoji: emoji, Content: content}
 	}
 
-	years := []Year{}
+	months := []Month{}
 	for d := startDate; d.Before(endDate); d = d.AddDate(0, 1, 0) {
-
-		if len(years) == 0 || d.Year() != years[0].Value {
-			years = append([]Year{{
-				Value:  d.Year(),
-				Months: []Month{},
-			}}, years...)
-		}
-
-		years[0].Months = append(years[0].Months, Month{
-			Value: d.Month(),
-			Days:  []Day{},
-		})
-
 		nextMonth := d.AddDate(0, 1, 0)
+		m := Month{
+			Year:  d.Year(),
+			Month: d.Month(),
+			Days:  []Day{},
+		}
 		for day := d; day.Before(nextMonth); day = day.AddDate(0, 0, 1) {
 			content := ""
 			emoji := ""
@@ -685,18 +676,19 @@ func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month,
 
 			timeRelation := u.TimeRelation(day)
 
-			mi := len(years[0].Months) - 1
-			years[0].Months[mi].Days = append(years[0].Months[mi].Days, Day{
+			m.Days = append(m.Days, Day{
 				Date:         day,
 				Content:      content,
 				Emoji:        emoji,
 				TimeRelation: timeRelation,
 			})
 		}
+
+		months = append([]Month{m}, months...)
 	}
 
 	return &TrackerEntries{
-		Years: years,
+		Months: months,
 	}, nil
 }
 
@@ -721,29 +713,29 @@ func (t *Tracker) String() string {
 }
 
 type TrackerEntries struct {
-	Years []Year
-}
-
-type Year struct {
-	Value  int
 	Months []Month
 }
 
-func (y Year) String() string {
-	return strconv.Itoa(y.Value)
-}
-
 type Month struct {
-	Value time.Month
+	Year  int
+	Month time.Month
 	Days  []Day
 }
 
-func (m Month) String() string {
-	return m.Value.String()[0:3]
+func (m Month) Weeks() int {
+	return m.Days[len(m.Days)-1].Week()
 }
 
-func (m Month) Val() string {
-	return fmt.Sprintf("%02d", m.Value)
+func (m Month) FormatYYYYMM() string {
+	return fmt.Sprintf("%d-%02d", m.Year, m.Month)
+}
+
+func (m Month) FormatTwoDigitMonth() string {
+	return fmt.Sprintf("%02d", m.Month)
+}
+
+func (m Month) FormatMonthName() string {
+	return m.Month.String()[0:3]
 }
 
 type Day struct {
@@ -759,7 +751,7 @@ func (d Day) WeekdayString() string {
 
 func (d Day) Week() int {
 	firstWeekday := int(time.Date(d.Date.Year(), d.Date.Month(), 1, 0, 0, 0, 0, time.UTC).Weekday())
-	return (firstWeekday+d.Date.Day()-1)/7 + 1
+	return (firstWeekday+d.Date.Day()-1)/7 + 2
 }
 
 func (d Day) Weekday() int {

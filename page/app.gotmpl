@@ -34,59 +34,63 @@
         <p class="mx-auto w-fit max-w-sm">{{ .Tracker.Description }}</p>
       </section>
     {{ end }}
-    <section class="grid grid-cols-[auto_max-content] justify-center">
-      <div class="col-span-2 grid grid-cols-subgrid gap-x-8">
-        <div class="group col-span-2 grid grid-cols-subgrid items-center">
-          <div></div>
-          <div class="grid grid-cols-7">
-            <div class="place-self-center font-semibold text-indigo-600">
-              Su
-            </div>
-            <div class="place-self-center font-semibold text-slate-600">Mo</div>
-            <div class="place-self-center font-semibold text-slate-600">Tu</div>
-            <div class="place-self-center font-semibold text-slate-600">We</div>
-            <div class="place-self-center font-semibold text-slate-600">Th</div>
-            <div class="place-self-center font-semibold text-slate-600">Fr</div>
-            <div class="place-self-center font-semibold text-indigo-600">
-              Sa
-            </div>
+    <section
+      class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto] justify-center gap-y-12"
+    >
+      {{ range .Tracker.Entries.Months }}
+        <div class="group col-span-8 grid grid-cols-subgrid">
+          <time
+            style="grid-row: 1 / span {{ add .Weeks 1 }}"
+            class="mr-12 place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+          >
+            {{ .FormatYYYYMM }}
+          </time>
+          <div
+            class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
+          >
+            Su
           </div>
-        </div>
-      </div>
-      {{ range $y := .Tracker.Entries.Years }}
-        <div class="col-span-2 grid grid-cols-subgrid gap-x-8">
-          {{ range $i, $m := $y.Months }}
-            <div
-              style="order:-{{ $m.Val }}"
-              class="group col-span-2 grid grid-cols-subgrid items-center"
+          <div
+            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+          >
+            Mo
+          </div>
+          <div
+            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+          >
+            Tu
+          </div>
+          <div
+            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+          >
+            We
+          </div>
+          <div
+            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+          >
+            Th
+          </div>
+          <div
+            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+          >
+            Fr
+          </div>
+          <div
+            class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
+          >
+            Sa
+          </div>
+          {{ range $i, $e :=  .Days }}
+            <time
+              id="day-{{ .String }}"
+              datetime="{{ .String }}"
+              hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
+              class="has-tooltip group/day relative z-10 grid h-7 w-7 place-content-center"
+              hx-trigger="update-day-{{ .String }}"
+              style="grid-column-start: {{ add .Weekday 1 }};grid-row-start: {{ .Week }};"
             >
-              <time
-                datetime="{{ $y.String }}-{{ .Val }}"
-                class="text-center font-semibold text-slate-300 group-hover:text-slate-600"
-              >
-                {{ .String }}
-                <br />
-                {{ $y.String }}
-              </time>
-              <div
-                class="{{ if ne (index .Days 0).Weekday 1 -}}
-                  -mb-7
-                {{- end }} grid grid-cols-7"
-              >
-                {{ range $i, $e :=  .Days }}
-                  <time
-                    id="day-{{ .String }}"
-                    datetime="{{ .String }}"
-                    hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
-                    class="has-tooltip group/day relative z-10 grid h-7 w-7 place-content-center"
-                    hx-trigger="update-day-{{ .String }}"
-                    style="grid-column-start: {{ .Weekday }};grid-row-start: -{{ .Week }};"
-                  >
-                    {{ template "day" dict "tracker" $.Tracker "day" $e }}
-                  </time>
-                {{ end }}
-              </div>
-            </div>
+              {{ template "day" dict "tracker" $.Tracker "day" $e }}
+            </time>
           {{ end }}
         </div>
       {{ end }}
