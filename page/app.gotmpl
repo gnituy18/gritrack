@@ -1,101 +1,149 @@
 {{ define "header" }}
-  <select
-    hx-on:change="onChangeTracker(this.options[this.selectedIndex].text)"
-    class="max-w-xs rounded border-slate-200 font-semibold"
+  <header
+    class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-4 border-r border-slate-200 py-3"
   >
-    {{ range .SessionUser.Trackers }}
-      <option
-        {{ if eq .TrackerName $.Tracker.TrackerName }}selected{{ end }}
-        value="{{ .TrackerName }}"
+    <div class="mx-4 flex items-baseline">
+      <a class="text-xl font-bold" href="/"> Gritrack </a>
+      <a
+        href="/create-tracker/"
+        class="ml-auto flex-none rounded px-2 py-1 text-center hover:bg-slate-100"
+        >➕</a
       >
-        {{ .TrackerName }}
-      </option>
-    {{ end }}
-  </select>
-
-  <nav class="flex items-baseline">
-    <a
-      href="/create-tracker/"
-      class="w-10 rounded p-2 text-center text-slate-800 hover:bg-slate-100"
-      >＋</a
-    >
-    <a
-      href="/settings/"
-      class="rounded p-2 text-center font-semibold text-slate-800 hover:bg-slate-100"
-      >Settings</a
-    >
-  </nav>
+      <a
+        href="/settings/"
+        class="flex-none rounded px-2 py-1 text-center hover:bg-slate-100"
+        >⚙️</a
+      >
+    </div>
+    <ul class="px-2">
+      <span class="mb-4 rounded px-2 text-sm font-semibold text-indigo-500">
+        Your Trackers
+      </span>
+      {{ range .SessionUser.Trackers }}
+        <li>
+          <a
+            class="{{ if eq .TrackerName $.Tracker.TrackerName }}
+              bg-slate-100
+            {{ else }}
+              text-slate-400
+            {{ end }} block truncate rounded px-2 py-1 hover:bg-slate-100"
+            href="/{{ $.SessionUser.Username }}/{{ .TrackerName }}/"
+          >
+            {{ .TrackerName }}
+          </a>
+        </li>
+      {{ end }}
+    </ul>
+  </header>
 {{ end }}
 
 {{ define "main" }}
-  <div class="grid justify-center gap-8 pb-8">
-    {{ if .Tracker.Description }}
-      <section class="left-0">
-        <p class="mx-auto w-fit max-w-sm">{{ .Tracker.Description }}</p>
-      </section>
-    {{ end }}
-    <section
-      class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto] justify-center gap-y-12"
+  <main class="flex grow">
+    <header
+      class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-4 border-r border-slate-200 p-3"
     >
-      {{ range .Tracker.Entries.Months }}
-        <div class="group col-span-8 grid grid-cols-subgrid">
-          <time
-            style="grid-row: 1 / span {{ add .Weeks 1 }}"
-            class="mr-12 place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
-          >
-            {{ .FormatYYYYMM }}
-          </time>
-          <div
-            class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
-          >
-            Su
-          </div>
-          <div
-            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
-          >
-            Mo
-          </div>
-          <div
-            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
-          >
-            Tu
-          </div>
-          <div
-            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
-          >
-            We
-          </div>
-          <div
-            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
-          >
-            Th
-          </div>
-          <div
-            class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
-          >
-            Fr
-          </div>
-          <div
-            class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
-          >
-            Sa
-          </div>
-          {{ range $i, $e :=  .Days }}
-            <time
-              id="day-{{ .String }}"
-              datetime="{{ .String }}"
-              hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
-              class="has-tooltip group/day relative z-10 grid h-7 w-7 place-content-center"
-              hx-trigger="update-day-{{ .String }}"
-              style="grid-column-start: {{ add .Weekday 1 }};grid-row-start: {{ .Week }};"
-            >
-              {{ template "day" dict "tracker" $.Tracker "day" $e }}
-            </time>
-          {{ end }}
-        </div>
+      <h1 class="text-xl font-semibold">{{ .Tracker.TrackerName }}</h1>
+      {{ if .Tracker.Description }}
+        <p>{{ .Tracker.Description }}</p>
       {{ end }}
-    </section>
-  </div>
+    </header>
+
+    <div class="flex grow flex-col gap-4">
+      <nav class="sticky top-0 flex w-full items-baseline gap-2 p-2">
+        <a
+          class="{{ if eq .Months 3 }}
+            text-indigo-600 bg-indigo-100
+          {{ else }}
+            bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-100
+          {{ end }} rounded-full border border-slate-200 px-2 py-1"
+          href="?months=3"
+        >
+          Past 3 Months
+        </a>
+        <a
+          class="{{ if eq .Months 6 }}
+            text-indigo-600 bg-indigo-100
+          {{ else }}
+            bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-100
+          {{ end }} rounded-full border border-slate-200 px-2 py-1"
+          href="?months=6"
+        >
+          Past 6 Months
+        </a>
+        <a
+          class="{{ if eq .Months 12 }}
+            text-indigo-600 bg-indigo-100
+          {{ else }}
+            bg-white text-slate-400 hover:text-slate-600 hover:bg-slate-100
+          {{ end }} rounded-full border border-slate-200 px-2 py-1"
+          href="?months=12"
+        >
+          Past 12 Months
+        </a>
+      </nav>
+      <section
+        class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto] content-start justify-center gap-y-12"
+      >
+        {{ range .Tracker.Entries.Months }}
+          <div class="group col-span-8 grid grid-cols-subgrid">
+            <time
+              style="grid-row: 1 / span {{ add .Weeks 1 }}"
+              class="mr-12 place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+            >
+              {{ .FormatYYYYMM }}
+            </time>
+            <div
+              class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
+            >
+              Su
+            </div>
+            <div
+              class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+            >
+              Mo
+            </div>
+            <div
+              class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+            >
+              Tu
+            </div>
+            <div
+              class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+            >
+              We
+            </div>
+            <div
+              class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+            >
+              Th
+            </div>
+            <div
+              class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+            >
+              Fr
+            </div>
+            <div
+              class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
+            >
+              Sa
+            </div>
+            {{ range $i, $e :=  .Days }}
+              <time
+                id="day-{{ .String }}"
+                datetime="{{ .String }}"
+                hx-get="/template/app/day/?tracker={{ $.Tracker.TrackerName }}&date={{ .String }}"
+                class="has-tooltip group/day relative z-10 grid h-7 w-7 place-content-center"
+                hx-trigger="update-day-{{ .String }}"
+                style="grid-column-start: {{ add .Weekday 1 }};grid-row-start: {{ .Week }};"
+              >
+                {{ template "day" dict "tracker" $.Tracker "day" $e }}
+              </time>
+            {{ end }}
+          </div>
+        {{ end }}
+      </section>
+    </div>
+  </main>
 
   <dialog id="day-detail" class="w-full max-w-md rounded px-8 py-6">
     <div class="flex flex-col gap-6">
@@ -224,10 +272,6 @@
       });
       htmx.trigger(`#day-${currentDate}`, `update-day-${currentDate}`);
       dayDetail.close();
-    }
-
-    function onChangeTracker(tracker) {
-      window.location.href = `/${username}/${tracker}/`;
     }
   </script>
 {{ end }}

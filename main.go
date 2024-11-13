@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -155,9 +156,10 @@ func main() {
 			log.Panic(err)
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/%s/%s/", username, tracker), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/%s/%s/?months=3", username, tracker), http.StatusFound)
 	})
 
+	// app handler
 	http.HandleFunc("GET /{username}/{tracker}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -167,6 +169,16 @@ func main() {
 
 		username := r.PathValue("username")
 		trackerName := r.PathValue("tracker")
+		monthsStr := r.URL.Query().Get("months")
+
+		months := 3
+		if monthsStr != "" {
+			months, err = strconv.Atoi(monthsStr)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		}
 
 		user := User{}
 		tracker := Tracker{}
@@ -193,8 +205,8 @@ func main() {
 
 		endY := sessionUser.Today().Year()
 		endM := sessionUser.Today().Month()
-		startY := endY - 1
-		startM := endM + 1
+		startY := endY
+		startM := endM - time.Month(months) + 1
 		trackerEntries, err := sessionUser.TrackerEntries(trackerName, startY, startM, endY, endM)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -206,6 +218,7 @@ func main() {
 			SessionUser: sessionUser,
 			User:        &user,
 			Tracker:     &tracker,
+			Months:      months,
 		})
 	})
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -697,6 +710,7 @@ type App struct {
 	User        *User
 
 	Tracker *Tracker
+	Months  int
 }
 
 type Tracker struct {
