@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -156,7 +155,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/%s/%s/?months=3", username, tracker), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/%s/%s/", username, tracker), http.StatusFound)
 	})
 
 	// app handler
@@ -169,16 +168,7 @@ func main() {
 
 		username := r.PathValue("username")
 		trackerName := r.PathValue("tracker")
-		monthsStr := r.URL.Query().Get("months")
-
-		months := 3
-		if monthsStr != "" {
-			months, err = strconv.Atoi(monthsStr)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-		}
+		months := 6
 
 		user := User{}
 		tracker := Tracker{}

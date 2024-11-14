@@ -1,0 +1,57 @@
+{{ define "months" }}
+  {{ $tracker := get . "tracker" }}
+  {{ range $tracker.Entries.Months }}
+    <div class="group col-span-7 grid grid-cols-subgrid">
+      <time class="col-span-7 text-slate-300 group-hover:text-slate-600">
+        {{ .FormatYYYYMM }}
+      </time>
+      <div
+        class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
+      >
+        Su
+      </div>
+      <div
+        class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+      >
+        Mo
+      </div>
+      <div
+        class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+      >
+        Tu
+      </div>
+      <div
+        class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+      >
+        We
+      </div>
+      <div
+        class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+      >
+        Th
+      </div>
+      <div
+        class="place-self-center font-semibold text-slate-300 group-hover:text-slate-600"
+      >
+        Fr
+      </div>
+      <div
+        class="place-self-center font-semibold text-indigo-300 group-hover:text-indigo-600"
+      >
+        Sa
+      </div>
+      {{ range $i, $e :=  .Days }}
+        <time
+          id="day-{{ .String }}"
+          datetime="{{ .String }}"
+          hx-get="/template/app/day/?tracker={{ $tracker.TrackerName }}&date={{ .String }}"
+          class="has-tooltip group/day relative z-10 grid h-7 w-7 place-content-center"
+          hx-trigger="update-day-{{ .String }}"
+          style="grid-column-start: {{ add .Weekday 1 }};grid-row-start: {{ .Week }};"
+        >
+          {{ template "day" dict "tracker" $tracker "day" $e }}
+        </time>
+      {{ end }}
+    </div>
+  {{ end }}
+{{ end }}
