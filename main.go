@@ -131,6 +131,7 @@ func main() {
 				},
 			}
 
+		case "months":
 		default:
 			w.WriteHeader(http.StatusNotFound)
 			return

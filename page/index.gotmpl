@@ -1,15 +1,22 @@
 {{ define "header" }}
 {{ end }}
 {{ define "main" }}
-  <div class="flex flex-col items-center gap-2">
-    <h1 class="text-2xl font-bold">Track Your Projects, Goals, and Memories</h1>
+  <main class="flex w-full flex-col items-center gap-8 pt-24">
+    <h1 class="text-center text-xl font-bold">
+      Gritrack helps you track your projects, habits, and life.
+      <br />So, you can focus on making progress.
+    </h1>
     <div class="flex gap-8">
-      <a href="/log-in/" class="rounded bg-indigo-300 px-6 py-2 font-bold"
+      <a
+        href="/log-in/"
+        class="rounded bg-indigo-600 px-6 py-2 font-semibold text-white"
         >Log In</a
       >
-      <a href="/sign-up/" class="rounded bg-indigo-300 px-6 py-2 font-bold"
+      <a
+        href="/sign-up/"
+        class="rounded border border-indigo-600 px-6 py-2 font-semibold text-indigo-600"
         >Sign Up</a
       >
     </div>
-  </div>
+  </main>
 {{ end }}
