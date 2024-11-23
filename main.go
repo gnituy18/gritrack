@@ -132,6 +132,7 @@ func main() {
 			}
 
 		case "months":
+
 		default:
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -169,7 +170,6 @@ func main() {
 
 		username := r.PathValue("username")
 		trackerName := r.PathValue("tracker")
-		months := 6
 
 		user := User{}
 		tracker := Tracker{}
@@ -194,11 +194,37 @@ func main() {
 			}
 		}
 
-		endY := sessionUser.Today().Year()
-		endM := sessionUser.Today().Month()
-		startY := endY
-		startM := endM - time.Month(months) + 1
-		trackerEntries, err := sessionUser.TrackerEntries(trackerName, startY, startM, endY, endM)
+		query := r.URL.Query()
+		from := query.Get("from")
+
+		fromY := sessionUser.Today().Year()
+		fromM := sessionUser.Today().Month()
+		if from != "" {
+			t, err := time.Parse(time.DateOnly, from+"-01")
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			fromY = t.Year()
+			fromM = t.Month()
+		}
+
+		toY := fromY
+		toM := fromM - time.Month(6) + 1
+		to := query.Get("to")
+		if to != "" {
+			t, err := time.Parse(time.DateOnly, to+"-01")
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			toY = t.Year()
+			toM = t.Month()
+		}
+
+		trackerEntries, err := sessionUser.TrackerEntries(trackerName, fromY, fromM, toY, toM)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
@@ -209,7 +235,6 @@ func main() {
 			SessionUser: sessionUser,
 			User:        &user,
 			Tracker:     &tracker,
-			Months:      months,
 		})
 	})
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -638,9 +663,9 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 	}
 }
 
-func (u *User) TrackerEntries(name string, startYear int, startMonth time.Month, endYear int, endMonth time.Month) (*TrackerEntries, error) {
-	startDate := time.Date(startYear, startMonth, 1, 0, 0, 0, 0, time.UTC)
-	endDate := time.Date(endYear, endMonth+1, 1, 0, 0, 0, 0, time.UTC)
+func (u *User) TrackerEntries(name string, fromYear int, fromMonth time.Month, toYear int, toMonth time.Month) (*TrackerEntries, error) {
+	startDate := time.Date(toYear, toMonth, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(fromYear, fromMonth+1, 1, 0, 0, 0, 0, time.UTC)
 	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
 	if err != nil {
 		return nil, err
@@ -701,7 +726,6 @@ type App struct {
 	User        *User
 
 	Tracker *Tracker
-	Months  int
 }
 
 type Tracker struct {

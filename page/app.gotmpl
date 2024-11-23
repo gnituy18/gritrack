@@ -140,6 +140,16 @@
   </dialog>
   <div
     class="hidden"
+    id="from"
+    data-from="{{ (mustFirst .Tracker.Entries.Months).FormatYYYYMM }}"
+  ></div>
+  <div
+    class="hidden"
+    id="to"
+    data-to="{{ (mustLast .Tracker.Entries.Months).FormatYYYYMM }}"
+  ></div>
+  <div
+    class="hidden"
     id="tracker"
     data-tracker="{{ .Tracker.TrackerName }}"
   ></div>
@@ -155,11 +165,24 @@
     const addEmoji = document.getElementById("add-emoji");
     const tracker = document.getElementById("tracker").dataset.tracker;
     const username = document.getElementById("username").dataset.username;
+    const from = document.getElementById("from").dataset.from;
+    const to = document.getElementById("to").dataset.to;
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTime = document.getElementById("day-detail-time");
     const inputEmoji = document.getElementById("emoji");
     const inputContent = document.getElementById("content");
     let currentDate = "";
+
+    const params = new URLSearchParams(window.location.search);
+
+    // Updating query parameters
+    params.set("from", from);
+    params.set("to", to);
+    history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?${params.toString()}`,
+    );
 
     async function getDayDetail(tracker, date) {
       try {
