@@ -38,9 +38,7 @@
 {{ end }}
 
 {{ define "main" }}
-  <header
-    class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-2 border-r border-slate-200 p-3"
-  >
+  <header class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-2 p-3">
     <h1 class="break-words text-xl font-semibold">
       {{ .Tracker.TrackerName }}
     </h1>
@@ -48,7 +46,7 @@
       <p>{{ .Tracker.Description }}</p>
     {{ end }}
   </header>
-  <main class="flex flex-1 flex-col items-center gap-8 py-8">
+  <main class="flex flex-1 flex-col items-center gap-8 py-4">
     <div
       id="months"
       class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-8"
@@ -58,7 +56,9 @@
     <button
       hx-target="#months"
       hx-swap="beforeend"
-      hx-get="/template/months/"
+      hx-get="/template/app/months/"
+      hx-vals="js:{...getNextMonths()}"
+      hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
       class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
     >
       Load More
@@ -140,13 +140,13 @@
   </dialog>
   <div
     class="hidden"
-    id="from"
-    data-from="{{ (mustFirst .Tracker.Entries.Months).FormatYYYYMM }}"
+    id="to"
+    data-to="{{ (mustFirst .Tracker.Entries.Months).FormatYYYYMM }}"
   ></div>
   <div
     class="hidden"
-    id="to"
-    data-to="{{ (mustLast .Tracker.Entries.Months).FormatYYYYMM }}"
+    id="from"
+    data-from="{{ (mustLast .Tracker.Entries.Months).FormatYYYYMM }}"
   ></div>
   <div
     class="hidden"
@@ -165,24 +165,59 @@
     const addEmoji = document.getElementById("add-emoji");
     const tracker = document.getElementById("tracker").dataset.tracker;
     const username = document.getElementById("username").dataset.username;
-    const from = document.getElementById("from").dataset.from;
-    const to = document.getElementById("to").dataset.to;
+    const from = document.getElementById("from");
+    const to = document.getElementById("to");
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTime = document.getElementById("day-detail-time");
     const inputEmoji = document.getElementById("emoji");
     const inputContent = document.getElementById("content");
+    const months = 3;
     let currentDate = "";
 
     const params = new URLSearchParams(window.location.search);
-
-    // Updating query parameters
-    params.set("from", from);
-    params.set("to", to);
+    params.set("from", from.dataset.from);
+    params.set("to", to.dataset.to);
     history.replaceState(
       null,
       "",
       `${window.location.pathname}?${params.toString()}`,
     );
+
+    function getNextFromTo() {
+      const [toYStr, toMStr] = from.dataset.from.split("-");
+      const toY = parseInt(toYStr, 10);
+      const toM = parseInt(toMStr, 10) - 1;
+      let toDate = new Date(toY, toM, 1);
+      toDate.setMonth(toDate.getMonth() - 1);
+
+      let fromDate = new Date(toY, toM, 1);
+      fromDate.setMonth(fromDate.getMonth() - months);
+
+      return {
+        to: `${toDate.getFullYear()}-${(toDate.getMonth() + 1).toString().padStart(2, "0")}`,
+        from: `${fromDate.getFullYear()}-${(fromDate.getMonth() + 1).toString().padStart(2, "0")}`,
+      };
+    }
+
+    function updateFromTo(fromStr, toStr) {
+      from.dataset.from = fromStr;
+      to.dataset.to = toStr;
+      params.set("from", from.dataset.from);
+      params.set("to", to.dataset.to);
+      history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}?${params.toString()}`,
+      );
+    }
+
+    function getNextMonths() {
+      return {
+        ...getNextFromTo(),
+        tracker,
+        username,
+      };
+    }
 
     async function getDayDetail(tracker, date) {
       try {
