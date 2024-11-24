@@ -51,7 +51,7 @@
           hx-trigger="update-day-{{ .String }}"
           style="grid-column-start: {{ .Weekday }};grid-row-start: {{ add .Week 2 }};"
         >
-          {{ template "day" dict "tracker" $tracker "day" $e }}
+          {{ template "day" dict "tracker" $tracker.TrackerName "day" $e }}
         </time>
       {{ end }}
     </section>
