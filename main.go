@@ -272,7 +272,7 @@ func main() {
 				return
 			}
 
-			toY= t.Year()
+			toY = t.Year()
 			toM = t.Month()
 		}
 

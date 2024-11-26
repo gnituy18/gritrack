@@ -2,18 +2,16 @@
   <header
     class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-4 border-r border-slate-200 py-3"
   >
-    <div class="ml-4 mr-2 flex items-baseline">
+    <div class="ml-4 mr-2 flex items-center">
       <a class="text-xl font-bold" href="/"> Gritrack </a>
       <a
         href="/create-tracker/"
-        class="ml-auto flex-none rounded px-2 py-1 text-center hover:bg-slate-100"
-        >➕</a
-      >
-      <a
-        href="/settings/"
-        class="flex-none rounded px-2 py-1 text-center hover:bg-slate-100"
-        >⚙️</a
-      >
+        class="ml-auto flex-none rounded p-1 text-center hover:bg-slate-100"
+        ><i class="block h-5 w-5" data-feather="plus"></i>
+      </a>
+      <a href="/settings/" class="flex-none rounded p-1 hover:bg-slate-100"
+        ><i class="block h-5 w-5" data-feather="settings"></i
+      ></a>
     </div>
     <ul class="px-2">
       <span class="mb-4 rounded px-2 text-sm font-semibold text-indigo-500">
@@ -251,5 +249,6 @@
       htmx.trigger(`#day-${currentDate}`, `update-day-${currentDate}`);
       dayDetail.close();
     }
+    feather.replace();
   </script>
 {{ end }}
