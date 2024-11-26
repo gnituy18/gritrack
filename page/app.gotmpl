@@ -81,40 +81,42 @@
       </div>
 
       <div class="flex flex-col gap-4">
-        <div class="flex items-baseline justify-center gap-4">
-          <input
-            readonly
-            id="emoji"
-            name="emoji"
-            type="text"
-            value=""
-            class="w-10 cursor-pointer rounded border-slate-200 bg-slate-100 p-2 text-center"
-            hx-on:click="ep.classList.remove('hidden');addEmoji.classList.add('hidden');clearEmoji.classList.remove('hidden');cancelEp.classList.remove('hidden');"
-          />
-          <button
-            id="add-emoji"
-            class="font-semibold text-indigo-600 underline"
-            hx-on:click="ep.classList.remove('hidden');addEmoji.classList.add('hidden');clearEmoji.classList.remove('hidden');cancelEp.classList.remove('hidden');"
-          >
-            Add an emoji
-          </button>
+        <div class="flex items-center justify-center gap-4">
+          <div class="relative grid h-10 w-10 place-items-center">
+            <input
+              readonly
+              id="emoji"
+              name="emoji"
+              type="text"
+              value=""
+              class="absolute h-10 w-10 cursor-pointer rounded border-slate-200 bg-slate-100 p-0 text-center"
+              hx-on:click="ep.classList.remove('hidden');clearEmoji.classList.remove('hidden');cancelEp.classList.remove('hidden');"
+            />
+
+            <i
+              x-data
+              x-show="!$store.emojiPicker.selected"
+              class="pointer-events-none absolute text-slate-400"
+              data-feather="smile"
+            ></i>
+          </div>
           <button
             id="clear-emoji"
             class="hidden font-semibold text-rose-600 underline"
-            hx-on:click="emoji.value = '';ep.classList.add('hidden');addEmoji.classList.remove('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');"
+            hx-on:click="emoji.value = '';ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').toggle(false);"
           >
             Clear
           </button>
           <button
             id="cancel-ep"
             class="hidden font-semibold text-slate-600 underline"
-            hx-on:click="ep.classList.add('hidden');addEmoji.classList.remove('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');"
+            hx-on:click="ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');"
           >
             Cancel
           </button>
         </div>
         <emoji-picker
-          hx-on:emoji-click="emoji.value = event.detail.unicode;ep.classList.add('hidden');addEmoji.classList.remove('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');"
+          hx-on:emoji-click="emoji.value = event.detail.unicode;ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').toggle(true);"
           id="ep"
           class="hidden w-full"
         ></emoji-picker>
@@ -225,6 +227,12 @@
         );
         const { emoji, content } = await res.json();
         inputEmoji.value = emoji;
+        if (emoji !== "") {
+          Alpine.store("emojiPicker").toggle(true);
+        } else {
+          Alpine.store("emojiPicker").toggle(false);
+        }
+
         inputContent.value = content;
         currentDate = date;
         dayDetailTime.replaceChildren(date);
@@ -235,12 +243,27 @@
       }
     }
 
+    document.addEventListener("alpine:init", () => {
+      Alpine.store("emojiPicker", {
+        selected: false,
+        toggle(s) {
+          this.selected = s;
+        },
+      });
+    });
+
     async function updateDayDetail() {
       const formData = new FormData();
       formData.set("tracker", tracker);
       formData.set("date", currentDate);
       formData.set("emoji", inputEmoji.value);
       formData.set("content", inputContent.value);
+
+      if (emoji !== "") {
+        Alpine.store("emojiPicker").toggle(true);
+      } else {
+        Alpine.store("emojiPicker").toggle(false);
+      }
 
       const res = await fetch("/day-detail/", {
         method: "PUT",
@@ -249,6 +272,7 @@
       htmx.trigger(`#day-${currentDate}`, `update-day-${currentDate}`);
       dayDetail.close();
     }
+
     feather.replace();
   </script>
 {{ end }}
