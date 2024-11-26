@@ -103,7 +103,7 @@
           <button
             id="clear-emoji"
             class="hidden font-semibold text-rose-600 underline"
-            hx-on:click="emoji.value = '';ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').toggle(false);"
+            hx-on:click="emoji.value = '';ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').selected = false;"
           >
             Clear
           </button>
@@ -116,7 +116,7 @@
           </button>
         </div>
         <emoji-picker
-          hx-on:emoji-click="emoji.value = event.detail.unicode;ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').toggle(true);"
+          hx-on:emoji-click="emoji.value = event.detail.unicode;ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').selected = true;"
           id="ep"
           class="hidden w-full"
         ></emoji-picker>
@@ -228,9 +228,9 @@
         const { emoji, content } = await res.json();
         inputEmoji.value = emoji;
         if (emoji !== "") {
-          Alpine.store("emojiPicker").toggle(true);
+          Alpine.store("emojiPicker").selected = true;
         } else {
-          Alpine.store("emojiPicker").toggle(false);
+          Alpine.store("emojiPicker").selected = false;
         }
 
         inputContent.value = content;
@@ -246,9 +246,6 @@
     document.addEventListener("alpine:init", () => {
       Alpine.store("emojiPicker", {
         selected: false,
-        toggle(s) {
-          this.selected = s;
-        },
       });
     });
 
@@ -260,9 +257,9 @@
       formData.set("content", inputContent.value);
 
       if (emoji !== "") {
-        Alpine.store("emojiPicker").toggle(true);
+        Alpine.store("emojiPicker").selected = true;
       } else {
-        Alpine.store("emojiPicker").toggle(false);
+        Alpine.store("emojiPicker").selected = false;
       }
 
       const res = await fetch("/day-detail/", {
