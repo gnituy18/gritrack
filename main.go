@@ -22,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
+	gosimpleSlug "github.com/gosimple/slug"
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
@@ -61,17 +62,19 @@ func main() {
 	}
 	defer db.Close()
 	db.Exec("PRAGMA foreign_keys = ON")
-	db.Exec("PRAGMA journal_mode=WAL")
+	db.Exec("PRAGMA journal_mode = WAL")
 
 	go func() {
+		ticker := time.NewTicker(time.Hour)
+		defer ticker.Stop()
+
 		for {
-			t := time.Now().Add(-7 * 24 * time.Hour)
-			if _, err := db.Exec("DELETE FROM user_sessions WHERE created_at < ?", t.Format(time.DateTime)); err != nil {
-				time.Sleep(time.Minute)
+			<-ticker.C
+			cutoff := time.Now().Add(-7 * 24 * time.Hour).Unix()
+			if _, err := db.Exec("DELETE FROM user_sessions WHERE created_at < ?", cutoff); err != nil {
+				log.Printf("deleting user sessions failed: %v\n", err)
 				continue
 			}
-
-			time.Sleep(time.Hour)
 		}
 	}()
 
@@ -106,7 +109,7 @@ func main() {
 		tmplateName := r.PathValue("template_name")
 		switch tmplateName {
 		case "day":
-			tracker := query.Get("tracker")
+			slug := query.Get("slug")
 			date := query.Get("date")
 			t, err := time.Parse(time.DateOnly, date)
 			if err != nil {
@@ -116,13 +119,13 @@ func main() {
 
 			var emoji string
 			var content string
-			if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
+			if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND slug = ? AND date = ?", sessionUser.Username, slug, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
 				w.WriteHeader(http.StatusInternalServerError)
 				log.Panic(err)
 			}
 
 			data = map[string]any{
-				"tracker": tracker,
+				"slug": slug,
 				"day": Day{
 					Date:         t,
 					Content:      content,
@@ -133,11 +136,11 @@ func main() {
 
 		case "months":
 			username := query.Get("username")
-			trackerName := query.Get("tracker")
+			slug := query.Get("slug")
 
 			user := User{}
 			tracker := Tracker{}
-			if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.tracker_name = ?", username, trackerName).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
+			if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.slug = ?", username, slug).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
 				w.WriteHeader(http.StatusNotFound)
 				return
 			} else if err != nil {
@@ -145,7 +148,7 @@ func main() {
 				log.Panic(err)
 			}
 			user.Username = username
-			tracker.TrackerName = trackerName
+			tracker.Slug = slug
 
 			if !tracker.Public {
 				if !ok {
@@ -188,7 +191,7 @@ func main() {
 				toM = t.Month()
 			}
 
-			trackerEntries, err := sessionUser.TrackerEntries(trackerName, fromY, fromM, toY, toM)
+			trackerEntries, err := sessionUser.TrackerEntries(slug, fromY, fromM, toY, toM)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				log.Panic(err)
@@ -215,7 +218,7 @@ func main() {
 		}
 
 		var username, tracker string
-		if err := db.QueryRow("SELECT users.username, trackers.tracker_name FROM users JOIN user_sessions ON users.username = user_sessions.username JOIN trackers ON users.username = trackers.username WHERE user_sessions.id = ? AND trackers.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT users.username, trackers.slug FROM users JOIN user_sessions ON users.username = user_sessions.username JOIN trackers ON users.username = trackers.username WHERE user_sessions.id = ? AND trackers.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
 			executePage(w, r, "index", nil)
 			return
 		} else if err != nil {
@@ -227,7 +230,7 @@ func main() {
 	})
 
 	// app handler
-	http.HandleFunc("GET /{username}/{tracker}/{$}", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("GET /{username}/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -235,11 +238,11 @@ func main() {
 		}
 
 		username := r.PathValue("username")
-		trackerName := r.PathValue("tracker")
+		slug := r.PathValue("slug")
 
 		user := User{}
 		tracker := Tracker{}
-		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.tracker_name = ?", username, trackerName).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.slug = ?", username, slug).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -247,7 +250,7 @@ func main() {
 			log.Panic(err)
 		}
 		user.Username = username
-		tracker.TrackerName = trackerName
+		tracker.Slug = slug
 
 		if !tracker.Public {
 			if !ok {
@@ -290,7 +293,7 @@ func main() {
 			fromM = t.Month()
 		}
 
-		trackerEntries, err := sessionUser.TrackerEntries(trackerName, fromY, fromM, toY, toM)
+		trackerEntries, err := sessionUser.TrackerEntries(slug, fromY, fromM, toY, toM)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
@@ -314,10 +317,10 @@ func main() {
 		}
 
 		query := r.URL.Query()
-		tracker := query.Get("tracker")
+		slug := query.Get("slug")
 		date := query.Get("date")
 
-		if !sessionUser.HasTracker(tracker) {
+		if !sessionUser.HasTracker(slug) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -329,7 +332,7 @@ func main() {
 
 		var emoji string
 		var content string
-		if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date = ?", sessionUser.Username, tracker, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
+		if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND slug = ? AND date = ?", sessionUser.Username, slug, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -353,12 +356,12 @@ func main() {
 			return
 		}
 
-		tracker := r.FormValue("tracker")
+		slug := r.FormValue("slug")
 		date := r.FormValue("date")
 		emoji := r.FormValue("emoji")
 		content := r.FormValue("content")
 
-		if !sessionUser.HasTracker(tracker) {
+		if !sessionUser.HasTracker(slug) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -375,7 +378,7 @@ func main() {
 			return
 		}
 
-		if _, err := db.Exec("INSERT INTO tracker_entries (username, tracker_name, date, emoji, content) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET emoji = ?, content = ?", sessionUser.Username, tracker, date, emoji, content, emoji, content); err != nil {
+		if _, err := db.Exec("INSERT INTO tracker_entries (username, slug, date, emoji, content) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO UPDATE SET emoji = ?, content = ?", sessionUser.Username, slug, date, emoji, content, emoji, content); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -406,18 +409,37 @@ func main() {
 			return
 		}
 
-		trackerName := r.FormValue("tracker_name")
-
-		if sessionUser.HasTracker(trackerName) {
-			w.Write([]byte("⚠️ A tracker with this name already exists. Please choose a different name."))
+		displayName := strings.TrimSpace(r.FormValue("display_name"))
+		if displayName == "" {
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		if _, err := db.Exec("INSERT INTO trackers (username, tracker_name, position) VALUES (?, ?, (SELECT COALESCE(MAX(position), 0) + 1 FROM trackers WHERE username = ?))", sessionUser.Username, trackerName, sessionUser.Username); err != nil {
+		baseSlug := gosimpleSlug.Make(displayName)
+		slug := baseSlug
+
+		suffix := 1
+
+		for {
+			_, err := db.Exec(
+				"INSERT INTO trackers (username, slug, display_name, position) VALUES (?, ?, ?, (SELECT COALESCE(MAX(position), 0) + 1 FROM trackers WHERE username = ?))",
+				sessionUser.Username, slug, displayName, sessionUser.Username,
+			)
+
+			if err == nil {
+				break
+			}
+
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				slug = fmt.Sprintf("%s-%d", baseSlug, suffix)
+				suffix++
+				continue
+			}
+
 			log.Panic(err)
 		}
 
-		w.Header().Add("HX-Location", fmt.Sprintf("/%s/%s/", sessionUser.Username, url.QueryEscape(trackerName)))
+		w.Header().Add("HX-Location", fmt.Sprintf("/%s/%s/", sessionUser.Username, url.QueryEscape(slug)))
 		w.WriteHeader(http.StatusSeeOther)
 	})
 
@@ -475,7 +497,7 @@ func main() {
 			tx.Rollback()
 			log.Panic(err)
 		}
-		if _, err := tx.Exec("INSERT INTO trackers (username, tracker_name, position) VALUES (?, ?, 1)", username, "Your_First_Tracker"); err != nil {
+		if _, err := tx.Exec("INSERT INTO trackers (username, slug, display_name, position) VALUES (?, ?, ?, 1)", username, "your_First_Tracker", "Your First Tracker!"); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}
@@ -677,7 +699,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 		return nil, false, err
 	}
 
-	rows, err := db.Query("SELECT tracker_name, description, position, public FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
+	rows, err := db.Query("SELECT slug, display_name, description, position, public FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
 	if err != nil {
 		return nil, false, err
 	}
@@ -685,7 +707,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 
 	for rows.Next() {
 		tracker := Tracker{}
-		if err := rows.Scan(&tracker.TrackerName, &tracker.Description, &tracker.Position, &tracker.Public); err != nil {
+		if err := rows.Scan(&tracker.Slug, &tracker.DisplayName, &tracker.Description, &tracker.Position, &tracker.Public); err != nil {
 			return nil, false, err
 		}
 
@@ -703,9 +725,9 @@ type User struct {
 	Trackers []Tracker
 }
 
-func (u *User) HasTracker(tracker string) bool {
+func (u *User) HasTracker(slug string) bool {
 	for _, t := range u.Trackers {
-		if t.TrackerName == tracker {
+		if t.Slug == slug {
 			return true
 		}
 	}
@@ -729,10 +751,10 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 	}
 }
 
-func (u *User) TrackerEntries(name string, fromYear int, fromMonth time.Month, toYear int, toMonth time.Month) (*TrackerEntries, error) {
+func (u *User) TrackerEntries(slug string, fromYear int, fromMonth time.Month, toYear int, toMonth time.Month) (*TrackerEntries, error) {
 	startDate := time.Date(fromYear, fromMonth, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(toYear, toMonth+1, 1, 0, 0, 0, 0, time.UTC)
-	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND tracker_name = ? AND date >= ? AND date < ?", u.Username, name, startDate, endDate)
+	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND slug = ? AND date >= ? AND date < ?", u.Username, slug, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
@@ -795,7 +817,8 @@ type App struct {
 }
 
 type Tracker struct {
-	TrackerName string
+	Slug        string
+	DisplayName string
 	Description string
 	Position    int
 	Public      bool
@@ -804,7 +827,7 @@ type Tracker struct {
 }
 
 func (t *Tracker) String() string {
-	return t.TrackerName
+	return t.DisplayName
 }
 
 type TrackerEntries struct {

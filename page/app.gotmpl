@@ -20,14 +20,14 @@
       {{ range .SessionUser.Trackers }}
         <li>
           <a
-            class="{{ if eq .TrackerName $.Tracker.TrackerName }}
+            class="{{ if eq .Slug $.Tracker.Slug }}
               bg-slate-100
             {{ else }}
               text-slate-400
             {{ end }} block break-all rounded px-2 py-1 hover:bg-slate-100"
-            href="/{{ $.SessionUser.Username }}/{{ .TrackerName }}/"
+            href="/{{ $.SessionUser.Username }}/{{ .Slug }}/"
           >
-            {{ .TrackerName }}
+            {{ .DisplayName }}
           </a>
         </li>
       {{ end }}
@@ -37,9 +37,18 @@
 
 {{ define "main" }}
   <header class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-2 p-3">
-    <h1 class="break-words text-xl font-semibold">
-      {{ .Tracker.TrackerName }}
-    </h1>
+    <div class="flex gap-2">
+      <a
+        href="javascript:void(0)"
+        id="toggle-sidebar"
+        class="flex-none rounded p-1 text-center hover:bg-slate-100"
+      >
+        <i class="block h-5 w-5" data-feather="menu"></i>
+      </a>
+      <h1 class="break-words text-xl font-semibold">
+        {{ .Tracker.DisplayName }}
+      </h1>
+    </div>
     {{ if .Tracker.Description }}
       <p>{{ .Tracker.Description }}</p>
     {{ end }}
@@ -68,7 +77,7 @@
       <div class="flex flex-col">
         <div class="flex justify-between gap-2 text-slate-800">
           <h1 class="text-xl font-semibold">
-            {{ .Tracker.TrackerName }}
+            {{ .Tracker.DisplayName }}
           </h1>
           <button
             class="cursor-pointer"
@@ -148,11 +157,7 @@
     id="from"
     data-from="{{ (mustLast .Tracker.Entries.Months).FormatYYYYMM }}"
   ></div>
-  <div
-    class="hidden"
-    id="tracker"
-    data-tracker="{{ .Tracker.TrackerName }}"
-  ></div>
+  <div class="hidden" id="slug" data-slug="{{ .Tracker.Slug }}"></div>
   <div
     class="hidden"
     id="username"
@@ -163,7 +168,7 @@
     const cancelEp = document.getElementById("cancel-ep");
     const clearEmoji = document.getElementById("clear-emoji");
     const addEmoji = document.getElementById("add-emoji");
-    const tracker = document.getElementById("tracker").dataset.tracker;
+    const slug = document.getElementById("slug").dataset.slug;
     const username = document.getElementById("username").dataset.username;
     const from = document.getElementById("from");
     const to = document.getElementById("to");
@@ -214,16 +219,15 @@
     function getNextMonths() {
       return {
         ...getNextFromTo(),
-        tracker,
+        slug,
         username,
       };
     }
 
-    async function getDayDetail(tracker, date) {
+    async function getDayDetail(slug, date) {
       try {
         const res = await fetch(
-          "/day-detail/?" +
-            new URLSearchParams({ tracker: tracker, date: date }),
+          "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
         );
         const { emoji, content } = await res.json();
         inputEmoji.value = emoji;
@@ -251,7 +255,7 @@
 
     async function updateDayDetail() {
       const formData = new FormData();
-      formData.set("tracker", tracker);
+      formData.set("slug", slug);
       formData.set("date", currentDate);
       formData.set("emoji", inputEmoji.value);
       formData.set("content", inputContent.value);
@@ -271,5 +275,16 @@
     }
 
     feather.replace();
+    document
+      .getElementById("toggle-sidebar")
+      .addEventListener("click", function () {
+        const sidebar = document.querySelector("header");
+        sidebar.classList.toggle("hidden"); // Toggle visibility
+      });
   </script>
+  <style>
+    .sidebar-hidden {
+      display: none;
+    }
+  </style>
 {{ end }}

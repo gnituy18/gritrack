@@ -1,9 +1,9 @@
 {{ define "day" }}
-  {{ $tracker := get . "tracker" }}
+  {{ $slug := get . "slug" }}
   {{ $day := get . "day" }}
   <button
     {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
-      hx-on:click="getDayDetail('{{ $tracker }}', '{{ $day.String }}')"
+      hx-on:click="getDayDetail('{{ $slug }}', '{{ $day.String }}')"
     {{ end }}
     class="{{- if $day.Emoji -}}
       bg-indigo-200 group-hover/day:bg-indigo-300

@@ -10,16 +10,17 @@
         hx-target="#error"
         hx-post="/create-tracker/"
       >
-        <p id="error" class="text-center text-red-600"></p>
         <div class="flex flex-col gap-1">
-          <label for="tracker_name" class="text-sm">Tracker Name</label>
+          <label for="display_name" class="text-sm">Tracker Name</label>
+          <p id="error" class="text-sm text-red-600"></p>
           <input
-            id="tracker_name"
-            autocomplete="tracker_name"
+            id="display_name"
             class="border-1 rounded border-slate-300 py-2"
-            name="tracker_name"
+            name="display_name"
             type="text"
             required
+            pattern=".*\S.*"
+            title="Please enter at least one non-space character."
           />
         </div>
         <input

@@ -1,5 +1,3 @@
-PRAGMA foreign_keys = ON;
-
 CREATE TABLE users(
 	username VARCHAR(32) NOT NULL PRIMARY KEY,
 	email VARCHAR(320) NOT NULL UNIQUE,
@@ -13,20 +11,21 @@ CREATE TABLE user_sessions(
 );
 
 CREATE TABLE trackers(
-	username REFERENCES users,
-	tracker_name TEXT NOT NULL,
+	username REFERENCES users(username),
+	slug TEXT NOT NULL,
+	display_name TEXT NOT NULL,
 	position INTEGER NOT NULL,
 	description TEXT NOT NULL DEFAULT "",
 	public INTEGER NOT NULL DEFAULT 0,
-	PRIMARY KEY (username, tracker_name)
+	PRIMARY KEY (username, slug)
 );
 
 CREATE TABLE tracker_entries(
 	username,
-	tracker_name, 
+	slug, 
 	date TEXT NOT NULL,
 	emoji TEXT NOT NULL DEFAULT "",
 	content TEXT NOT NULL DEFAULT "",
-	FOREIGN KEY(username, tracker_name) REFERENCES trackers(username, tracker_name),
-	PRIMARY KEY (username, tracker_name, date DESC)
+	FOREIGN KEY(username, slug) REFERENCES trackers(username, slug),
+	PRIMARY KEY (username, slug, date DESC)
 );

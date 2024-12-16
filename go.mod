@@ -1,6 +1,6 @@
 module gritrack.com
 
-go 1.22.4
+go 1.23.4
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
@@ -28,6 +28,8 @@ require (
 	github.com/aws/smithy-go v1.20.4 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/gosimple/slug v1.14.0 // indirect
+	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
