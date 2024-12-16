@@ -242,7 +242,7 @@ func main() {
 
 		user := User{}
 		tracker := Tracker{}
-		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.slug = ?", username, slug).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
+		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.display_name, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.slug = ?", username, slug).Scan(&user.Email, &user.TimeZone, &tracker.DisplayName, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
