@@ -3,7 +3,7 @@
     class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-4 border-r border-slate-200 py-3"
   >
     <div class="ml-4 mr-2 flex items-center">
-      <a class="text-xl font-bold" href="/"> Gritrack </a>
+      <p class="rounded font-semibold text-indigo-500">Trackers</p>
       <a
         href="/create-tracker/"
         class="ml-auto flex-none rounded p-1 text-center hover:bg-slate-100"
@@ -14,9 +14,6 @@
       ></a>
     </div>
     <ul class="px-2">
-      <span class="mb-4 rounded px-2 text-sm font-semibold text-indigo-500">
-        Your Trackers
-      </span>
       {{ range .SessionUser.Trackers }}
         <li>
           <a
