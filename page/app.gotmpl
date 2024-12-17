@@ -9,9 +9,6 @@
         class="ml-auto flex-none rounded p-1 text-center hover:bg-slate-100"
         ><i class="block h-5 w-5" data-feather="plus"></i>
       </a>
-      <a href="/settings/" class="flex-none rounded p-1 hover:bg-slate-100"
-        ><i class="block h-5 w-5" data-feather="settings"></i
-      ></a>
     </div>
     <ul class="px-2">
       {{ range .SessionUser.Trackers }}
@@ -29,6 +26,13 @@
         </li>
       {{ end }}
     </ul>
+    <div class="mt-auto w-full flex-none px-2 text-indigo-500">
+      <a
+        href="/settings/"
+        class="block flex items-center justify-center gap-2 rounded p-2 font-semibold hover:bg-slate-100"
+        ><i class="block h-5 w-5" data-feather="settings"></i> Settings</a
+      >
+    </div>
   </header>
 {{ end }}
 
