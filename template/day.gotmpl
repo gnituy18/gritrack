@@ -6,16 +6,14 @@
       hx-on:click="getDayDetail('{{ $slug }}', '{{ $day.String }}')"
     {{ end }}
     class="{{- if $day.Emoji -}}
-      bg-indigo-200 group-hover/day:bg-indigo-300
+      bg-indigo-200 hover:bg-indigo-300
     {{- else if $day.Content -}}
-      bg-indigo-200 text-indigo-500 group-hover:text-indigo-600
-      group-hover/day:bg-indigo-300
+      bg-indigo-200 text-indigo-600 hover:bg-indigo-300
     {{- else if $day.TimeRelation.IsPast -}}
       {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
-        text-indigo-300 group-hover:text-indigo-600
-        group-hover/day:bg-indigo-100
+        text-indigo-600 hover:bg-indigo-100
       {{ else }}
-        text-slate-300 group-hover:text-slate-600 group-hover/day:bg-slate-200
+        text-slate-600 hover:bg-slate-200
       {{ end }}
     {{- else if $day.TimeRelation.IsFuture -}}
       cursor-default
@@ -25,8 +23,7 @@
         text-slate-300
       {{ end }}
     {{- else if $day.TimeRelation.IsToday -}}
-      bg-amber-300 text-amber-500 group-hover/day:bg-amber-400
-      group-hover:text-amber-600
+      bg-amber-300 text-amber-500 hover:bg-amber-400
     {{- end }} place-center grid h-6 w-6 rounded"
   >
     {{ if $day.Emoji }}

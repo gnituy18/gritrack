@@ -1,79 +1,75 @@
 {{ define "header" }}
-  <header
-    class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-4 border-r border-slate-200 py-3"
-  >
-    <div class="ml-4 mr-2 flex items-center">
-      <p class="rounded font-semibold text-indigo-500">Trackers</p>
-      <a
-        href="/create-tracker/"
-        class="ml-auto flex-none rounded p-1 text-center hover:bg-slate-100"
-        ><i class="block h-5 w-5" data-feather="plus"></i>
-      </a>
-    </div>
-    <ul class="px-2">
-      {{ range .SessionUser.Trackers }}
-        <li>
-          <a
-            class="{{ if eq .Slug $.Tracker.Slug }}
-              bg-slate-100
-            {{ else }}
-              text-slate-400
-            {{ end }} block break-all rounded px-2 py-1 hover:bg-slate-100"
-            href="/{{ $.SessionUser.Username }}/{{ .Slug }}/"
-          >
-            {{ .DisplayName }}
-          </a>
-        </li>
-      {{ end }}
-    </ul>
-    <div class="mt-auto w-full flex-none px-2 text-indigo-500">
-      <a
-        href="/settings/"
-        class="block flex items-center justify-center gap-2 rounded p-2 font-semibold hover:bg-slate-100"
-        ><i class="block h-5 w-5" data-feather="settings"></i> Settings</a
-      >
-    </div>
-  </header>
 {{ end }}
 
 {{ define "main" }}
-  <header class="sticky top-0 flex h-screen w-64 flex-none flex-col gap-2 p-3">
-    <div class="flex gap-2">
-      <a
-        href="javascript:void(0)"
-        id="toggle-sidebar"
-        class="flex-none rounded p-1 text-center hover:bg-slate-100"
+  <main class="mx-auto flex max-w-screen-md gap-8">
+    <nav
+      class="sticky top-0 flex h-screen w-96 flex-none flex-col gap-4 border-r border-slate-200 py-3"
+    >
+      <div class="ml-4 mr-2 flex items-center">
+        <p class="rounded-xl text-lg font-semibold text-indigo-500">Trackers</p>
+        <a
+          href="/create-tracker/"
+          class="ml-auto block flex items-center justify-center gap-2 rounded-xl p-2 font-semibold hover:bg-slate-100"
+          ><i class="block h-5 w-5" data-feather="plus"></i>
+        </a>
+        <a
+          href="/settings/"
+          class="block flex items-center justify-center gap-2 rounded-xl p-2 font-semibold hover:bg-slate-100"
+          ><i class="block h-5 w-5" data-feather="user"></i
+        ></a>
+      </div>
+      <ul class="flex flex-col gap-4 px-2">
+        {{ range .SessionUser.Trackers }}
+          <li>
+            <a
+              class="{{ if eq .Slug $.Tracker.Slug }}
+                text-indigo-600 underline
+              {{ else }}
+                text-slate-600
+              {{ end }} group block break-all rounded-xl text-lg font-semibold hover:bg-indigo-50 hover:text-indigo-600"
+              {{ if eq $.Tracker.Slug .Slug }}
+                href="/{{ $.SessionUser.Username }}/"
+              {{ else }}
+                href="/{{ $.SessionUser.Username }}/{{ .Slug }}/"
+              {{ end }}
+            >
+              <div class="relative px-4 py-2">
+                {{ .DisplayName }}
+                <span hx-on:click="event.preventDefault()">
+                  <i
+                    class="absolute right-3 top-2.5 block hidden h-6 w-6 rounded p-1 hover:bg-indigo-200 group-hover:block"
+                    data-feather="settings"
+                  ></i>
+                </span>
+                <div>1 2 3 4 5</div>
+              </div>
+            </a>
+          </li>
+        {{ end }}
+      </ul>
+    </nav>
+    <div>
+      <div
+        id="months"
+        class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-8"
       >
-        <i class="block h-5 w-5" data-feather="menu"></i>
-      </a>
-      <h1 class="break-words text-xl font-semibold">
-        {{ .Tracker.DisplayName }}
-      </h1>
+        {{ template "months" dict "tracker" .Tracker }}
+      </div>
+      <button
+        hx-target="#months"
+        hx-swap="beforeend"
+        hx-get="/template/app/months/"
+        hx-vals="js:{...getNextMonths()}"
+        hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
+        class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+      >
+        Load More
+      </button>
     </div>
-    {{ if .Tracker.Description }}
-      <p>{{ .Tracker.Description }}</p>
-    {{ end }}
-  </header>
-  <main class="flex flex-1 flex-col items-center gap-8 py-4">
-    <div
-      id="months"
-      class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-8"
-    >
-      {{ template "months" dict "tracker" .Tracker }}
-    </div>
-    <button
-      hx-target="#months"
-      hx-swap="beforeend"
-      hx-get="/template/app/months/"
-      hx-vals="js:{...getNextMonths()}"
-      hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
-      class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-    >
-      Load More
-    </button>
   </main>
 
-  <dialog id="day-detail" class="w-full max-w-md rounded px-8 py-6">
+  <dialog id="day-detail" class="w-full max-w-md rounded-xl px-8 py-6">
     <div class="flex flex-col gap-6">
       <div class="flex flex-col">
         <div class="flex justify-between gap-2 text-slate-800">
@@ -276,13 +272,12 @@
     }
 
     feather.replace();
-    document
-      .getElementById("toggle-sidebar")
-      .addEventListener("click", function () {
-        const sidebar = document.querySelector("header");
-        sidebar.classList.toggle("hidden"); // Toggle visibility
-      });
   </script>
+
+  <script type="module">
+    import { computePosition } from "https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.12/+esm";
+  </script>
+
   <style>
     .sidebar-hidden {
       display: none;
