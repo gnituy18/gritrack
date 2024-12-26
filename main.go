@@ -89,10 +89,6 @@ func main() {
 		"email-sent":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
 	}
 
-	minifier = minify.New()
-	minifier.AddFunc("text/html", html.Minify)
-	minifier.AddFunc("text/css", css.Minify)
-
 	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -178,7 +174,7 @@ func main() {
 			}
 
 			toY := fromY
-			toM := fromM - time.Month(6) + 1
+			toM := fromM - time.Month(3) + 1
 			to := query.Get("to")
 			if to != "" {
 				t, err := time.Parse(time.DateOnly, to+"-01")
@@ -217,8 +213,13 @@ func main() {
 			return
 		}
 
-		var username, tracker string
-		if err := db.QueryRow("SELECT users.username, trackers.slug FROM users JOIN user_sessions ON users.username = user_sessions.username JOIN trackers ON users.username = trackers.username WHERE user_sessions.id = ? AND trackers.position = 1", cookie.Value).Scan(&username, &tracker); err == sql.ErrNoRows {
+		var username string
+		if err := db.QueryRow(`
+			SELECT users.username
+			FROM users
+			JOIN user_sessions ON users.username = user_sessions.username
+			WHERE user_sessions.id = ?
+		`, cookie.Value).Scan(&username); err == sql.ErrNoRows {
 			executePage(w, r, "index", nil)
 			return
 		} else if err != nil {
@@ -226,7 +227,27 @@ func main() {
 			log.Panic(err)
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/%s/%s/", username, tracker), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("/%s/", username), http.StatusFound)
+	})
+
+	// user handler
+	http.HandleFunc("GET /{username}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		if sessionUser.Username != r.PathValue("username") {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
+		executePage(w, r, "app", App{
+			SessionUser: sessionUser,
+		})
 	})
 
 	// app handler
@@ -242,7 +263,25 @@ func main() {
 
 		user := User{}
 		tracker := Tracker{}
-		if err := db.QueryRow("SELECT users.email, users.timezone, trackers.display_name, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.slug = ?", username, slug).Scan(&user.Email, &user.TimeZone, &tracker.DisplayName, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
+		if err := db.QueryRow(`
+			SELECT
+			users.email,
+			users.timezone,
+			trackers.display_name,
+			trackers.description,
+			trackers.position,
+			trackers.public
+			FROM users
+			JOIN trackers ON users.username = trackers.username
+			WHERE users.username = ?
+			AND trackers.slug = ?
+		`, username, slug).Scan(
+			&user.Email,
+			&user.TimeZone,
+			&tracker.DisplayName,
+			&tracker.Description,
+			&tracker.Position,
+			&tracker.Public); err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -280,7 +319,7 @@ func main() {
 		}
 
 		fromY := toY
-		fromM := toM - time.Month(6) + 1
+		fromM := toM - time.Month(3) + 1
 		from := query.Get("from")
 		if from != "" {
 			t, err := time.Parse(time.DateOnly, from+"-01")
@@ -306,6 +345,7 @@ func main() {
 			Tracker:     &tracker,
 		})
 	})
+
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -578,6 +618,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	minifier = minify.New()
+	minifier.AddFunc("text/html", html.Minify)
+	minifier.AddFunc("text/css", css.Minify)
+
 	var cssBuf bytes.Buffer
 	minifyWriter := minifier.Writer("text/css", &cssBuf)
 	if _, err := minifyWriter.Write(style); err != nil {
@@ -592,6 +636,25 @@ func main() {
 		if _, err := w.Write(css); err != nil {
 			log.Panic(err)
 		}
+	})
+
+	http.HandleFunc("GET /logo.svg/{$}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/svg+xml")
+
+		svg := `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="9 9 62 62" width="62" height="62">
+  <rect x="0" y="0" width="24" height="24" rx="4" ry="4" />
+  <rect x="28" y="0" width="24" height="24" rx="4" ry="4" />
+  <rect x="56" y="0" width="24" height="24" rx="4" ry="4" />
+  <rect x="0" y="28" width="24" height="24" rx="4" ry="4"  />
+  <rect x="28" y="28" width="24" height="24" rx="4" ry="4"  />
+  <rect x="56" y="28" width="24" height="24" rx="4" ry="4"  />
+  <rect x="0" y="56" width="24" height="24" rx="4" ry="4"  />
+  <rect x="28" y="56" width="24" height="24" rx="4" ry="4"  />
+  <rect x="56" y="56" width="24" height="24" rx="4" ry="4" />
+</svg>
+`
+		w.Write([]byte(svg))
 	})
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
@@ -693,13 +756,33 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 	}
 
 	user := User{Trackers: []Tracker{}}
-	if err := db.QueryRow("SELECT users.username, users.email, users.timezone FROM users JOIN user_sessions ON user_sessions.username = users.username WHERE user_sessions.id = ?", cookie.Value).Scan(&user.Username, &user.Email, &user.TimeZone); err == sql.ErrNoRows {
+	if err := db.QueryRow(`
+		SELECT 
+		users.username,
+		users.email,
+		users.timezone
+		FROM users 
+		JOIN user_sessions ON user_sessions.username = users.username 
+		WHERE user_sessions.id = ?
+	`, cookie.Value).Scan(
+		&user.Username,
+		&user.Email,
+		&user.TimeZone); err == sql.ErrNoRows {
 		return nil, false, nil
 	} else if err != nil {
 		return nil, false, err
 	}
 
-	rows, err := db.Query("SELECT slug, display_name, description, position, public FROM trackers WHERE trackers.username = ? ORDER BY position", user.Username)
+	rows, err := db.Query(`
+		SELECT
+		slug,
+		display_name,
+		description,
+		position,
+		public
+		FROM trackers 
+		WHERE trackers.username = ? 
+		ORDER BY position`, user.Username)
 	if err != nil {
 		return nil, false, err
 	}

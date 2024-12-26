@@ -4,6 +4,7 @@
   <html lang="en">
     <head>
       <title>Gritrack</title>
+      <link rel="icon" type="image/svg+xml" href="/logo.svg/" />
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <script
@@ -23,9 +24,8 @@
       <link href="/style.css/" rel="stylesheet" />
     </head>
 
-    <body class="flex text-slate-800">
-      {{ template "header" . }}
-      {{ template "main" . }}
+    <body class="bg-slate-50 text-slate-950">
+      {{ template "body" . }}
     </body>
   </html>
 {{ end }}

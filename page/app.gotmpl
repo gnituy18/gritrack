@@ -1,160 +1,182 @@
-{{ define "header" }}
-{{ end }}
-
-{{ define "main" }}
-  <main class="mx-auto flex max-w-screen-md gap-8">
-    <nav
-      class="sticky top-0 flex h-screen w-96 flex-none flex-col gap-4 border-r border-slate-200 py-3"
-    >
-      <div class="ml-4 mr-2 flex items-center">
-        <p class="rounded-xl text-lg font-semibold text-indigo-500">Trackers</p>
+{{ define "body" }}
+  <header class="sticky top-0 z-30 flex items-center bg-slate-50 p-4">
+    <a href="/">
+      <svg
+        class="h-8 w-8"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="9 9 62 62"
+        width="62"
+        height="62"
+      >
+        <rect x="0" y="0" width="24" height="24" rx="4" ry="4" />
+        <rect x="28" y="0" width="24" height="24" rx="4" ry="4" />
+        <rect x="56" y="0" width="24" height="24" rx="4" ry="4" />
+        <rect x="0" y="28" width="24" height="24" rx="4" ry="4" />
+        <rect x="28" y="28" width="24" height="24" rx="4" ry="4" />
+        <rect x="56" y="28" width="24" height="24" rx="4" ry="4" />
+        <rect x="0" y="56" width="24" height="24" rx="4" ry="4" />
+        <rect x="28" y="56" width="24" height="24" rx="4" ry="4" />
+        <rect x="56" y="56" width="24" height="24" rx="4" ry="4" />
+      </svg>
+    </a>
+    <a
+      href="/settings/"
+      class="block flex items-center justify-center gap-2 rounded-xl p-1 font-semibold hover:bg-slate-100"
+      ><i class="block h-5 w-5" data-feather="user"></i
+    ></a>
+  </header>
+  <main class="flex justify-center gap-12 pt-8">
+    <nav class="flex w-96 flex-col">
+      <div class="mx-4 flex items-center">
+        <h1 class="text-lg font-bold text-slate-500">Your Trackers</h1>
         <a
           href="/create-tracker/"
-          class="ml-auto block flex items-center justify-center gap-2 rounded-xl p-2 font-semibold hover:bg-slate-100"
+          class="ml-auto block flex items-center justify-center rounded-xl p-2 font-semibold text-slate-500 hover:bg-slate-100"
           ><i class="block h-5 w-5" data-feather="plus"></i>
         </a>
-        <a
-          href="/settings/"
-          class="block flex items-center justify-center gap-2 rounded-xl p-2 font-semibold hover:bg-slate-100"
-          ><i class="block h-5 w-5" data-feather="user"></i
-        ></a>
       </div>
-      <ul class="flex flex-col gap-4 px-2">
+      <ul class="flex flex-col">
         {{ range .SessionUser.Trackers }}
-          <li>
-            <a
-              class="{{ if eq .Slug $.Tracker.Slug }}
-                text-indigo-600 underline
-              {{ else }}
-                text-slate-600
-              {{ end }} group block break-all rounded-xl text-lg font-semibold hover:bg-indigo-50 hover:text-indigo-600"
-              {{ if eq $.Tracker.Slug .Slug }}
-                href="/{{ $.SessionUser.Username }}/"
-              {{ else }}
-                href="/{{ $.SessionUser.Username }}/{{ .Slug }}/"
-              {{ end }}
+          <li
+            class="group flex gap-4 rounded-xl px-4 py-2 text-lg font-semibold hover:bg-slate-100"
+            {{ if and $.Tracker (eq $.Tracker.Slug .Slug) }}
+              href="/{{ $.SessionUser.Username }}/"
+            {{ else }}
+              href="/{{ $.SessionUser.Username }}/{{ .Slug }}/"
+            {{ end }}
+          >
+            <div
+              class="invisible flex h-full w-5 items-center group-hover:visible"
             >
-              <div class="relative px-4 py-2">
+              <i class="block h-5 w-5" data-feather="menu"></i>
+            </div>
+            <div class="relative flex-1">
+              <h2 class="flex h-9">
                 {{ .DisplayName }}
-                <span hx-on:click="event.preventDefault()">
-                  <i
-                    class="absolute right-3 top-2.5 block hidden h-6 w-6 rounded p-1 hover:bg-indigo-200 group-hover:block"
-                    data-feather="settings"
-                  ></i>
-                </span>
-                <div>1 2 3 4 5</div>
-              </div>
-            </a>
+              </h2>
+              <a
+                href="/"
+                class="absolute right-0 top-0 ml-auto hidden rounded-xl p-2 group-hover:block"
+              >
+                <i class="h-5 w-5 rounded-xl" data-feather="settings"></i>
+              </a>
+              <div>1 2 3 4 5</div>
+            </div>
           </li>
         {{ end }}
       </ul>
     </nav>
-    <div>
-      <div
-        id="months"
-        class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-8"
-      >
-        {{ template "months" dict "tracker" .Tracker }}
+    {{ if .Tracker }}
+      <div>
+        <div
+          id="months"
+          class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-8"
+        >
+          {{ template "months" dict "tracker" .Tracker }}
+        </div>
+        <button
+          hx-target="#months"
+          hx-swap="beforeend"
+          hx-get="/template/app/months/"
+          hx-vals="js:{...getNextMonths()}"
+          hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
+          class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+        >
+          Load More
+        </button>
       </div>
-      <button
-        hx-target="#months"
-        hx-swap="beforeend"
-        hx-get="/template/app/months/"
-        hx-vals="js:{...getNextMonths()}"
-        hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
-        class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-      >
-        Load More
-      </button>
-    </div>
+    {{ end }}
   </main>
 
-  <dialog id="day-detail" class="w-full max-w-md rounded-xl px-8 py-6">
-    <div class="flex flex-col gap-6">
-      <div class="flex flex-col">
-        <div class="flex justify-between gap-2 text-slate-800">
-          <h1 class="text-xl font-semibold">
-            {{ .Tracker.DisplayName }}
-          </h1>
-          <button
-            class="cursor-pointer"
-            hx-on:click="document.getElementById('day-detail').close();document.getElementById('ep').classList.add('hidden')"
-          >
-            ✕
-          </button>
-        </div>
-        <time id="day-detail-time" class="font-semibold text-slate-400"> </time>
-      </div>
-
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center justify-center gap-4">
-          <div class="relative grid h-10 w-10 place-items-center">
-            <input
-              readonly
-              id="emoji"
-              name="emoji"
-              type="text"
-              value=""
-              class="absolute h-10 w-10 cursor-pointer rounded border-slate-200 bg-slate-100 p-0 text-center"
-              hx-on:click="ep.classList.remove('hidden');clearEmoji.classList.remove('hidden');cancelEp.classList.remove('hidden');"
-            />
-
-            <i
-              x-data
-              x-show="!$store.emojiPicker.selected"
-              class="pointer-events-none absolute text-slate-400"
-              data-feather="smile"
-            ></i>
+  {{ if .Tracker }}
+    <dialog id="day-detail" class="w-full max-w-md rounded-xl px-8 py-6">
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-col">
+          <div class="flex justify-between gap-2 text-slate-800">
+            <h1 class="text-xl font-semibold">
+              {{ .Tracker.DisplayName }}
+            </h1>
+            <button
+              class="cursor-pointer"
+              hx-on:click="document.getElementById('day-detail').close();document.getElementById('ep').classList.add('hidden')"
+            >
+              ✕
+            </button>
           </div>
-          <button
-            id="clear-emoji"
-            class="hidden font-semibold text-rose-600 underline"
-            hx-on:click="emoji.value = '';ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').selected = false;"
-          >
-            Clear
-          </button>
-          <button
-            id="cancel-ep"
-            class="hidden font-semibold text-slate-600 underline"
-            hx-on:click="ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');"
-          >
-            Cancel
-          </button>
+          <time id="day-detail-time" class="font-semibold text-slate-400">
+          </time>
         </div>
-        <emoji-picker
-          hx-on:emoji-click="emoji.value = event.detail.unicode;ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').selected = true;"
-          id="ep"
-          class="hidden w-full"
-        ></emoji-picker>
+
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-center gap-4">
+            <div class="relative grid h-10 w-10 place-items-center">
+              <input
+                readonly
+                id="emoji"
+                name="emoji"
+                type="text"
+                value=""
+                class="absolute h-10 w-10 cursor-pointer rounded border-slate-200 bg-slate-100 p-0 text-center"
+                hx-on:click="ep.classList.remove('hidden');clearEmoji.classList.remove('hidden');cancelEp.classList.remove('hidden');"
+              />
+
+              <i
+                x-data
+                x-show="!$store.emojiPicker.selected"
+                class="pointer-events-none absolute text-slate-400"
+                data-feather="smile"
+              ></i>
+            </div>
+            <button
+              id="clear-emoji"
+              class="hidden font-semibold text-rose-600 underline"
+              hx-on:click="emoji.value = '';ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').selected = false;"
+            >
+              Clear
+            </button>
+            <button
+              id="cancel-ep"
+              class="hidden font-semibold text-slate-600 underline"
+              hx-on:click="ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');"
+            >
+              Cancel
+            </button>
+          </div>
+          <emoji-picker
+            hx-on:emoji-click="emoji.value = event.detail.unicode;ep.classList.add('hidden');clearEmoji.classList.add('hidden');cancelEp.classList.add('hidden');Alpine.store('emojiPicker').selected = true;"
+            id="ep"
+            class="hidden w-full"
+          ></emoji-picker>
+        </div>
+        <input
+          autofocus
+          id="content"
+          type="text"
+          name="content"
+          value=""
+          placeholder="Notes about today's activities..."
+          class="flex-1 rounded border-slate-200 bg-slate-100 p-2 placeholder-slate-300 focus:bg-white"
+        />
+        <button
+          hx-on:click="updateDayDetail()"
+          class="cursor-pointer rounded bg-indigo-600 p-2 font-semibold text-white"
+        >
+          Save
+        </button>
       </div>
-      <input
-        autofocus
-        id="content"
-        type="text"
-        name="content"
-        value=""
-        placeholder="Notes about today's activities..."
-        class="flex-1 rounded border-slate-200 bg-slate-100 p-2 placeholder-slate-300 focus:bg-white"
-      />
-      <button
-        hx-on:click="updateDayDetail()"
-        class="cursor-pointer rounded bg-indigo-600 p-2 font-semibold text-white"
-      >
-        Save
-      </button>
-    </div>
-  </dialog>
-  <div
-    class="hidden"
-    id="to"
-    data-to="{{ (mustFirst .Tracker.Entries.Months).FormatYYYYMM }}"
-  ></div>
-  <div
-    class="hidden"
-    id="from"
-    data-from="{{ (mustLast .Tracker.Entries.Months).FormatYYYYMM }}"
-  ></div>
-  <div class="hidden" id="slug" data-slug="{{ .Tracker.Slug }}"></div>
+    </dialog>
+    <div
+      class="hidden"
+      id="to"
+      data-to="{{ (mustFirst .Tracker.Entries.Months).FormatYYYYMM }}"
+    ></div>
+    <div
+      class="hidden"
+      id="from"
+      data-from="{{ (mustLast .Tracker.Entries.Months).FormatYYYYMM }}"
+    ></div>
+    <div class="hidden" id="slug" data-slug="{{ .Tracker.Slug }}"></div>
+  {{ end }}
   <div
     class="hidden"
     id="username"
@@ -166,9 +188,9 @@
     const clearEmoji = document.getElementById("clear-emoji");
     const addEmoji = document.getElementById("add-emoji");
     const slug = document.getElementById("slug").dataset.slug;
-    const username = document.getElementById("username").dataset.username;
     const from = document.getElementById("from");
     const to = document.getElementById("to");
+    const username = document.getElementById("username").dataset.username;
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTime = document.getElementById("day-detail-time");
     const inputEmoji = document.getElementById("emoji");
