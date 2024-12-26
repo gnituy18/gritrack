@@ -1,7 +1,8 @@
 CREATE TABLE users(
 	username VARCHAR(32) NOT NULL PRIMARY KEY,
 	email VARCHAR(320) NOT NULL UNIQUE,
-	timezone TEXT NOT NULL
+	timezone TEXT NOT NULL,
+	public INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE user_sessions(
