@@ -193,9 +193,9 @@ func main() {
 				log.Panic(err)
 			}
 
-			tracker.Entries = trackerEntries
 			data = map[string]any{
 				"tracker": tracker,
+				"entries": trackerEntries,
 			}
 
 		default:
@@ -240,17 +240,24 @@ func main() {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		if sessionUser.Username != r.PathValue("username") {
-			w.WriteHeader(http.StatusForbidden)
+
+		if sessionUser.Username == r.PathValue("username") {
+			daysArr, err := sessionUser.PastDays(10)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			executePage(w, r, "app", map[string]any{
+				"sessionUser": sessionUser,
+				"daysArr":     daysArr,
+			})
 			return
 		}
 
-		executePage(w, r, "app", App{
-			SessionUser: sessionUser,
-		})
+		w.WriteHeader(http.StatusForbidden)
 	})
 
-	// app handler
 	http.HandleFunc("GET /{username}/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -338,11 +345,11 @@ func main() {
 			log.Panic(err)
 		}
 
-		tracker.Entries = trackerEntries
-		executePage(w, r, "app", App{
-			SessionUser: sessionUser,
-			User:        &user,
-			Tracker:     &tracker,
+		executePage(w, r, "app", map[string]any{
+			"SessionUser": sessionUser,
+			"User":        &user,
+			"Tracker":     &tracker,
+			"Entries":     trackerEntries,
 		})
 	})
 
@@ -755,55 +762,79 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 		return nil, false, nil
 	}
 
-	user := User{Trackers: []Tracker{}}
-	if err := db.QueryRow(`
-		SELECT 
-		users.username,
-		users.email,
-		users.timezone
-		FROM users 
-		JOIN user_sessions ON user_sessions.username = users.username 
-		WHERE user_sessions.id = ?
-	`, cookie.Value).Scan(
-		&user.Username,
-		&user.Email,
-		&user.TimeZone); err == sql.ErrNoRows {
-		return nil, false, nil
-	} else if err != nil {
-		return nil, false, err
-	}
-
+	var user *User
 	rows, err := db.Query(`
 		SELECT
-		slug,
-		display_name,
-		description,
-		position,
-		public
-		FROM trackers 
-		WHERE trackers.username = ? 
-		ORDER BY position`, user.Username)
+		users.username,
+		users.email,
+		users.timezone,
+		users.public,
+		trackers.slug,
+		trackers.display_name,
+		trackers.description,
+		trackers.position,
+		trackers.public
+		FROM users
+		INNER JOIN user_sessions ON users.username = user_sessions.username
+		JOIN trackers ON trackers.username = users.username
+		WHERE user_sessions.id = ?
+		ORDER BY trackers.position`, cookie.Value)
+
 	if err != nil {
 		return nil, false, err
 	}
-	defer rows.Close()
 
 	for rows.Next() {
-		tracker := Tracker{}
-		if err := rows.Scan(&tracker.Slug, &tracker.DisplayName, &tracker.Description, &tracker.Position, &tracker.Public); err != nil {
-			return nil, false, err
+		var username, email, timeZone string
+		var userPublic bool
+		var slug, displayName, description string
+		var position int
+		var trackerPublic bool
+
+		rows.Scan(
+			&username,
+			&email,
+			&timeZone,
+			&userPublic,
+			&slug,
+			&displayName,
+			&description,
+			&position,
+			&trackerPublic,
+		)
+
+		if user == nil {
+			user = &User{
+				Username: username,
+				Email:    email,
+				TimeZone: timeZone,
+				Public:   userPublic,
+				Trackers: []Tracker{},
+			}
 		}
 
-		user.Trackers = append(user.Trackers, tracker)
+		user.Trackers = append(user.Trackers, Tracker{
+			Slug:        slug,
+			DisplayName: displayName,
+			Description: description,
+			Position:    position,
+			Public:      trackerPublic,
+		})
+
 	}
 
-	return &user, true, nil
+	if user == nil {
+		return nil, false, nil
+	}
+
+	return user, true, nil
 }
 
 type User struct {
 	Username string
 	Email    string
 	TimeZone string
+	Public   bool
 
 	Trackers []Tracker
 }
@@ -832,6 +863,63 @@ func (u *User) TimeRelation(date time.Time) TimeRelation {
 	} else {
 		return Today
 	}
+}
+
+func (u *User) PastDays(days int) (map[string][]*Day, error) {
+	endDate := u.Today()
+	startDate := endDate.AddDate(0, 0, -(days - 1))
+	rows, err := db.Query(`
+		SELECT
+		slug,
+		date,
+		emoji,
+		content
+		FROM tracker_entries
+		WHERE username = ? AND date >= ? AND date <= ?
+		ORDER BY slug, date
+		`, u.Username, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+
+	daysMap := map[string]map[string]*Day{}
+	daysArr := map[string][]*Day{}
+	for _, t := range u.Trackers {
+		daysMap[t.Slug] = map[string]*Day{}
+		daysArr[t.Slug] = []*Day{}
+	}
+
+	for rows.Next() {
+		var slug, date, content, emoji string
+		rows.Scan(&slug, &date, &emoji, &content)
+		t, err := time.Parse(time.DateOnly, date)
+		if err != nil {
+			return nil, err
+		}
+		timeRelation := u.TimeRelation(t)
+		daysMap[slug][date] = &Day{
+			Date:         t,
+			Emoji:        emoji,
+			Content:      content,
+			TimeRelation: timeRelation,
+		}
+	}
+
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		for _, t := range u.Trackers {
+			if d := daysMap[t.Slug][d.Format(time.DateOnly)]; d != nil {
+				daysArr[t.Slug] = append(daysArr[t.Slug], d)
+				continue
+			}
+
+			daysArr[t.Slug] = append(daysArr[t.Slug], &Day{
+				Date:         d,
+				TimeRelation: u.TimeRelation(d),
+			})
+		}
+	}
+
+	return daysArr, nil
 }
 
 func (u *User) TrackerEntries(slug string, fromYear int, fromMonth time.Month, toYear int, toMonth time.Month) (*TrackerEntries, error) {
@@ -892,21 +980,12 @@ func (u *User) TrackerEntries(slug string, fromYear int, fromMonth time.Month, t
 	}, nil
 }
 
-type App struct {
-	SessionUser *User
-	User        *User
-
-	Tracker *Tracker
-}
-
 type Tracker struct {
 	Slug        string
 	DisplayName string
 	Description string
 	Position    int
 	Public      bool
-
-	Entries *TrackerEntries
 }
 
 func (t *Tracker) String() string {

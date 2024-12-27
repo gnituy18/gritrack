@@ -31,170 +31,43 @@
       ><i class="block h-6 w-6 text-slate-500" data-feather="user"></i
     ></a>
   </header>
-  <main class="flex justify-center gap-12 pt-8">
-    <nav class="flex w-96 flex-col">
-      <div class="mx-4 flex items-center">
-        <h1 class="text-lg font-bold text-slate-500">Your Trackers</h1>
-      </div>
-      <ul class="flex flex-col">
-        {{ range .SessionUser.Trackers }}
-          <li
-            class="group flex gap-4 rounded-xl px-4 py-2 text-lg font-semibold hover:bg-slate-100"
-            {{ if and $.Tracker (eq $.Tracker.Slug .Slug) }}
-              href="/{{ $.SessionUser.Username }}/"
-            {{ else }}
-              href="/{{ $.SessionUser.Username }}/{{ .Slug }}/"
-            {{ end }}
-          >
+  <main class="flex justify-center pb-8">
+    <nav class="flex max-w-60 flex-col gap-2">
+      <h1 class="pl-9 text-sm text-slate-500">Your Trackers</h1>
+      <ul class="flex flex-col gap-4 ">
+        {{ range $ti, $t := .sessionUser.Trackers }}
+          <li class="group flex gap-2">
             <div
               class="invisible flex h-full w-5 items-center group-hover:visible"
             >
               <i class="block h-5 w-5" data-feather="menu"></i>
             </div>
-            <div class="relative flex-1">
-              <h2 class="flex h-9">
+            <div
+              class="relative flex flex-1 flex-col gap-2 rounded-xl p-2 group-hover:bg-slate-100"
+            >
+              <a
+                href="/{{ .Slug }}/settings/"
+                class="absolute right-2 top-2 hidden group-hover:block"
+              >
+                <i class="h-6 w-5 rounded-xl" data-feather="settings"></i>
+              </a>
+              <h2 class="px-1 flex font-semibold">
                 {{ .DisplayName }}
               </h2>
-              <a
-                href="/"
-                class="absolute right-0 top-0 ml-auto hidden rounded-xl p-2 group-hover:block"
-              >
-                <i class="h-5 w-5 rounded-xl" data-feather="settings"></i>
-              </a>
-              <div>1 2 3 4 5</div>
+              <div class="flex flex-col">
+                <h3 class="px-1 text-sm text-slate-500">
+                  Past 10 Days
+                </h3>
+	        <div class="flex gap-1">
+                {{ range $i, $d := (index $.daysArr $t.Slug) }}
+                  {{ template "day" dict "slug" $t.Slug "day" $d }}
+                {{ end }}
+	        <div>
+              </div>
             </div>
           </li>
         {{ end }}
       </ul>
     </nav>
   </main>
-
-  <div
-    class="hidden"
-    id="username"
-    data-username="{{ .SessionUser.Username }}"
-  ></div>
-  <script>
-    const ep = document.getElementById("ep");
-    const cancelEp = document.getElementById("cancel-ep");
-    const clearEmoji = document.getElementById("clear-emoji");
-    const addEmoji = document.getElementById("add-emoji");
-    const slug = document.getElementById("slug").dataset.slug;
-    const from = document.getElementById("from");
-    const to = document.getElementById("to");
-    const username = document.getElementById("username").dataset.username;
-    const dayDetail = document.getElementById("day-detail");
-    const dayDetailTime = document.getElementById("day-detail-time");
-    const inputEmoji = document.getElementById("emoji");
-    const inputContent = document.getElementById("content");
-    const months = 3;
-    let currentDate = "";
-
-    const params = new URLSearchParams(window.location.search);
-    params.set("from", from.dataset.from);
-    params.set("to", to.dataset.to);
-    history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}?${params.toString()}`,
-    );
-
-    function getNextFromTo() {
-      const [toYStr, toMStr] = from.dataset.from.split("-");
-      const toY = parseInt(toYStr, 10);
-      const toM = parseInt(toMStr, 10) - 1;
-      let toDate = new Date(toY, toM, 1);
-      toDate.setMonth(toDate.getMonth() - 1);
-
-      let fromDate = new Date(toY, toM, 1);
-      fromDate.setMonth(fromDate.getMonth() - months);
-
-      return {
-        to: `${toDate.getFullYear()}-${(toDate.getMonth() + 1).toString().padStart(2, "0")}`,
-        from: `${fromDate.getFullYear()}-${(fromDate.getMonth() + 1).toString().padStart(2, "0")}`,
-      };
-    }
-
-    function updateFromTo(fromStr, toStr) {
-      from.dataset.from = fromStr;
-      to.dataset.to = toStr;
-      params.set("from", from.dataset.from);
-      params.set("to", to.dataset.to);
-      history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}?${params.toString()}`,
-      );
-    }
-
-    function getNextMonths() {
-      return {
-        ...getNextFromTo(),
-        slug,
-        username,
-      };
-    }
-
-    async function getDayDetail(slug, date) {
-      try {
-        const res = await fetch(
-          "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
-        );
-        const { emoji, content } = await res.json();
-        inputEmoji.value = emoji;
-        if (emoji !== "") {
-          Alpine.store("emojiPicker").selected = true;
-        } else {
-          Alpine.store("emojiPicker").selected = false;
-        }
-
-        inputContent.value = content;
-        currentDate = date;
-        dayDetailTime.replaceChildren(date);
-        dayDetail.showModal();
-      } catch (err) {
-        alert("Something went wrong.");
-        console.error(err);
-      }
-    }
-
-    document.addEventListener("alpine:init", () => {
-      Alpine.store("emojiPicker", {
-        selected: false,
-      });
-    });
-
-    async function updateDayDetail() {
-      const formData = new FormData();
-      formData.set("slug", slug);
-      formData.set("date", currentDate);
-      formData.set("emoji", inputEmoji.value);
-      formData.set("content", inputContent.value);
-
-      if (emoji !== "") {
-        Alpine.store("emojiPicker").selected = true;
-      } else {
-        Alpine.store("emojiPicker").selected = false;
-      }
-
-      const res = await fetch("/day-detail/", {
-        method: "PUT",
-        body: formData,
-      });
-      htmx.trigger(`#day-${currentDate}`, `update-day-${currentDate}`);
-      dayDetail.close();
-    }
-
-    feather.replace();
-  </script>
-
-  <script type="module">
-    import { computePosition } from "https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.12/+esm";
-  </script>
-
-  <style>
-    .sidebar-hidden {
-      display: none;
-    }
-  </style>
 {{ end }}
