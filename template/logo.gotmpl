@@ -1,5 +1,9 @@
 {{ define "logo" }}
+  {{ $class := get . "class" }}
   <svg
+    {{ if $class }}
+      class="{{ $class }}"
+    {{ end }}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="9 9 62 62"
     width="62"

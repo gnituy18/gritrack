@@ -1,68 +1,64 @@
 {{ define "body" }}
   <header class="sticky top-0 z-30 flex items-center bg-slate-50 px-6 py-4">
     <a href="/">
-      <svg
-        class="h-8 w-8"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="9 9 62 62"
-        width="62"
-        height="62"
-      >
-        <rect x="0" y="0" width="24" height="24" rx="4" ry="4" />
-        <rect x="28" y="0" width="24" height="24" rx="4" ry="4" />
-        <rect x="56" y="0" width="24" height="24" rx="4" ry="4" />
-        <rect x="0" y="28" width="24" height="24" rx="4" ry="4" />
-        <rect x="28" y="28" width="24" height="24" rx="4" ry="4" />
-        <rect x="56" y="28" width="24" height="24" rx="4" ry="4" />
-        <rect x="0" y="56" width="24" height="24" rx="4" ry="4" />
-        <rect x="28" y="56" width="24" height="24" rx="4" ry="4" />
-        <rect x="56" y="56" width="24" height="24" rx="4" ry="4" />
-      </svg>
+      {{ template "logo" dict "class" "h-8 w-8" }}
     </a>
-    <a href="/examples/" class="ml-4 hover:underline">Examples</a>
+    <a href="/examples/" class="ml-6 hover:underline">Examples</a>
     <a
       href="/create-tracker/"
-      class="ml-auto block flex items-center justify-center rounded-xl p-2 hover:bg-slate-200"
-      ><i class="block h-6 w-6 text-slate-500" data-feather="plus"></i>
+      class="ml-auto flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-200"
+      ><i class="h-6 w-6" data-feather="plus"></i>
     </a>
     <a
       href="/settings/"
-      class="block flex items-center justify-center rounded-xl p-2 hover:bg-slate-200"
-      ><i class="block h-6 w-6 text-slate-500" data-feather="user"></i
+      class="flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-200"
+      ><i class="h-6 w-6" data-feather="user"></i
     ></a>
   </header>
-  <main class="flex justify-center pb-8">
-    <nav class="flex max-w-60 flex-col gap-2">
-      <h1 class="pl-9 text-sm text-slate-500">Your Trackers</h1>
-      <ul class="flex flex-col gap-4 ">
+  <main class="flex justify-center py-8">
+    <nav class="flex max-w-96 flex-col gap-2">
+      <h1 class="ml-9 text-sm text-slate-500">Your Trackers</h1>
+      <ul class="flex flex-col gap-4">
         {{ range $ti, $t := .sessionUser.Trackers }}
           <li class="group flex gap-2">
             <div
-              class="invisible flex h-full w-5 items-center group-hover:visible"
+              class="invisible flex h-full w-5 items-center text-slate-500 group-hover:visible"
             >
-              <i class="block h-5 w-5" data-feather="menu"></i>
+              <i class="h-5 w-5" data-feather="menu"></i>
             </div>
             <div
-              class="relative flex flex-1 flex-col gap-2 rounded-xl p-2 group-hover:bg-slate-100"
+              class="relative flex flex-1 flex-col gap-2 rounded-xl bg-gray-100 px-4 py-2 shadow group-hover:bg-slate-100"
             >
-              <a
-                href="/{{ .Slug }}/settings/"
-                class="absolute right-2 top-2 hidden group-hover:block"
-              >
-                <i class="h-6 w-5 rounded-xl" data-feather="settings"></i>
-              </a>
-              <h2 class="px-1 flex font-semibold">
+              <h2 class="font-semibold">
                 {{ .DisplayName }}
               </h2>
-              <div class="flex flex-col">
-                <h3 class="px-1 text-sm text-slate-500">
-                  Past 10 Days
+              <a
+                href="/{{ .Slug }}/settings/"
+                class="absolute right-3 top-2 hidden text-slate-500 group-hover:block"
+              >
+                <i class="h-6 w-5" data-feather="settings"></i>
+              </a>
+              <div class="grid grid-cols-[auto_auto] justify-items-start gap-2">
+                <h3 class="flex items-center gap-2 text-sm text-slate-500">
+                  <i class="h-4 w-4" data-feather="sun"></i>Today
                 </h3>
-	        <div class="flex gap-1">
-                {{ range $i, $d := (index $.daysArr $t.Slug) }}
-                  {{ template "day" dict "slug" $t.Slug "day" $d }}
-                {{ end }}
-	        <div>
+                <div class="flex items-center justify-center gap-1">
+                  {{ range $i, $d := (index $.daysArr $t.Slug) }}
+                    {{ if eq $i 1 }}
+                      {{ template "day" dict "slug" $t.Slug "day" $d }}
+                    {{ end }}
+                  {{ end }}
+                  <span class="text-sm text-slate-500"> (Not Logged Yet) </span>
+                </div>
+                <h3 class="flex items-center gap-2 text-sm text-slate-500">
+                  <i class="h-4 w-4" data-feather="clock"></i>
+                  Past 7 Days
+                </h3>
+                <div class="flex gap-1">
+                  {{ range $i, $d := (index $.daysArr $t.Slug) }}
+                    {{ template "day" dict "slug" $t.Slug "day" $d }}
+                  {{ end }}
+                </div>
               </div>
             </div>
           </li>
@@ -70,4 +66,7 @@
       </ul>
     </nav>
   </main>
+  <script>
+    feather.replace();
+  </script>
 {{ end }}
