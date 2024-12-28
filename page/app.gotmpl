@@ -17,7 +17,7 @@
   </header>
   <main class="flex justify-center py-8">
     <nav class="flex max-w-96 flex-col gap-2">
-      <h1 class="ml-9 text-sm text-slate-500">Your Trackers</h1>
+      <h1 class="ml-11 text-sm text-slate-500">Your Trackers</h1>
       <ul class="flex flex-col gap-4">
         {{ range $ti, $t := .sessionUser.Trackers }}
           <li class="group flex gap-2">
@@ -27,7 +27,7 @@
               <i class="h-5 w-5" data-feather="menu"></i>
             </div>
             <div
-              class="relative flex flex-1 flex-col gap-2 rounded-xl bg-gray-100 px-4 py-2 shadow group-hover:bg-slate-100"
+              class="relative flex flex-1 flex-col gap-2 rounded-xl bg-slate-100 px-4 py-2 shadow group-hover:bg-slate-200"
             >
               <h2 class="font-semibold">
                 {{ .DisplayName }}
