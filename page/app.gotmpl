@@ -1,7 +1,7 @@
 {{ define "body" }}
-  <header class="sticky top-0 z-30 flex items-center bg-slate-50 px-6 py-4">
+  <header class="sticky top-0 z-30 flex items-center bg-white px-6 py-4">
     <a href="/">
-      {{ template "logo" dict "class" "h-8 w-8" }}
+      {{ template "logo" dict "class" "h-8 w-8" "fill" "#16161d" }}
     </a>
     <a href="/examples/" class="ml-6 hover:underline">Examples</a>
     <a
@@ -24,10 +24,10 @@
             <div
               class="invisible flex h-full w-5 items-center text-slate-500 group-hover:visible"
             >
-              <i class="h-5 w-5" data-feather="menu"></i>
+              <i class="h-4 w-4" data-feather="menu"></i>
             </div>
             <div
-              class="relative flex flex-1 flex-col gap-2 rounded-xl bg-slate-100 px-4 py-2 shadow group-hover:bg-slate-200"
+              class="relative flex flex-1 flex-col gap-2 rounded-xl border bg-white px-4 py-2 group-hover:border-slate-500"
             >
               <h2 class="font-semibold">
                 {{ .DisplayName }}
@@ -36,7 +36,7 @@
                 href="/{{ .Slug }}/settings/"
                 class="absolute right-3 top-2 hidden text-slate-500 group-hover:block"
               >
-                <i class="h-6 w-5" data-feather="settings"></i>
+                <i class="h-6 w-4" data-feather="settings"></i>
               </a>
               <div class="grid grid-cols-[auto_auto] justify-items-start gap-2">
                 <h3 class="flex items-center gap-2 text-sm text-slate-500">
@@ -66,7 +66,36 @@
       </ul>
     </nav>
   </main>
-  <script>
+  <script type="module">
     feather.replace();
+
+    document.addEventListener("alpine:init", () => {
+      Alpine.store("emojiPicker", {
+        selected: false,
+      });
+    });
+
+    async function getDayDetail(slug, date) {
+      try {
+        const res = await fetch(
+          "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
+        );
+        const { emoji, content } = await res.json();
+        inputEmoji.value = emoji;
+        if (emoji !== "") {
+          Alpine.store("emojiPicker").selected = true;
+        } else {
+          Alpine.store("emojiPicker").selected = false;
+        }
+
+        inputContent.value = content;
+        currentDate = date;
+        dayDetailTime.replaceChildren(date);
+        dayDetail.showModal();
+      } catch (err) {
+        alert("Something went wrong.");
+        console.error(err);
+      }
+    }
   </script>
 {{ end }}

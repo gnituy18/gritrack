@@ -1,4 +1,9 @@
 {{ define "body" }}
+  <header class="sticky top-0 z-30 flex items-center bg-slate-50 px-6 py-4">
+    <a href="/">
+      {{ template "logo" dict "class" "h-8 w-8" }}
+    </a>
+  </header>
   <main class="mt-12 flex w-full flex-col items-center gap-4">
     <h2 class="text-2xl font-bold">Log In</h2>
 
@@ -10,7 +15,9 @@
       >
         <p id="error" class="text-center text-red-600">{{ . }}</p>
         <div class="flex flex-col gap-1">
-          <label for="email" class="text-sm">Email address</label>
+          <label for="email" class="text-sm text-slate-500"
+            >Email address</label
+          >
           <input
             id="email"
             autocomplete="email"
@@ -22,14 +29,14 @@
           />
         </div>
         <input
-          class="cursor-pointer rounded bg-indigo-600 py-2 font-semibold text-white"
+          class="cursor-pointer rounded bg-slate-950 py-2 font-semibold text-slate-50"
           value="Send Log In Email"
           type="submit"
         />
       </form>
-      <p class="text-center text-slate-600">
+      <p class="text-center text-slate-500">
         Don't have an account yet?
-        <a href="/sign-up/" class="font-bold text-indigo-600 underline"
+        <a href="/sign-up/" class="font-bold text-slate-950 underline"
           >Sign Up</a
         >
       </p>
