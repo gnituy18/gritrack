@@ -1,46 +1,51 @@
 {{ define "body" }}
-  <header class="sticky top-0 z-30 flex items-center bg-white px-6 py-4">
+  <header class="sticky top-0 z-30 flex items-center bg-white p-4">
     <a href="/">
-      {{ template "logo" dict "class" "h-8 w-8" "fill" "#16161d" }}
+      {{ template "logo" dict "class" "size-7 text-eigengrau-900" }}
     </a>
-    <a href="/examples/" class="ml-6 hover:underline">Examples</a>
+    <a href="/examples/" class="ml-4 hover:underline">Examples</a>
     <a
       href="/create-tracker/"
-      class="ml-auto flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-200"
-      ><i class="h-6 w-6" data-feather="plus"></i>
+      class="ml-auto flex items-center justify-center rounded-xl p-2 text-eigengrau-500 hover:bg-eigengrau-50"
+    >
+      {{ template "icon-plus" dict "class" "size-5 text-eigengrau-500" }}
     </a>
     <a
       href="/settings/"
-      class="flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-200"
-      ><i class="h-6 w-6" data-feather="user"></i
-    ></a>
+      class="flex items-center justify-center rounded-xl p-2 text-eigengrau-500 hover:bg-eigengrau-50"
+    >
+      {{ template "icon-user" dict "class" "size-5 text-eigengrau-500" }}
+    </a>
   </header>
-  <main class="flex justify-center py-8">
-    <nav class="flex max-w-96 flex-col gap-2">
-      <h1 class="ml-11 text-sm text-slate-500">Your Trackers</h1>
+  <main class="flex justify-center py-4">
+    <nav class="flex max-w-prose flex-col gap-2">
+      <h1 class="ml-11 flex items-center gap-2 text-sm text-eigengrau-700">
+        Your Trackers
+      </h1>
       <ul class="flex flex-col gap-4">
         {{ range $ti, $t := .sessionUser.Trackers }}
           <li class="group flex gap-2">
             <div
-              class="invisible flex h-full w-5 items-center text-slate-500 group-hover:visible"
+              class="invisible flex h-full w-5 items-center text-eigengrau-700 group-hover:visible"
             >
-              <i class="h-4 w-4" data-feather="menu"></i>
+              {{ template "icon-bars-3" dict "class" "size-5 text-eigengrau-500" }}
             </div>
             <div
-              class="relative flex flex-1 flex-col gap-2 rounded-xl border bg-white px-4 py-2 group-hover:border-slate-500"
+              class="relative flex flex-1 flex-col gap-2 rounded-xl border border-eigengrau-100 p-4 group-hover:border-eigengrau-300"
             >
               <h2 class="font-semibold">
                 {{ .DisplayName }}
               </h2>
               <a
                 href="/{{ .Slug }}/settings/"
-                class="absolute right-3 top-2 hidden text-slate-500 group-hover:block"
+                class="absolute right-3 top-3 hidden group-hover:block"
               >
-                <i class="h-6 w-4" data-feather="settings"></i>
+                {{ template "icon-cog-6-tooth" dict "class" "size-5 text-eigengrau-500" }}
               </a>
               <div class="grid grid-cols-[auto_auto] justify-items-start gap-2">
-                <h3 class="flex items-center gap-2 text-sm text-slate-500">
-                  <i class="h-4 w-4" data-feather="sun"></i>Today
+                <h3 class="flex items-center gap-1 text-sm text-slate-500">
+                  {{ template "icon-sun" dict "class" "size-5 text-eigengrau-300" }}
+                  Today
                 </h3>
                 <div class="flex items-center justify-center gap-1">
                   {{ range $i, $d := (index $.daysArr $t.Slug) }}
@@ -48,10 +53,12 @@
                       {{ template "day" dict "slug" $t.Slug "day" $d }}
                     {{ end }}
                   {{ end }}
-                  <span class="text-sm text-slate-500"> (Not Logged Yet) </span>
+                  <span class="text-sm text-eigengrau-500">
+                    (Not Logged Yet)
+                  </span>
                 </div>
-                <h3 class="flex items-center gap-2 text-sm text-slate-500">
-                  <i class="h-4 w-4" data-feather="clock"></i>
+                <h3 class="flex items-center gap-1 text-sm text-slate-500">
+                  {{ template "icon-clock" dict "class" "size-5 text-eigengrau-300" }}
                   Past 7 Days
                 </h3>
                 <div class="flex gap-1">

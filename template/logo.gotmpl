@@ -1,10 +1,9 @@
 {{ define "logo" }}
   {{ $class := get . "class" }}
-  {{ $fill := get . "fill" }}
   <svg
-    {{ if $class }}class="{{ $class }}"{{ end }}
-    {{ if $fill }}fill="{{ $fill }}"{{ end }}
     xmlns="http://www.w3.org/2000/svg"
+    {{ if $class }}class="{{ $class }}"{{ end }}
+    fill="currentColor"
     viewBox="9 9 62 62"
     width="62"
     height="62"
