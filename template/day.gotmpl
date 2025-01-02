@@ -1,11 +1,12 @@
 {{ define "day" }}
-  {{ $slug := get . "slug" }}
+  {{ $tracker := get . "tracker" }}
   {{ $day := get . "day" }}
   <div class="has-tooltip relative">
     <button
-      id="day-{{ $slug }}-{{ $day }}"
+      id="day-{{ $tracker.Slug }}-{{ $day }}"
       {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
-        hx-on:click="getDayDetail('{{ $slug }}', '{{ $day.String }}')"
+        hx-on:click="getDayDetail('{{ $tracker.DisplayName }}',
+        '{{ $tracker.Slug }}', '{{ $day.String }}')"
       {{ end }}
 
       class="{{- if $day.Emoji -}}
@@ -34,7 +35,7 @@
       {{ end }}
     </button>
     <div
-      id="tooltip-{{ $slug }}-{{ $day }}"
+      id="tooltip-{{ $tracker.Slug }}-{{ $day }}"
       class="tooltip flex max-w-xs flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm shadow-md"
     >
       <time
@@ -58,8 +59,8 @@
       shift,
       offset,
     } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.12/+esm';
-    const day = document.getElementById('day-{{ $slug }}-{{ $day }}')
-    const tooltip = document.querySelector('#tooltip-{{ $slug }}-{{ $day }}');
+    const day = document.getElementById('day-{{ $tracker.Slug }}-{{ $day }}')
+    const tooltip = document.querySelector('#tooltip-{{ $tracker.Slug }}-{{ $day }}');
     computePosition(day, tooltip, {
       placement: 'bottom',
       middleware: [offset(8), flip(), shift({padding: 5})],

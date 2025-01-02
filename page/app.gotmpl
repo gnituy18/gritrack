@@ -49,7 +49,7 @@
                 </h3>
                 <div class="flex items-center justify-center gap-1">
                   {{ $today := index (index $.daysArr $t.Slug) 7 }}
-                  {{ template "day" dict "slug" $t.Slug "day" $today }}
+                  {{ template "day" dict "tracker" $t "day" $today }}
                   <span class="text-sm text-eigengrau-500">
                     (Not Logged Yet)
                   </span>
@@ -60,7 +60,7 @@
                 </h3>
                 <div class="flex gap-1">
                   {{ range $i, $d := slice (index $.daysArr $t.Slug) 0 7 }}
-                    {{ template "day" dict "slug" $t.Slug "day" $d }}
+                    {{ template "day" dict "tracker" $t "day" $d }}
                   {{ end }}
                 </div>
               </div>
@@ -70,7 +70,13 @@
       </ul>
     </nav>
   </main>
-  <dialog id="day-detail" class="w-full max-w-md rounded-xl p-4">123</dialog>
+  <dialog
+    id="day-detail"
+    class="w-full max-w-md rounded-xl p-4 text-eigengrau-900"
+  >
+    <h1 id="day-detail-title" class="font-semibold"></h1>
+    <time id="day-detail-date" class="text-sm text-eigengrau-700"></time>
+  </dialog>
   <script>
     document.addEventListener("alpine:init", () => {
       Alpine.store("emojiPicker", {
@@ -79,13 +85,20 @@
     });
 
     const dayDetail = document.getElementById("day-detail");
+    const dayDetailTitle = document.getElementById("day-detail-title");
+    const dayDetailDate = document.getElementById("day-detail-date");
 
-    async function getDayDetail(slug, date) {
+    async function getDayDetail(displayName, slug, date) {
       try {
         const res = await fetch(
           "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
         );
         const { emoji, content } = await res.json();
+        console.log(displayName);
+        console.log(slug);
+        console.log(date);
+        dayDetailTitle.textContent = displayName;
+        dayDetailDate.textContent = date;
         // inputEmoji.value = emoji;
         // if (emoji !== "") {
         //   Alpine.store("emojiPicker").selected = true;
