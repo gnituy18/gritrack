@@ -242,7 +242,7 @@ func main() {
 		}
 
 		if sessionUser.Username == r.PathValue("username") {
-			daysArr, err := sessionUser.PastDays(7)
+			daysArr, err := sessionUser.PastDays(8)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return

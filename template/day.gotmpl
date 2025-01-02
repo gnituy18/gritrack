@@ -1,54 +1,56 @@
 {{ define "day" }}
   {{ $slug := get . "slug" }}
   {{ $day := get . "day" }}
-  <button
-    id="d-{{ $day }}"
-    {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
-      hx-on:click="getDayDetail('{{ $slug }}', '{{ $day.String }}')"
-    {{ end }}
-    class="{{- if $day.Emoji -}}
-      shadow-inner bg-slate-300
-    {{- else if $day.Content -}}
-      shadow-inner bg-slate-300
-    {{- else if $day.TimeRelation.IsPast -}}
-      {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
-        text-indigo-600 hover:bg-indigo-100
+  <div class="has-tooltip relative">
+    <button
+      id="day-{{ $slug }}-{{ $day }}"
+      {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
+        hx-on:click="getDayDetail('{{ $slug }}', '{{ $day.String }}')"
+      {{ end }}
+
+      class="{{- if $day.Emoji -}}
+        shadow-inner bg-slate-300
+      {{- else if $day.Content -}}
+        shadow-inner bg-slate-300
+      {{- else if $day.TimeRelation.IsPast -}}
+        {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
+          text-indigo-600 hover:bg-indigo-100
+        {{ else }}
+          hover:bg-slate-300
+        {{ end }}
+      {{- else if $day.TimeRelation.IsFuture -}}
+        cursor-default
+        {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
+          text-indigo-300
+        {{ end }}
+      {{- else if $day.TimeRelation.IsToday -}}
+        bg-amber-300 text-amber-500 hover:bg-amber-400
+      {{- end }} place-center grid h-6 w-6 rounded"
+    >
+      {{ if $day.Emoji }}
+        {{ $day.Emoji }}
       {{ else }}
-        hover:bg-slate-300
+        {{ $day.Date.Day }}
       {{ end }}
-    {{- else if $day.TimeRelation.IsFuture -}}
-      cursor-default
-      {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
-        text-indigo-300
+    </button>
+    <div
+      id="tooltip-{{ $slug }}-{{ $day }}"
+      class="tooltip flex max-w-xs flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm shadow-md"
+    >
+      <time
+        datetime="{{ $day.String }}"
+        class="min-w-max font-semibold text-slate-400"
+        >{{ $day.String }}
+        <span class="text-indigo-400">
+          {{ $day.WeekdayString }}
+        </span>
+      </time>
+      {{ if ne $day.Content "" }}
+        <div>
+          {{ $day.Content }}
+        </div>
       {{ end }}
-    {{- else if $day.TimeRelation.IsToday -}}
-      bg-amber-300 text-amber-500 hover:bg-amber-400
-    {{- end }} has-tooltip place-center grid h-6 w-6 rounded"
-  >
-    {{ if $day.Emoji }}
-      {{ $day.Emoji }}
-    {{ else }}
-      {{ $day.Date.Day }}
-    {{ end }}
-  </button>
-  <div
-    id="tt-{{ $day }}"
-    class="tooltip bottom-full left-1/2 mb-3 flex max-w-xs -translate-x-1/2 flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm shadow-md"
-  >
-    <time
-      datetime="{{ $day.String }}"
-      class="min-w-max font-semibold text-slate-400"
-      >{{ $day.String }}
-      <span class="text-indigo-400">
-        {{ $day.WeekdayString }}
-      </span>
-    </time>
-    {{ if ne $day.Content "" }}
-      <div>
-        {{ $day.Content }}
-      </div>
-    {{ end }}
-  </div>
+    </div>
   <script type="module">
     import {
       computePosition,
@@ -56,13 +58,11 @@
       shift,
       offset,
     } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.12/+esm';
-
-    const button = document.querySelector('#d-{{ $day }}');
-    const tooltip = document.querySelector('#tt-{{ $day }}');
-
-    computePosition(button, tooltip, {
-      placement: 'top',
-      middleware: [offset(6), flip(), shift({padding: 5})],
+    const day = document.getElementById('day-{{ $slug }}-{{ $day }}')
+    const tooltip = document.querySelector('#tooltip-{{ $slug }}-{{ $day }}');
+    computePosition(day, tooltip, {
+      placement: 'bottom',
+      middleware: [offset(8), flip(), shift({padding: 5})],
     }).then(({x, y}) => {
       Object.assign(tooltip.style, {
         left: `${x}px`,
@@ -70,4 +70,5 @@
       });
     });
   </script>
+  </div>
 {{ end }}

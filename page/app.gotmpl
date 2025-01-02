@@ -48,11 +48,8 @@
                   Today
                 </h3>
                 <div class="flex items-center justify-center gap-1">
-                  {{ range $i, $d := (index $.daysArr $t.Slug) }}
-                    {{ if eq $i 1 }}
-                      {{ template "day" dict "slug" $t.Slug "day" $d }}
-                    {{ end }}
-                  {{ end }}
+                  {{ $today := index (index $.daysArr $t.Slug) 7 }}
+                  {{ template "day" dict "slug" $t.Slug "day" $today }}
                   <span class="text-sm text-eigengrau-500">
                     (Not Logged Yet)
                   </span>
@@ -62,7 +59,7 @@
                   Past 7 Days
                 </h3>
                 <div class="flex gap-1">
-                  {{ range $i, $d := (index $.daysArr $t.Slug) }}
+                  {{ range $i, $d := slice (index $.daysArr $t.Slug) 0 7 }}
                     {{ template "day" dict "slug" $t.Slug "day" $d }}
                   {{ end }}
                 </div>
@@ -73,14 +70,15 @@
       </ul>
     </nav>
   </main>
-  <script type="module">
-    feather.replace();
-
+  <dialog id="day-detail" class="w-full max-w-md rounded-xl p-4">123</dialog>
+  <script>
     document.addEventListener("alpine:init", () => {
       Alpine.store("emojiPicker", {
         selected: false,
       });
     });
+
+    const dayDetail = document.getElementById("day-detail");
 
     async function getDayDetail(slug, date) {
       try {
@@ -88,16 +86,16 @@
           "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
         );
         const { emoji, content } = await res.json();
-        inputEmoji.value = emoji;
-        if (emoji !== "") {
-          Alpine.store("emojiPicker").selected = true;
-        } else {
-          Alpine.store("emojiPicker").selected = false;
-        }
+        // inputEmoji.value = emoji;
+        // if (emoji !== "") {
+        //   Alpine.store("emojiPicker").selected = true;
+        // } else {
+        //   Alpine.store("emojiPicker").selected = false;
+        // }
 
-        inputContent.value = content;
-        currentDate = date;
-        dayDetailTime.replaceChildren(date);
+        // inputContent.value = content;
+        // currentDate = date;
+        // dayDetailTime.replaceChildren(date);
         dayDetail.showModal();
       } catch (err) {
         alert("Something went wrong.");
