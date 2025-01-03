@@ -1064,6 +1064,10 @@ func (d Day) String() string {
 	return d.Date.Format(time.DateOnly)
 }
 
+func (d Day) Set() bool {
+	return !(d.Content == "" && d.Emoji == "")
+}
+
 const (
 	Past   TimeRelation = "Past"
 	Today  TimeRelation = "Today"

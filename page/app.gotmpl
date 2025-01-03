@@ -48,12 +48,18 @@
                   {{ template "icon-sun" dict "class" "size-5 text-eigengrau-300" }}
                   Today
                 </h3>
-                <div class="flex items-center justify-center gap-1">
+                <div class="flex items-center justify-center gap-2">
                   {{ $today := index (index $.daysArr $t.Slug) 7 }}
                   {{ template "day" dict "tracker" $t "day" $today }}
-                  <span class="text-sm text-eigengrau-500">
-                    (Not Logged Yet)
-                  </span>
+                  {{ if $today.Set }}
+                    <span class="text-sm text-eigengrau-700">
+                      {{ $today.Content }}
+                    </span>
+                  {{ else }}
+                    <span class="text-sm text-eigengrau-500">
+                      Click to log today!
+                    </span>
+                  {{ end }}
                 </div>
                 <h3 class="flex items-center gap-1 text-sm text-slate-500">
                   {{ template "icon-clock" dict "class" "size-5 text-eigengrau-300" }}
