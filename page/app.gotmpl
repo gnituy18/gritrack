@@ -5,14 +5,8 @@
     </a>
     <a href="/examples/" class="ml-4 hover:underline">Examples</a>
     <a
-      href="/create-tracker/"
-      class="ml-auto flex items-center justify-center rounded-xl p-2 text-eigengrau-500 hover:bg-eigengrau-50"
-    >
-      {{ template "icon-plus" dict "class" "size-5 text-eigengrau-500" }}
-    </a>
-    <a
       href="/settings/"
-      class="flex items-center justify-center rounded-xl p-2 text-eigengrau-500 hover:bg-eigengrau-50"
+      class="ml-auto flex items-center justify-center rounded-xl p-2 text-eigengrau-500 hover:bg-eigengrau-50"
     >
       {{ template "icon-user" dict "class" "size-5 text-eigengrau-500" }}
     </a>
@@ -21,6 +15,13 @@
     <nav class="flex max-w-prose flex-col gap-2">
       <h1 class="ml-11 flex items-center gap-2 text-sm text-eigengrau-700">
         Your Trackers
+        <a
+          href="/create-tracker/"
+          class="ml-auto flex items-center rounded-xl bg-eigengrau-700 px-3 py-1 text-sm text-white hover:bg-eigengrau-900"
+        >
+          {{ template "icon-plus" dict "class" "size-4" }}
+          New
+        </a>
       </h1>
       <ul class="flex flex-col gap-4">
         {{ range $ti, $t := .sessionUser.Trackers }}
