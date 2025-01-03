@@ -113,21 +113,43 @@ func main() {
 				return
 			}
 
-			var emoji string
-			var content string
-			if err := db.QueryRow("SELECT emoji, content FROM tracker_entries WHERE username = ? AND slug = ? AND date = ?", sessionUser.Username, slug, date).Scan(&emoji, &content); err != nil && err != sql.ErrNoRows {
+			tracker := Tracker{
+				Slug: slug,
+			}
+			day := Day{
+				Date: t,
+			}
+
+			if err := db.QueryRow(`
+				SELECT
+				trackers.display_name,
+				trackers.position,
+				trackers.public,
+				tracker_entries.emoji,
+				tracker_entries.content 
+				FROM tracker_entries 
+				INNER JOIN trackers
+				ON tracker_entries.username = trackers.username
+				AND tracker_entries.slug = trackers.slug
+				WHERE tracker_entries.username = ? 
+				AND tracker_entries.slug = ? 
+				AND tracker_entries.date = ?
+			`, sessionUser.Username, slug, date).Scan(
+				&tracker.DisplayName,
+				&tracker.Position,
+				&tracker.Public,
+				&day.Emoji,
+				&day.Content,
+			); err != nil && err != sql.ErrNoRows {
 				w.WriteHeader(http.StatusInternalServerError)
 				log.Panic(err)
 			}
 
+			day.TimeRelation = sessionUser.TimeRelation(t)
+
 			data = map[string]any{
-				"slug": slug,
-				"day": Day{
-					Date:         t,
-					Content:      content,
-					Emoji:        emoji,
-					TimeRelation: sessionUser.TimeRelation(t),
-				},
+				"tracker": tracker,
+				"day":     day,
 			}
 
 		case "months":

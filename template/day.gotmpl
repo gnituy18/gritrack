@@ -1,7 +1,14 @@
 {{ define "day" }}
   {{ $tracker := get . "tracker" }}
   {{ $day := get . "day" }}
-  <div class="has-tooltip relative">
+  <div
+    id="day-wrapper-{{ $tracker.Slug }}-{{ $day }}"
+    hx-get="/template/app/day/?slug={{ $tracker.Slug }}&date={{ $day }}"
+    hx-trigger="update-day-{{ $tracker.Slug }}-{{ $day }}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    class="has-tooltip relative"
+  >
     <button
       id="day-{{ $tracker.Slug }}-{{ $day }}"
       {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}

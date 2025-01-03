@@ -12,8 +12,8 @@
     </a>
   </header>
   <main class="flex justify-center py-4">
-    <nav class="flex max-w-prose flex-col gap-2">
-      <h1 class="ml-11 flex items-center gap-2 text-sm text-eigengrau-700">
+    <nav class="flex w-full max-w-md flex-col gap-2">
+      <h1 class="ml-11 flex items-baseline gap-2 text-sm text-eigengrau-700">
         Your Trackers
         <a
           href="/create-tracker/"
@@ -72,22 +72,75 @@
     </nav>
   </main>
   <dialog
+    x-data
     id="day-detail"
-    class="w-full max-w-md rounded-xl p-4 text-eigengrau-900"
+    class="fixed w-full max-w-md rounded-xl p-4 text-eigengrau-900 shadow"
   >
+    <button
+      type="button"
+      class="absolute right-4 top-4"
+      @click="dayDetail.close();$store.dayDetail.emojiPickerOpen = false"
+    >
+      {{ template "icon-x-mark" dict "class" "size-5" }}
+    </button>
     <h1 id="day-detail-title" class="font-semibold"></h1>
     <time id="day-detail-date" class="text-sm text-eigengrau-700"></time>
+    <form class="mt-4 flex flex-col gap-4">
+      <div class="flex gap-2">
+        <div class="relative">
+          <input
+            class="size-10 cursor-pointer rounded-xl border-eigengrau-300 p-0 text-center"
+            readonly
+            id="day-detail-emoji"
+            type="text"
+            value=""
+            @click="$store.dayDetail.emojiPickerOpen = true"
+          />
+          <div
+            class="pointer-events-none absolute left-0 top-0 flex size-full items-center justify-center"
+            x-show="!$store.dayDetail.emojiSelected"
+          >
+            {{ template "icon-face-smile" dict "class" "size-5 text-eigengrau-300" }}
+          </div>
+        </div>
+        <input
+          placeholder="Update notes for this day."
+          autofocus
+          class="h-10 flex-1 rounded-xl border-eigengrau-300 placeholder:text-eigengrau-300"
+          id="day-detail-content"
+          type="text"
+          value=""
+        />
+      </div>
+      <emoji-picker
+        class="w-full"
+        x-show="$store.dayDetail.emojiPickerOpen"
+        @emoji-click="$store.dayDetail.emojiSelected = true;dayDetailEmoji.value = $event.detail.unicode"
+      >
+      </emoji-picker>
+      <button
+        hx-on:click="updateDayDetail()"
+        type="button"
+        class="w-full rounded-xl bg-eigengrau-700 px-6 py-2 text-white"
+      >
+        Submit
+      </button>
+    </form>
   </dialog>
   <script>
     document.addEventListener("alpine:init", () => {
-      Alpine.store("emojiPicker", {
-        selected: false,
+      Alpine.store("dayDetail", {
+        emojiPickerOpen: false,
+        emojiSelected: false,
       });
     });
 
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTitle = document.getElementById("day-detail-title");
     const dayDetailDate = document.getElementById("day-detail-date");
+    const dayDetailEmoji = document.getElementById("day-detail-emoji");
+    const dayDetailContent = document.getElementById("day-detail-content");
+    let currentSlug = "";
 
     async function getDayDetail(displayName, slug, date) {
       try {
@@ -95,26 +148,42 @@
           "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
         );
         const { emoji, content } = await res.json();
-        console.log(displayName);
-        console.log(slug);
-        console.log(date);
         dayDetailTitle.textContent = displayName;
         dayDetailDate.textContent = date;
-        // inputEmoji.value = emoji;
-        // if (emoji !== "") {
-        //   Alpine.store("emojiPicker").selected = true;
-        // } else {
-        //   Alpine.store("emojiPicker").selected = false;
-        // }
+        dayDetailEmoji.value = emoji;
+        dayDetailContent.value = content;
+        currentSlug = slug;
 
-        // inputContent.value = content;
-        // currentDate = date;
-        // dayDetailTime.replaceChildren(date);
+        if (emoji !== "") {
+          Alpine.store("dayDetail").emojiSelected = true;
+        } else {
+          Alpine.store("dayDetail").emojiSelected = false;
+        }
+
         dayDetail.showModal();
       } catch (err) {
         alert("Something went wrong.");
         console.error(err);
       }
+    }
+
+    async function updateDayDetail() {
+      const formData = new FormData();
+      formData.set("slug", currentSlug);
+      console.log(currentSlug);
+      formData.set("date", dayDetailDate.textContent);
+      formData.set("emoji", dayDetailEmoji.value);
+      formData.set("content", dayDetailContent.value);
+
+      const res = await fetch("/day-detail/", {
+        method: "PUT",
+        body: formData,
+      });
+      htmx.trigger(
+        `#day-wrapper-${currentSlug}-${dayDetailDate.textContent}`,
+        `update-day-${currentSlug}-${dayDetailDate.textContent}`,
+      );
+      dayDetail.close();
     }
   </script>
 {{ end }}

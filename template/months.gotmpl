@@ -34,8 +34,8 @@
         <time
           id="day-{{ .String }}"
           datetime="{{ .String }}"
-          hx-get="/template/app/day/?slug={{ $tracker.Slug }}&date={{ .String }}"
           class="has-tooltip relative z-10 grid h-7 w-7 place-items-center"
+          hx-get="/template/app/day/?slug={{ $tracker.Slug }}&date={{ .String }}"
           hx-trigger="update-day-{{ .String }}"
           style="grid-column-start: {{ .Weekday }};grid-row-start: {{ add .Week 2 }};"
         >
