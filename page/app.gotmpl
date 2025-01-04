@@ -116,6 +116,12 @@
           type="text"
           name="content"
         />
+        <button
+          type="button"
+          @click="$store.dayDetail.emojiSelected = false;dayDetailEmoji.value='';dayDetailContent.value = ''"
+        >
+          {{ template "icon-x-mark" dict "class" "size-5" }}
+        </button>
       </div>
       <emoji-picker
         class="w-full"
