@@ -51,15 +51,7 @@
                 <div class="flex items-center justify-center gap-2">
                   {{ $today := index (index $.daysArr $t.Slug) 7 }}
                   {{ template "day" dict "tracker" $t "day" $today }}
-                  {{ if $today.Set }}
-                    <span class="text-sm text-eigengrau-700">
-                      {{ $today.Content }}
-                    </span>
-                  {{ else }}
-                    <span class="text-sm text-eigengrau-500">
-                      Click to log today!
-                    </span>
-                  {{ end }}
+                  {{ template "today-preview" dict "tracker" $t "day" $today }}
                 </div>
                 <h3 class="flex items-center gap-1 text-sm text-slate-500">
                   {{ template "icon-clock" dict "class" "size-5 text-eigengrau-300" }}
@@ -92,14 +84,21 @@
     <h1 id="day-detail-title" class="font-semibold"></h1>
     <time id="day-detail-date" class="text-sm text-eigengrau-700"></time>
     <form class="mt-4 flex flex-col gap-4">
+      <input id="day-detail-slug" type="text" class="hidden" name="slug" />
+      <input
+        id="day-detail-input-date"
+        type="text"
+        class="hidden"
+        name="date"
+      />
       <div class="flex gap-2">
         <div class="relative">
           <input
             class="size-10 cursor-pointer rounded-xl border-eigengrau-300 p-0 text-center"
             readonly
             id="day-detail-emoji"
+            name="emoji"
             type="text"
-            value=""
             @click="$store.dayDetail.emojiPickerOpen = true"
           />
           <div
@@ -115,7 +114,7 @@
           class="h-10 flex-1 rounded-xl border-eigengrau-300 placeholder:text-eigengrau-300"
           id="day-detail-content"
           type="text"
-          value=""
+          name="content"
         />
       </div>
       <emoji-picker
@@ -125,8 +124,9 @@
       >
       </emoji-picker>
       <button
-        hx-on:click="updateDayDetail()"
-        type="button"
+        hx-put="/day-detail/"
+        hx-swap="none"
+        hx-on::after-request="dayDetail.close()"
         class="w-full rounded-xl bg-eigengrau-700 px-6 py-2 text-white"
       >
         Submit
@@ -144,9 +144,10 @@
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTitle = document.getElementById("day-detail-title");
     const dayDetailDate = document.getElementById("day-detail-date");
+    const dayDetailInputDate = document.getElementById("day-detail-input-date");
     const dayDetailEmoji = document.getElementById("day-detail-emoji");
     const dayDetailContent = document.getElementById("day-detail-content");
-    let currentSlug = "";
+    const dayDetailSlug = document.getElementById("day-detail-slug");
 
     async function getDayDetail(displayName, slug, date) {
       try {
@@ -156,9 +157,10 @@
         const { emoji, content } = await res.json();
         dayDetailTitle.textContent = displayName;
         dayDetailDate.textContent = date;
+        dayDetailInputDate.value = date;
         dayDetailEmoji.value = emoji;
         dayDetailContent.value = content;
-        currentSlug = slug;
+        dayDetailSlug.value = slug;
 
         if (emoji !== "") {
           Alpine.store("dayDetail").emojiSelected = true;
@@ -171,25 +173,6 @@
         alert("Something went wrong.");
         console.error(err);
       }
-    }
-
-    async function updateDayDetail() {
-      const formData = new FormData();
-      formData.set("slug", currentSlug);
-      console.log(currentSlug);
-      formData.set("date", dayDetailDate.textContent);
-      formData.set("emoji", dayDetailEmoji.value);
-      formData.set("content", dayDetailContent.value);
-
-      const res = await fetch("/day-detail/", {
-        method: "PUT",
-        body: formData,
-      });
-      htmx.trigger(
-        `#day-wrapper-${currentSlug}-${dayDetailDate.textContent}`,
-        `update-day-${currentSlug}-${dayDetailDate.textContent}`,
-      );
-      dayDetail.close();
     }
   </script>
 {{ end }}

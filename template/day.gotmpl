@@ -1,16 +1,14 @@
 {{ define "day" }}
+  {{ $oob := get . "oob" }}
   {{ $tracker := get . "tracker" }}
   {{ $day := get . "day" }}
   <div
-    id="day-wrapper-{{ $tracker.Slug }}-{{ $day }}"
-    hx-get="/template/app/day/?slug={{ $tracker.Slug }}&date={{ $day }}"
-    hx-trigger="update-day-{{ $tracker.Slug }}-{{ $day }}"
-    hx-target="this"
-    hx-swap="outerHTML"
+    id="day-{{ $tracker.Slug }}-{{ $day }}"
+    {{ if $oob }}hx-swap-oob="true"{{ end }}
     class="has-tooltip relative"
   >
     <button
-      id="day-{{ $tracker.Slug }}-{{ $day }}"
+      id="day-button-{{ $tracker.Slug }}-{{ $day }}"
       {{ if or $day.TimeRelation.IsToday $day.TimeRelation.IsPast }}
         hx-on:click="getDayDetail('{{ $tracker.DisplayName }}',
         '{{ $tracker.Slug }}', '{{ $day.String }}')"
@@ -42,7 +40,7 @@
       {{ end }}
     </button>
     <div
-      id="tooltip-{{ $tracker.Slug }}-{{ $day }}"
+      id="day-tooltip-{{ $tracker.Slug }}-{{ $day }}"
       class="tooltip flex max-w-xs flex-col gap-1 rounded border border-indigo-600 bg-slate-50 p-2 text-sm shadow-md"
     >
       <time
@@ -66,9 +64,9 @@
       shift,
       offset,
     } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.12/+esm';
-    const day = document.getElementById('day-{{ $tracker.Slug }}-{{ $day }}')
-    const tooltip = document.querySelector('#tooltip-{{ $tracker.Slug }}-{{ $day }}');
-    computePosition(day, tooltip, {
+    const button = document.getElementById('day-button-{{ $tracker.Slug }}-{{ $day }}')
+    const tooltip = document.getElementById('day-tooltip-{{ $tracker.Slug }}-{{ $day }}');
+    computePosition(button, tooltip, {
       placement: 'bottom',
       middleware: [offset(8), flip(), shift({padding: 5})],
     }).then(({x, y}) => {

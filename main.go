@@ -104,54 +104,6 @@ func main() {
 
 		tmplateName := r.PathValue("template_name")
 		switch tmplateName {
-		case "day":
-			slug := query.Get("slug")
-			date := query.Get("date")
-			t, err := time.Parse(time.DateOnly, date)
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			tracker := Tracker{
-				Slug: slug,
-			}
-			day := Day{
-				Date: t,
-			}
-
-			if err := db.QueryRow(`
-				SELECT
-				trackers.display_name,
-				trackers.position,
-				trackers.public,
-				tracker_entries.emoji,
-				tracker_entries.content 
-				FROM tracker_entries 
-				INNER JOIN trackers
-				ON tracker_entries.username = trackers.username
-				AND tracker_entries.slug = trackers.slug
-				WHERE tracker_entries.username = ? 
-				AND tracker_entries.slug = ? 
-				AND tracker_entries.date = ?
-			`, sessionUser.Username, slug, date).Scan(
-				&tracker.DisplayName,
-				&tracker.Position,
-				&tracker.Public,
-				&day.Emoji,
-				&day.Content,
-			); err != nil && err != sql.ErrNoRows {
-				w.WriteHeader(http.StatusInternalServerError)
-				log.Panic(err)
-			}
-
-			day.TimeRelation = sessionUser.TimeRelation(t)
-
-			data = map[string]any{
-				"tracker": tracker,
-				"day":     day,
-			}
-
 		case "months":
 			username := query.Get("username")
 			slug := query.Get("slug")
@@ -225,7 +177,7 @@ func main() {
 			return
 		}
 
-		executeTemplate(w, tmplateName, data, "")
+		executeTemplates(w, data, "", tmplateName)
 	})
 
 	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -437,7 +389,6 @@ func main() {
 
 		t, err := time.Parse(time.DateOnly, date)
 		if err != nil {
-
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -452,7 +403,46 @@ func main() {
 			log.Panic(err)
 		}
 
-		w.WriteHeader(http.StatusNoContent)
+		tracker := Tracker{
+			Slug: slug,
+		}
+		day := Day{
+			Date: t,
+		}
+		if err := db.QueryRow(`
+				SELECT
+				trackers.display_name,
+				trackers.position,
+				trackers.public,
+				tracker_entries.emoji,
+				tracker_entries.content 
+				FROM tracker_entries 
+				INNER JOIN trackers
+				ON tracker_entries.username = trackers.username
+				AND tracker_entries.slug = trackers.slug
+				WHERE tracker_entries.username = ? 
+				AND tracker_entries.slug = ? 
+				AND tracker_entries.date = ?
+			`, sessionUser.Username, slug, date).Scan(
+			&tracker.DisplayName,
+			&tracker.Position,
+			&tracker.Public,
+			&day.Emoji,
+			&day.Content,
+		); err != nil && err != sql.ErrNoRows {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		day.TimeRelation = sessionUser.TimeRelation(t)
+
+		data := map[string]any{
+			"tracker": tracker,
+			"day":     day,
+			"oob":     true,
+		}
+
+		executeTemplates(w, data, "", "day", "today-preview")
 		return
 	})
 
@@ -712,7 +702,7 @@ func executePage(w http.ResponseWriter, r *http.Request, name string, data any) 
 	}
 }
 
-func executeTemplate(w http.ResponseWriter, name string, data any, trigger string) {
+func executeTemplates(w http.ResponseWriter, data any, trigger string, names ...string) {
 	minifyWriter := minifier.Writer("text/html", w)
 	defer minifyWriter.Close()
 
@@ -720,9 +710,11 @@ func executeTemplate(w http.ResponseWriter, name string, data any, trigger strin
 		w.Header().Add("HX-Trigger", trigger)
 	}
 
-	if err := tmpl.ExecuteTemplate(minifyWriter, name, data); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Panic(err)
+	for _, name := range names {
+		if err := tmpl.ExecuteTemplate(minifyWriter, name, data); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
 	}
 }
 

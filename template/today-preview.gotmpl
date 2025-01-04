@@ -1,0 +1,17 @@
+{{ define "today-preview" }}
+  {{ $oob := get . "oob" }}
+  {{ $tracker := get . "tracker" }}
+  {{ $day := get . "day" }}
+  <div
+    {{ if $oob }}hx-swap-oob="true"{{ end }}
+    id="today-preview-{{ $tracker.Slug }}-{{ $day }}"
+  >
+    {{ if $day.Set }}
+      <span class="text-sm text-eigengrau-700">
+        {{ $day.Content }}
+      </span>
+    {{ else }}
+      <span class="text-sm text-eigengrau-500"> Click to log today! </span>
+    {{ end }}
+  </div>
+{{ end }}
