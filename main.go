@@ -80,13 +80,14 @@ func main() {
 
 	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
 	pageTmpl = map[string]*template.Template{
-		"index":          template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
-		"app":            template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
-		"create-tracker": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/create-tracker.gotmpl")),
-		"log-in":         template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
-		"sign-up":        template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
-		"settings":       template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/settings.gotmpl")),
-		"email-sent":     template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
+		"index":            template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
+		"app":              template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
+		"create-tracker":   template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/create-tracker.gotmpl")),
+		"log-in":           template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
+		"sign-up":          template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
+		"settings":         template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/settings.gotmpl")),
+		"settings-tracker": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/settings-tracker.gotmpl")),
+		"email-sent":       template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
 	}
 
 	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -327,6 +328,30 @@ func main() {
 		})
 	})
 
+	http.HandleFunc("GET /settings/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		slug := r.PathValue("slug")
+
+		tracker := sessionUser.Tracker(slug)
+		if tracker == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		executePage(w, r, "settings-tracker", map[string]any{
+			"SessionUser": sessionUser,
+			"Tracker":     tracker,
+		})
+	})
+
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -341,7 +366,7 @@ func main() {
 		slug := query.Get("slug")
 		date := query.Get("date")
 
-		if !sessionUser.HasTracker(slug) {
+		if sessionUser.Tracker(slug) == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -382,7 +407,7 @@ func main() {
 		emoji := r.FormValue("emoji")
 		content := r.FormValue("content")
 
-		if !sessionUser.HasTracker(slug) {
+		if sessionUser.Tracker(slug) == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -853,14 +878,14 @@ type User struct {
 	Trackers []Tracker
 }
 
-func (u *User) HasTracker(slug string) bool {
+func (u *User) Tracker(slug string) *Tracker {
 	for _, t := range u.Trackers {
 		if t.Slug == slug {
-			return true
+			return &t
 		}
 	}
 
-	return false
+	return nil
 }
 
 func (u *User) Today() time.Time {

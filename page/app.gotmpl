@@ -38,7 +38,7 @@
                 {{ .DisplayName }}
               </h2>
               <a
-                href="/{{ .Slug }}/settings/"
+                href="/settings/{{ .Slug }}/"
                 class="absolute right-3 top-3 hidden group-hover:block"
               >
                 {{ template "icon-cog-6-tooth" dict "class" "size-5 text-eigengrau-500" }}
@@ -120,7 +120,7 @@
           type="button"
           @click="$store.dayDetail.emojiSelected = false;dayDetailEmoji.value='';dayDetailContent.value = ''"
         >
-          {{ template "icon-x-mark" dict "class" "size-5" }}
+          {{ template "icon-trash" dict "class" "size-5" }}
         </button>
       </div>
       <emoji-picker
