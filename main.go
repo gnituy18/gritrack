@@ -404,20 +404,20 @@ func main() {
 			return
 		}
 
-		displayName := r.FormValue("slug")
+		newSlug := r.FormValue("slug")
 
 		if _, err := db.Exec(`
 			UPDATE trackers
 			SET slug = ?
 			WHERE username = ?
 			AND slug = ?
-			`, displayName, sessionUser.Username, slug); err != nil {
+			`, newSlug, sessionUser.Username, slug); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
 
-		w.Header().Add("HX-Trigger", "success")
-		w.WriteHeader(http.StatusNoContent)
+		w.Header().Add("HX-Redirect", fmt.Sprintf("/settings/%s/", newSlug))
+		w.WriteHeader(http.StatusSeeOther)
 	})
 
 	http.HandleFunc("DELETE /settings/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
