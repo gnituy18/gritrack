@@ -386,6 +386,40 @@ func main() {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
+	http.HandleFunc("PATCH /settings/{slug}/slug/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		slug := r.PathValue("slug")
+
+		tracker := sessionUser.Tracker(slug)
+		if tracker == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		displayName := r.FormValue("slug")
+
+		if _, err := db.Exec(`
+			UPDATE trackers
+			SET slug = ?
+			WHERE username = ?
+			AND slug = ?
+			`, displayName, sessionUser.Username, slug); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		w.Header().Add("HX-Trigger", "success")
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	http.HandleFunc("DELETE /settings/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
