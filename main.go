@@ -347,9 +347,44 @@ func main() {
 		}
 
 		executePage(w, r, "settings-tracker", map[string]any{
-			"SessionUser": sessionUser,
-			"Tracker":     tracker,
+			"sessionUser": sessionUser,
+			"tracker":     tracker,
 		})
+	})
+
+	http.HandleFunc("PATCH /settings/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		slug := r.PathValue("slug")
+
+		tracker := sessionUser.Tracker(slug)
+		if tracker == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		displayName := r.FormValue("display_name")
+		description := r.FormValue("description")
+
+		if _, err := db.Exec(`
+			UPDATE trackers
+			SET display_name = ?, description = ?
+			WHERE username = ?
+			AND slug = ?
+			`, displayName, description, sessionUser.Username, slug); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		w.Header().Add("HX-Trigger", "success")
+		w.WriteHeader(http.StatusNoContent)
 	})
 
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -578,10 +613,6 @@ func main() {
 		}
 
 		if _, err := tx.Exec("INSERT INTO users (username, email, timezone) VALUES (?, ?, ?)", username, email, tz); err != nil {
-			tx.Rollback()
-			log.Panic(err)
-		}
-		if _, err := tx.Exec("INSERT INTO trackers (username, slug, display_name, position) VALUES (?, ?, ?, 1)", username, "your_First_Tracker", "Your First Tracker!"); err != nil {
 			tx.Rollback()
 			log.Panic(err)
 		}
@@ -815,7 +846,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 		trackers.public
 		FROM users
 		INNER JOIN user_sessions ON users.username = user_sessions.username
-		JOIN trackers ON trackers.username = users.username
+		LEFT JOIN trackers ON trackers.username = users.username
 		WHERE user_sessions.id = ?
 		ORDER BY trackers.position`, cookie.Value)
 
@@ -852,14 +883,15 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 			}
 		}
 
-		user.Trackers = append(user.Trackers, Tracker{
-			Slug:        slug,
-			DisplayName: displayName,
-			Description: description,
-			Position:    position,
-			Public:      trackerPublic,
-		})
-
+		if slug != "" {
+			user.Trackers = append(user.Trackers, Tracker{
+				Slug:        slug,
+				DisplayName: displayName,
+				Description: description,
+				Position:    position,
+				Public:      trackerPublic,
+			})
+		}
 	}
 
 	if user == nil {

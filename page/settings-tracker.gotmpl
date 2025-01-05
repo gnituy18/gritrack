@@ -1,3 +1,53 @@
 {{ define "body" }}
-  <h1>123</h1>
+  {{ $sessionUser := .sessionUser }}
+  {{ $tracker := .tracker }}
+  {{ template "header" }}
+  <main class="mx-auto flex w-full max-w-md flex-col gap-8">
+    <section class="flex flex-col gap-2">
+      <h2 class="text-lg font-semibold">Tracker Info</h2>
+      <form hx-patch="/" class="flex flex-col gap-4 rounded-xl">
+        <div class="flex flex-col gap-1">
+          <label for="display_name" class="text-sm">Display Name</label>
+          <input
+            id="display_name"
+            class="border-1 rounded-xl border-slate-300 py-2"
+            name="display_name"
+            type="text"
+            required
+            pattern=".*\S.*"
+            title="Please enter at least one non-space character."
+            value="{{ $tracker }}"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="description" class="text-sm">Description</label>
+          <input
+            id="description"
+            class="border-1 rounded-xl border-slate-300 py-2"
+            name="description"
+            type="text"
+            required
+            value="{{ $tracker.Description }}"
+            pattern=".*\S.*"
+            title="Please enter at least one non-space character."
+          />
+        </div>
+        <input
+          hx-patch="/settings/{{ $tracker.Slug }}/"
+          hx-swap="none"
+          class="cursor-pointer rounded-xl bg-eigengrau-700 py-2 text-white hover:bg-eigengrau-900"
+          value="Save"
+          type="submit"
+        />
+      </form>
+    </section>
+    <hr />
+    <section>
+      <h2 class="text-lg font-semibold">Change Tracker ID (Slug)</h2>
+    </section>
+    <hr />
+    <section>
+      <h2 class="text-lg font-semibold text-red-500">Delete Tracker</h2>
+    </section>
+  </main>
 {{ end }}

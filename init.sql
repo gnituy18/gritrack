@@ -23,10 +23,13 @@ CREATE TABLE trackers(
 
 CREATE TABLE tracker_entries(
 	username,
-	slug, 
+	slug,
 	date TEXT NOT NULL,
 	emoji TEXT NOT NULL DEFAULT "",
 	content TEXT NOT NULL DEFAULT "",
-	FOREIGN KEY(username, slug) REFERENCES trackers(username, slug),
+	FOREIGN KEY(username, slug)
+	REFERENCES trackers(username, slug)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE,
 	PRIMARY KEY (username, slug, date DESC)
 );
