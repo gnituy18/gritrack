@@ -46,8 +46,17 @@
       <h2 class="text-lg font-semibold">Change Tracker ID (Slug)</h2>
     </section>
     <hr />
-    <section>
+    <section class="flex flex-col gap-2">
       <h2 class="text-lg font-semibold text-red-500">Delete Tracker</h2>
+      <form>
+        <input
+          hx-delete="/settings/{{ $tracker.Slug }}/"
+          hx-confirm="Are you sure you want to delete '{{ $tracker }}'?"
+          class="cursor-pointer rounded-xl bg-red-600 px-6 py-2 text-white hover:bg-red-700"
+          value="Delete"
+          type="submit"
+        />
+      </form>
     </section>
   </main>
 {{ end }}

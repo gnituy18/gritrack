@@ -13,7 +13,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -387,6 +386,37 @@ func main() {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
+	http.HandleFunc("DELETE /settings/{slug}/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		slug := r.PathValue("slug")
+
+		tracker := sessionUser.Tracker(slug)
+		if tracker == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		if _, err := db.Exec(`
+			DELETE FROM trackers
+			WHERE username = ?
+			AND slug = ?
+			`, sessionUser.Username, slug); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		w.Header().Add("HX-Redirect", fmt.Sprintf("/%s/", sessionUser.Username))
+		w.WriteHeader(http.StatusSeeOther)
+	})
+
 	http.HandleFunc("GET /day-detail/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -558,7 +588,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		w.Header().Add("HX-Location", fmt.Sprintf("/%s/%s/", sessionUser.Username, url.QueryEscape(slug)))
+		w.Header().Add("HX-Redirect", fmt.Sprintf("/%s/", sessionUser.Username))
 		w.WriteHeader(http.StatusSeeOther)
 	})
 
