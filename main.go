@@ -978,7 +978,7 @@ func (u *User) PastDays(days int) (map[string][]*Day, error) {
 		FROM tracker_entries
 		WHERE username = ? AND date >= ? AND date <= ?
 		ORDER BY slug, date
-		`, u.Username, startDate, endDate)
+		`, u.Username, startDate.Format(time.DateOnly), endDate.Format(time.DateOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -1026,7 +1026,7 @@ func (u *User) PastDays(days int) (map[string][]*Day, error) {
 func (u *User) TrackerEntries(slug string, fromYear int, fromMonth time.Month, toYear int, toMonth time.Month) (*TrackerEntries, error) {
 	startDate := time.Date(fromYear, fromMonth, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(toYear, toMonth+1, 1, 0, 0, 0, 0, time.UTC)
-	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND slug = ? AND date >= ? AND date < ?", u.Username, slug, startDate, endDate)
+	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND slug = ? AND date >= ? AND date < ?", u.Username, slug, startDate.Format(time.DateOnly), endDate.Format(time.DateOnly))
 	if err != nil {
 		return nil, err
 	}
