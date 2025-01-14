@@ -2,7 +2,9 @@
   {{ template "header" }}
   <main class="flex justify-center py-4">
     <nav class="flex w-full max-w-md flex-col gap-2">
-      <h1 class="ml-11 flex items-baseline gap-2 text-sm text-eigengrau-700">
+      <h1
+        class="ml-11 mr-7 flex items-baseline gap-2 text-sm text-eigengrau-700"
+      >
         Your Trackers
         <a
           href="/create-tracker/"
@@ -52,6 +54,11 @@
                   {{ end }}
                 </div>
               </div>
+            </div>
+            <div class="invisible flex items-center group-hover:visible">
+              <a href="/{{ $.sessionUser.Username }}/{{ $t.Slug }}/">
+                {{ template "icon-arrows-pointing-out" dict "class" "size-5 text-eigengrau-300" }}
+              </a>
             </div>
           </li>
         {{ end }}
