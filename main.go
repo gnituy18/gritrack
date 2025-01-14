@@ -81,6 +81,7 @@ func main() {
 	pageTmpl = map[string]*template.Template{
 		"index":            template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
 		"app":              template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
+		"owner-tracker":    template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/owner-tracker.gotmpl")),
 		"create-tracker":   template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/create-tracker.gotmpl")),
 		"log-in":           template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
 		"sign-up":          template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
@@ -319,7 +320,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		executePage(w, r, "app", map[string]any{
+		executePage(w, r, "owner-tracker", map[string]any{
 			"SessionUser": sessionUser,
 			"User":        &user,
 			"Tracker":     &tracker,
