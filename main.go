@@ -243,35 +243,7 @@ func main() {
 		username := r.PathValue("username")
 		slug := r.PathValue("slug")
 
-		user := User{}
-		tracker := Tracker{}
-		if err := db.QueryRow(`
-			SELECT
-			users.email,
-			users.timezone,
-			trackers.display_name,
-			trackers.description,
-			trackers.position,
-			trackers.public
-			FROM users
-			JOIN trackers ON users.username = trackers.username
-			WHERE users.username = ?
-			AND trackers.slug = ?
-		`, username, slug).Scan(
-			&user.Email,
-			&user.TimeZone,
-			&tracker.DisplayName,
-			&tracker.Description,
-			&tracker.Position,
-			&tracker.Public); err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		} else if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Panic(err)
-		}
-		user.Username = username
-		tracker.Slug = slug
+		tracker := sessionUser.Tracker(slug)
 
 		if !tracker.Public {
 			if !ok {
@@ -321,10 +293,9 @@ func main() {
 		}
 
 		executePage(w, r, "owner-tracker", map[string]any{
-			"SessionUser": sessionUser,
-			"User":        &user,
-			"Tracker":     &tracker,
-			"Entries":     trackerEntries,
+			"sessionUser": sessionUser,
+			"tracker":     &tracker,
+			"entries":     trackerEntries,
 		})
 	})
 

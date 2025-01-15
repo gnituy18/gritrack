@@ -1,6 +1,7 @@
 {{ define "months" }}
   {{ $tracker := get . "tracker" }}
-  {{ range $tracker.Entries.Months }}
+  {{ $entries := get . "entries" }}
+  {{ range $entries.Months }}
     <section class="col-span-7 grid grid-cols-subgrid place-items-center">
       <time class="col-span-7 text-center font-semibold text-slate-600">
         {{ .FormatYYYYMM }}
@@ -32,14 +33,10 @@
       </div>
       {{ range $i, $e :=  .Days }}
         <time
-          id="day-{{ .String }}"
-          datetime="{{ .String }}"
-          class="has-tooltip relative z-10 grid h-7 w-7 place-items-center"
-          hx-get="/template/app/day/?slug={{ $tracker.Slug }}&date={{ .String }}"
-          hx-trigger="update-day-{{ .String }}"
+          class="grid size-7 place-items-center"
           style="grid-column-start: {{ .Weekday }};grid-row-start: {{ add .Week 2 }};"
         >
-          {{ template "day" dict "slug" $tracker.Slug "day" $e }}
+          {{ template "day" dict "tracker" $tracker "day" $e }}
         </time>
       {{ end }}
     </section>
