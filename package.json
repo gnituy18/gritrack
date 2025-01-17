@@ -1,7 +1,7 @@
 {
   "scripts": {
     "tailwindcss-watch": "tailwindcss -i ./style.css -o ./asset/style.css --watch",
-    "prettier-watch": "onchange \"**/*.gotmpl\" -- prettier --write {{changed}}"
+    "prettier-watch": "onchange \"**/*.tmpl\" -- prettier --write {{changed}}"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.9",

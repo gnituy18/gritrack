@@ -77,7 +77,7 @@ func main() {
 		}
 	}()
 
-	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
+	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.tmpl"))
 	files, err := os.ReadDir("./page")
 	if err != nil {
 		log.Fatal(err)
@@ -183,7 +183,7 @@ func main() {
 	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err != nil {
-			executePage(w, r, "index.gotmpl", nil)
+			executePage(w, r, "index.tmpl", nil)
 			return
 		}
 
@@ -194,7 +194,7 @@ func main() {
 			JOIN user_sessions ON users.username = user_sessions.username
 			WHERE user_sessions.id = ?
 		`, cookie.Value).Scan(&username); err == sql.ErrNoRows {
-			executePage(w, r, "index.gotmpl", nil)
+			executePage(w, r, "index.tmpl", nil)
 			return
 		} else if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -204,7 +204,6 @@ func main() {
 		http.Redirect(w, r, fmt.Sprintf("/%s/", username), http.StatusFound)
 	})
 
-	// user handler
 	http.HandleFunc("GET /{username}/{$}", func(w http.ResponseWriter, r *http.Request) {
 		sessionUser, ok, err := getSessionUser(r)
 		if err != nil {
@@ -222,7 +221,7 @@ func main() {
 				return
 			}
 
-			executePage(w, r, "owner-tracker-list.gotmpl", map[string]any{
+			executePage(w, r, "owner-tracker-list.tmpl", map[string]any{
 				"sessionUser": sessionUser,
 				"daysArr":     daysArr,
 			})
@@ -291,7 +290,7 @@ func main() {
 			log.Panic(err)
 		}
 
-		executePage(w, r, "owner-tracker.gotmpl", map[string]any{
+		executePage(w, r, "owner-tracker.tmpl", map[string]any{
 			"sessionUser": sessionUser,
 			"tracker":     tracker,
 			"entries":     trackerEntries,
@@ -316,7 +315,7 @@ func main() {
 			return
 		}
 
-		executePage(w, r, "settings-tracker.gotmpl", map[string]any{
+		executePage(w, r, "settings-tracker.tmpl", map[string]any{
 			"sessionUser": sessionUser,
 			"tracker":     tracker,
 		})
@@ -550,7 +549,7 @@ func main() {
 			return
 		}
 
-		executePage(w, r, "create-tracker.gotmpl", nil)
+		executePage(w, r, "create-tracker.tmpl", nil)
 	})
 
 	http.HandleFunc("POST /create-tracker/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -607,7 +606,7 @@ func main() {
 			return
 		}
 
-		executePage(w, r, "settings.gotmpl", sessionUser)
+		executePage(w, r, "settings.tmpl", sessionUser)
 	})
 
 	http.HandleFunc("GET /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -620,7 +619,7 @@ func main() {
 			return
 		}
 
-		executePage(w, r, "sign-up.gotmpl", nil)
+		executePage(w, r, "sign-up.tmpl", nil)
 	})
 
 	http.HandleFunc("POST /sign-up/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -675,7 +674,7 @@ func main() {
 			return
 		}
 
-		executePage(w, r, "log-in.gotmpl", nil)
+		executePage(w, r, "log-in.tmpl", nil)
 	})
 
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -699,11 +698,11 @@ func main() {
 	})
 
 	http.HandleFunc("GET /account-created/{$}", func(w http.ResponseWriter, r *http.Request) {
-		executePage(w, r, "email-sent.gotmpl", "🎉 Account Successfully Created! 🎉")
+		executePage(w, r, "email-sent.tmpl", "🎉 Account Successfully Created! 🎉")
 	})
 
 	http.HandleFunc("GET /log-in-email-sent/{$}", func(w http.ResponseWriter, r *http.Request) {
-		executePage(w, r, "email-sent.gotmpl", "📧 Log In Email Sent! 📧")
+		executePage(w, r, "email-sent.tmpl", "📧 Log In Email Sent! 📧")
 	})
 
 	http.HandleFunc("GET /log-in-with-token/{$}", func(w http.ResponseWriter, r *http.Request) {
