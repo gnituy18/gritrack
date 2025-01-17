@@ -30,7 +30,11 @@
     id="from"
     data-from="{{ (mustLast .entries.Months).FormatYYYYMM }}"
   ></div>
-  <div class="hidden" id="slug" data-slug="{{ .tracker.Slug }}"></div>
+  <div
+    class="hidden"
+    id="tracker-id"
+    data-tracker-id="{{ .tracker.TrackerId }}"
+  ></div>
   <div
     class="hidden"
     id="username"
@@ -41,7 +45,7 @@
     const months = 3;
     const from = document.getElementById("from");
     const to = document.getElementById("to");
-    const slug = document.getElementById("slug").dataset.slug;
+    const trackerId = document.getElementById("tracker-id").dataset.trackerId;
     const username = document.getElementById("username").dataset.username;
 
     function getNextFromTo() {
@@ -63,7 +67,7 @@
     function getNextMonths() {
       return {
         ...getNextFromTo(),
-        slug,
+        tracker_id: trackerId,
         username,
       };
     }

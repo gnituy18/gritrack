@@ -14,7 +14,12 @@
     <h1 id="day-detail-title" class="font-semibold"></h1>
     <time id="day-detail-date" class="text-sm text-eigengrau-700"></time>
     <form class="mt-4 flex flex-col gap-4">
-      <input id="day-detail-slug" type="text" class="hidden" name="slug" />
+      <input
+        id="day-detail-tracker-id"
+        type="text"
+        class="hidden"
+        name="tracker_id"
+      />
       <input
         id="day-detail-input-date"
         type="text"
@@ -83,12 +88,13 @@
     const dayDetailInputDate = document.getElementById("day-detail-input-date");
     const dayDetailEmoji = document.getElementById("day-detail-emoji");
     const dayDetailContent = document.getElementById("day-detail-content");
-    const dayDetailSlug = document.getElementById("day-detail-slug");
+    const dayDetailTrackerId = document.getElementById("day-detail-tracker-id");
 
-    async function getDayDetail(displayName, slug, date) {
+    async function getDayDetail(displayName, trackerId, date) {
       try {
         const res = await fetch(
-          "/day-detail/?" + new URLSearchParams({ slug: slug, date: date }),
+          "/day-detail/?" +
+            new URLSearchParams({ tracker_id: trackerId, date: date }),
         );
         const { emoji, content } = await res.json();
         dayDetailTitle.textContent = displayName;
@@ -96,7 +102,7 @@
         dayDetailInputDate.value = date;
         dayDetailEmoji.value = emoji;
         dayDetailContent.value = content;
-        dayDetailSlug.value = slug;
+        dayDetailTrackerId.value = trackerId;
 
         if (emoji !== "") {
           Alpine.store("dayDetail").emojiSelected = true;

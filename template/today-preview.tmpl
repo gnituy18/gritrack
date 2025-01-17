@@ -4,7 +4,7 @@
   {{ $day := get . "day" }}
   <div
     {{ if $oob }}hx-swap-oob="true"{{ end }}
-    id="today-preview-{{ $tracker.Slug }}-{{ $day }}"
+    id="today-preview-{{ $tracker.TrackerId }}-{{ $day }}"
   >
     {{ if $day.Set }}
       <span class="text-sm text-eigengrau-700">

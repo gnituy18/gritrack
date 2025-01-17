@@ -29,7 +29,7 @@
                 {{ .DisplayName }}
               </h2>
               <a
-                href="/settings/{{ .Slug }}/"
+                href="/settings/{{ .TrackerId }}/"
                 class="absolute right-3 top-3 hidden group-hover:block"
               >
                 {{ template "icon-cog-6-tooth" dict "class" "size-5 text-eigengrau-500" }}
@@ -40,7 +40,7 @@
                   Today
                 </h3>
                 <div class="flex items-center justify-center gap-2">
-                  {{ $today := index (index $.daysArr $t.Slug) 7 }}
+                  {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
                   {{ template "day" dict "tracker" $t "day" $today }}
                   {{ template "today-preview" dict "tracker" $t "day" $today }}
                 </div>
@@ -49,14 +49,14 @@
                   Past 7 Days
                 </h3>
                 <div class="flex gap-1">
-                  {{ range $i, $d := slice (index $.daysArr $t.Slug) 0 7 }}
+                  {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
                     {{ template "day" dict "tracker" $t "day" $d }}
                   {{ end }}
                 </div>
               </div>
             </div>
             <div class="invisible flex items-center group-hover:visible">
-              <a href="/{{ $.sessionUser.Username }}/{{ $t.Slug }}/">
+              <a href="/{{ $.sessionUser.Username }}/{{ $t.TrackerId }}/">
                 {{ template "icon-arrows-pointing-out" dict "class" "size-5 text-eigengrau-300" }}
               </a>
             </div>

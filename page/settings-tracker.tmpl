@@ -6,7 +6,7 @@
     <section class="flex flex-col gap-2">
       <h2 class="text-lg font-semibold">Tracker Info</h2>
       <form
-        hx-patch="/settings/{{ $tracker.Slug }}/"
+        hx-patch="/settings/{{ $tracker.TrackerId }}/"
         class="flex flex-col gap-4 rounded-xl"
       >
         <div class="flex flex-col gap-1">
@@ -46,19 +46,19 @@
     <section>
       <h2 class="text-lg font-semibold">Change Tracker ID (Slug)</h2>
       <form
-        hx-patch="/settings/{{ $tracker.Slug }}/slug/"
-        hx-confirm="Are you sure you want update '{{ $tracker.Slug }}'?"
+        hx-patch="/settings/{{ $tracker.TrackerId }}/tracker_id/"
+        hx-confirm="Are you sure you want update '{{ $tracker.TrackerId }}'?"
         class="flex flex-col gap-4 rounded-xl"
       >
         <div class="flex flex-col gap-1">
-          <label for="slug" class="text-sm">Tracker ID (Slug)</label>
+          <label for="tracker_id" class="text-sm">Tracker ID (Slug)</label>
           <input
-            id="slug"
+            id="tracker_id"
             class="border-1 rounded-xl border-slate-300 py-2"
-            name="slug"
+            name="tracker_id"
             type="text"
             required
-            value="{{ $tracker.Slug }}"
+            value="{{ $tracker.TrackerId }}"
             title="Please enter at least one non-space character."
           />
         </div>
@@ -73,7 +73,7 @@
     <section class="flex flex-col gap-2">
       <h2 class="text-lg font-semibold text-red-500">Delete Tracker</h2>
       <form
-        hx-delete="/settings/{{ $tracker.Slug }}/"
+        hx-delete="/settings/{{ $tracker.TrackerId }}/"
         hx-confirm="Are you sure you want to delete '{{ $tracker }}'?"
       >
         <input
