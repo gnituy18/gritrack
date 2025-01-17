@@ -78,16 +78,14 @@ func main() {
 	}()
 
 	tmpl = template.Must(template.New("base").Funcs(sprig.FuncMap()).ParseGlob("./template/*.gotmpl"))
-	pageTmpl = map[string]*template.Template{
-		"index":            template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/index.gotmpl")),
-		"app":              template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/app.gotmpl")),
-		"owner-tracker":    template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/owner-tracker.gotmpl")),
-		"create-tracker":   template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/create-tracker.gotmpl")),
-		"log-in":           template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/log-in.gotmpl")),
-		"sign-up":          template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/sign-up.gotmpl")),
-		"settings":         template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/settings.gotmpl")),
-		"settings-tracker": template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/settings-tracker.gotmpl")),
-		"email-sent":       template.Must(template.Must(tmpl.Clone()).ParseFiles("./page/email-sent.gotmpl")),
+	files, err := os.ReadDir("./page")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pageTmpl = map[string]*template.Template{}
+	for _, file := range files {
+		filename, _ := strings.CutSuffix(file.Name(), ".gotmpl")
+		pageTmpl[filename] = template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s", file.Name())))
 	}
 
 	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -223,7 +221,7 @@ func main() {
 				return
 			}
 
-			executePage(w, r, "app", map[string]any{
+			executePage(w, r, "owner-tracker-list", map[string]any{
 				"sessionUser": sessionUser,
 				"daysArr":     daysArr,
 			})
@@ -294,7 +292,7 @@ func main() {
 
 		executePage(w, r, "owner-tracker", map[string]any{
 			"sessionUser": sessionUser,
-			"tracker":     &tracker,
+			"tracker":     tracker,
 			"entries":     trackerEntries,
 		})
 	})

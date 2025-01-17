@@ -1,6 +1,6 @@
 CREATE TABLE users(
 	username VARCHAR(32) NOT NULL PRIMARY KEY,
-	email VARCHAR(320) NOT NULL UNIQUE,
+	email TEXT NOT NULL UNIQUE,
 	timezone TEXT NOT NULL,
 	public INTEGER NOT NULL DEFAULT 0
 );
@@ -13,23 +13,23 @@ CREATE TABLE user_sessions(
 
 CREATE TABLE trackers(
 	username REFERENCES users(username),
-	slug TEXT NOT NULL,
+	tracker_id TEXT NOT NULL,
 	display_name TEXT NOT NULL,
 	position INTEGER NOT NULL,
 	description TEXT NOT NULL DEFAULT "",
 	public INTEGER NOT NULL DEFAULT 0,
-	PRIMARY KEY (username, slug)
+	PRIMARY KEY (username, tracker_id)
 );
 
 CREATE TABLE tracker_entries(
 	username,
-	slug,
+	tracker_id,
 	date TEXT NOT NULL,
 	emoji TEXT NOT NULL DEFAULT "",
 	content TEXT NOT NULL DEFAULT "",
-	FOREIGN KEY(username, slug)
-	REFERENCES trackers(username, slug)
+	FOREIGN KEY(username, tracker_id)
+	REFERENCES trackers(username, tracker_id)
 	ON UPDATE CASCADE
 	ON DELETE CASCADE,
-	PRIMARY KEY (username, slug, date DESC)
+	PRIMARY KEY (username, tracker_id, date DESC)
 );

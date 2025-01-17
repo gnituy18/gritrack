@@ -1,13 +1,71 @@
 {{ define "body" }}
   {{ template "header" }}
-  <main class="mx-auto flex w-full max-w-md flex-col gap-8">
+  <main class="mx-auto flex w-full max-w-md flex-col gap-8 py-8">
     <h1 class="text-center font-semibold text-eigengrau-700">
       {{ .tracker }}
     </h1>
     <div
+      id="months"
       class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-12"
     >
       {{ template "months" dict "tracker" .tracker "entries" .entries }}
     </div>
+    <button
+      hx-target="#months"
+      hx-swap="beforeend"
+      hx-get="/template/app/months/"
+      hx-vals="js:{...getNextMonths()}"
+      class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+    >
+      Load More
+    </button>
   </main>
+  <div
+    class="hidden"
+    id="to"
+    data-to="{{ (mustFirst .entries.Months).FormatYYYYMM }}"
+  ></div>
+  <div
+    class="hidden"
+    id="from"
+    data-from="{{ (mustLast .entries.Months).FormatYYYYMM }}"
+  ></div>
+  <div class="hidden" id="slug" data-slug="{{ .tracker.Slug }}"></div>
+  <div
+    class="hidden"
+    id="username"
+    data-username="{{ .sessionUser.Username }}"
+  ></div>
+  {{ template "day-detail-dialog" }}
+  <script>
+    const months = 3;
+    const from = document.getElementById("from");
+    const to = document.getElementById("to");
+    const slug = document.getElementById("slug").dataset.slug;
+    const username = document.getElementById("username").dataset.username;
+
+    function getNextFromTo() {
+      const [toYStr, toMStr] = from.dataset.from.split("-");
+      const toY = parseInt(toYStr, 10);
+      const toM = parseInt(toMStr, 10) - 1;
+      let toDate = new Date(toY, toM, 1);
+      toDate.setMonth(toDate.getMonth() - 1);
+
+      let fromDate = new Date(toY, toM, 1);
+      fromDate.setMonth(fromDate.getMonth() - months);
+
+      return {
+        to: `${toDate.getFullYear()}-${(toDate.getMonth() + 1).toString().padStart(2, "0")}`,
+        from: `${fromDate.getFullYear()}-${(fromDate.getMonth() + 1).toString().padStart(2, "0")}`,
+      };
+    }
+
+    function getNextMonths() {
+      return {
+        ...getNextFromTo(),
+        slug,
+        username,
+      };
+    }
+  </script>
 {{ end }}
