@@ -1,5 +1,5 @@
 {{ define "header" }}
-  <header class="sticky top-0 z-30 flex items-center bg-white p-4">
+  <header id="header" class="sticky top-0 z-30 flex items-center bg-white p-4">
     <a href="/">
       {{ template "logo" dict "class" "size-7 text-eigengrau-900" }}
     </a>
@@ -11,4 +11,19 @@
       {{ template "icon-user" dict "class" "size-5 text-eigengrau-500" }}
     </a>
   </header>
+  <script>
+    const header = document.getElementById("header");
+    const shadow = "shadow-md";
+    window.addEventListener("scroll", (event) => {
+      if (window.scrollY > 0 && !header.classList.contains(shadow)) {
+        header.classList.add(shadow);
+        return;
+      }
+
+      if (window.scrollY === 0 && header.classList.contains(shadow)) {
+        header.classList.remove(shadow);
+        return;
+      }
+    });
+  </script>
 {{ end }}
