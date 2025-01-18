@@ -13,8 +13,9 @@
     <button
       hx-target="#months"
       hx-swap="beforeend"
-      hx-get="/template/app/months/"
-      hx-vals="js:{...getNextMonths()}"
+      hx-get="/{{ .sessionUser.Username }}/{{ .tracker.TrackerId }}/months/"
+      hx-vals="js:{...getNextFromTo()}"
+      hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
       class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
     >
       Load More
@@ -64,12 +65,9 @@
       };
     }
 
-    function getNextMonths() {
-      return {
-        ...getNextFromTo(),
-        tracker_id: trackerId,
-        username,
-      };
+    function updateFromTo(fromStr, toStr) {
+      from.dataset.from = fromStr;
+      to.dataset.to = toStr;
     }
   </script>
 {{ end }}

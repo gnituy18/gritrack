@@ -89,97 +89,6 @@ func main() {
 		pageTmpl[filename] = template.Must(template.Must(tmpl.Clone()).ParseFiles(fmt.Sprintf("./page/%s", filename)))
 	}
 
-	http.HandleFunc("GET /template/app/{template_name}/{$}", func(w http.ResponseWriter, r *http.Request) {
-		sessionUser, ok, err := getSessionUser(r)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Panic(err)
-		} else if !ok {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		query := r.URL.Query()
-		var data any
-
-		tmplateName := r.PathValue("template_name")
-		switch tmplateName {
-		case "months":
-			username := query.Get("username")
-			trackerId := query.Get("tracker_id")
-
-			user := User{}
-			tracker := Tracker{}
-			if err := db.QueryRow("SELECT users.email, users.timezone, trackers.description, trackers.position, trackers.public FROM users JOIN trackers ON users.username = trackers.username WHERE users.username = ? AND trackers.tracker_id = ?", username, trackerId).Scan(&user.Email, &user.TimeZone, &tracker.Description, &tracker.Position, &tracker.Public); err == sql.ErrNoRows {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			} else if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				log.Panic(err)
-			}
-			user.Username = username
-			tracker.TrackerId = trackerId
-
-			if !tracker.Public {
-				if !ok {
-					w.WriteHeader(http.StatusUnauthorized)
-					return
-				}
-				if username != sessionUser.Username {
-					w.WriteHeader(http.StatusForbidden)
-					return
-				}
-			}
-
-			query := r.URL.Query()
-			from := query.Get("from")
-
-			fromY := sessionUser.Today().Year()
-			fromM := sessionUser.Today().Month()
-			if from != "" {
-				t, err := time.Parse(time.DateOnly, from+"-01")
-				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					return
-				}
-
-				fromY = t.Year()
-				fromM = t.Month()
-			}
-
-			toY := fromY
-			toM := fromM - time.Month(3) + 1
-			to := query.Get("to")
-			if to != "" {
-				t, err := time.Parse(time.DateOnly, to+"-01")
-				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					return
-				}
-
-				toY = t.Year()
-				toM = t.Month()
-			}
-
-			trackerEntries, err := sessionUser.TrackerEntries(trackerId, fromY, fromM, toY, toM)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				log.Panic(err)
-			}
-
-			data = map[string]any{
-				"tracker": tracker,
-				"entries": trackerEntries,
-			}
-
-		default:
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-
-		executeTemplates(w, data, "", tmplateName)
-	})
-
 	http.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("session")
 		if err != nil {
@@ -255,36 +164,10 @@ func main() {
 		}
 
 		query := r.URL.Query()
+		from := query.Get("from")
 		to := query.Get("to")
 
-		toY := sessionUser.Today().Year()
-		toM := sessionUser.Today().Month()
-		if to != "" {
-			t, err := time.Parse(time.DateOnly, to+"-01")
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			toY = t.Year()
-			toM = t.Month()
-		}
-
-		fromY := toY
-		fromM := toM - time.Month(3) + 1
-		from := query.Get("from")
-		if from != "" {
-			t, err := time.Parse(time.DateOnly, from+"-01")
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			fromY = t.Year()
-			fromM = t.Month()
-		}
-
-		trackerEntries, err := sessionUser.TrackerEntries(trackerId, fromY, fromM, toY, toM)
+		trackerEntries, err := sessionUser.TrackerEntries(trackerId, from, to)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
@@ -295,6 +178,50 @@ func main() {
 			"tracker":     tracker,
 			"entries":     trackerEntries,
 		})
+	})
+
+	http.HandleFunc("GET /{username}/{tracker_id}/months/{$}", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		username := r.PathValue("username")
+		trackerId := r.PathValue("tracker_id")
+
+		tracker := sessionUser.Tracker(trackerId)
+
+		if !tracker.Public {
+			if !ok {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			if username != sessionUser.Username {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+		}
+
+		query := r.URL.Query()
+		from := query.Get("from")
+		to := query.Get("to")
+
+		trackerEntries, err := sessionUser.TrackerEntries(trackerId, from, to)
+
+		fmt.Println(from, to)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		}
+
+		fmt.Println(tracker, trackerEntries)
+
+		executeTemplates(w, map[string]any{
+			"tracker": tracker,
+			"entries": trackerEntries,
+		}, "", "months")
 	})
 
 	http.HandleFunc("GET /settings/{tracker_id}/{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -1027,7 +954,31 @@ func (u *User) PastDays(days int) (map[string][]*Day, error) {
 	return daysArr, nil
 }
 
-func (u *User) TrackerEntries(trackerId string, fromYear int, fromMonth time.Month, toYear int, toMonth time.Month) (*TrackerEntries, error) {
+func (u *User) TrackerEntries(trackerId, from, to string) (*TrackerEntries, error) {
+	toYear := u.Today().Year()
+	toMonth := u.Today().Month()
+	if to != "" {
+		t, err := time.Parse(time.DateOnly, to+"-01")
+		if err != nil {
+			return nil, err
+		}
+
+		toYear = t.Year()
+		toMonth = t.Month()
+	}
+
+	fromYear := toYear
+	fromMonth := toMonth - time.Month(3) + 1
+	if from != "" {
+		t, err := time.Parse(time.DateOnly, from+"-01")
+		if err != nil {
+			return nil, err
+		}
+
+		fromYear = t.Year()
+		fromMonth = t.Month()
+	}
+
 	startDate := time.Date(fromYear, fromMonth, 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(toYear, toMonth+1, 1, 0, 0, 0, 0, time.UTC)
 	rows, err := db.Query("SELECT date, emoji, content FROM tracker_entries WHERE username = ? AND tracker_id = ? AND date >= ? AND date < ?", u.Username, trackerId, startDate.Format(time.DateOnly), endDate.Format(time.DateOnly))
