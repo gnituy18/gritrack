@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -222,6 +223,60 @@ func main() {
 			"tracker": tracker,
 			"entries": trackerEntries,
 		}, "", "months")
+	})
+
+	http.HandleFunc("PATCH /move-tracker/", func(w http.ResponseWriter, r *http.Request) {
+		sessionUser, ok, err := getSessionUser(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Panic(err)
+		} else if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		oldPosition, err := strconv.Atoi(r.FormValue("old_position"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		newPosition, err := strconv.Atoi(r.FormValue("new_position"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if newPosition > oldPosition {
+			if _, err := db.Exec(`
+			UPDATE trackers
+			SET position = CASE
+				WHEN position <= ? AND position > ?
+				THEN position - 1
+				WHEN position = ?
+				THEN ?
+				ELSE position
+			END
+			WHERE username = ?;
+			`, newPosition, oldPosition, oldPosition, newPosition, sessionUser.Username); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		} else {
+			if _, err := db.Exec(`
+			UPDATE trackers
+			SET position = CASE
+				WHEN position >= ? AND position < ?
+				THEN position + 1
+				WHEN position = ?
+				THEN ?
+				ELSE position
+			END
+			WHERE username = ?;
+			`, newPosition, oldPosition, oldPosition, newPosition, sessionUser.Username); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}
+
 	})
 
 	http.HandleFunc("GET /settings/{tracker_id}/{$}", func(w http.ResponseWriter, r *http.Request) {

@@ -14,11 +14,11 @@
           New
         </a>
       </h1>
-      <ul class="flex flex-col gap-4">
+      <ul id="trackers" class="flex flex-col gap-4">
         {{ range $ti, $t := .sessionUser.Trackers }}
           <li class="group flex gap-2">
             <div
-              class="invisible flex h-full w-5 items-center text-eigengrau-700 group-hover:visible"
+              class="handle invisible flex h-full w-5 items-center text-eigengrau-700 group-hover:visible"
             >
               {{ template "icon-bars-3" dict "class" "size-5 text-eigengrau-500" }}
             </div>
@@ -66,4 +66,19 @@
     </nav>
   </main>
   {{ template "day-detail-dialog" }}
+  <script>
+    const trackers = document.getElementById("trackers");
+    const sortable = new Sortable(trackers, {
+      handle: ".handle",
+      onUpdate: function (event) {
+        const body = new FormData();
+        body.append("old_position", event.oldIndex + 1);
+        body.append("new_position", event.newIndex + 1);
+        fetch("/move-tracker/", {
+          method: "PATCH",
+          body: body,
+        });
+      },
+    });
+  </script>
 {{ end }}
