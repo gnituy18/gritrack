@@ -29,3 +29,7 @@ emoji-picker {
 .has-tooltip:hover .tooltip {
   @apply visible z-20;
 }
+
+.sortable-ghost {
+  @apply invisible
+}

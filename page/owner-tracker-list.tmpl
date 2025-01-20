@@ -22,12 +22,12 @@
       </li>
       {{ range $ti, $t := .sessionUser.Trackers }}
         <li
-          class="group col-span-5 flex grid h-12 grid-cols-subgrid items-center"
+          class="item group col-span-5 flex grid h-12 grid-cols-subgrid items-center"
         >
           <div
-            class="handle invisible flex size-5 h-full cursor-move items-center group-hover:visible"
+            class="invisible flex size-5 h-full cursor-move items-center group-hover:visible"
           >
-            {{ template "icon-bars-3" dict "class" "size-5 text-eigengrau-500" }}
+            {{ template "icon-bars-3" dict "class" "handle size-5 text-eigengrau-500" }}
           </div>
           <h2 class="handle max-w-80 cursor-move font-semibold">
             {{ .DisplayName }}
@@ -59,6 +59,9 @@
     const trackers = document.getElementById("trackers");
     const sortable = new Sortable(trackers, {
       handle: ".handle",
+      touchStartThreshold: 8,
+      animation: 150,
+      draggable: ".item",
       onUpdate: function (event) {
         const body = new FormData();
         body.append("old_position", event.oldIndex);
