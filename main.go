@@ -391,10 +391,25 @@ func main() {
 		}
 
 		if _, err := db.Exec(`
+			BEGIN TRANSACTION;
+
+			WITH old_positions AS (
+				SELECT position
+				FROM trackers
+				WHERE username = ?
+				AND tracker_id = ?
+			)
+			UPDATE trackers
+			SET position = position - 1
+			WHERE username = ?
+			AND position > (SELECT position FROM old_positions);
+
 			DELETE FROM trackers
 			WHERE username = ?
-			AND tracker_id = ?
-			`, sessionUser.Username, trackerId); err != nil {
+			AND tracker_id = ?;
+
+			COMMIT;
+			`, sessionUser.Username, trackerId, sessionUser.Username, sessionUser.Username, trackerId); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
