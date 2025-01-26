@@ -1,26 +1,39 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-emoji-picker {
-	--num-columns: 10;
-	--border-color: theme('colors.slate.300');
-	--border-radius: theme('spacing.1');
-	--emoji-padding: theme('spacing.2');
-	--button-active-background: theme('colors.slate.300');
-	--button-hover-background: theme('colors.slate.200');
-	--category-emoji-padding: theme('spacing.2');
-	--indicator-color: theme('colors.indigo.600');
+@plugin '@tailwindcss/forms';
 
-	--input-border-color: theme('colors.slate.300');
-	--input-border-radius: theme('spacing.1');
-	--input-border-size: 1px;
-	--input-font-color: theme('colors.slate.800');
-	--input-padding: theme('spacing.2');
-
-	--outline-color: theme('colors.indigo.600');
+@theme {
+  --color-eigengrau-50: #f6f6f9;
+  --color-eigengrau-100: #ececf2;
+  --color-eigengrau-200: #d6d6e1;
+  --color-eigengrau-300: #b2b3c7;
+  --color-eigengrau-400: #888ba8;
+  --color-eigengrau-500: #696d8e;
+  --color-eigengrau-600: #545675;
+  --color-eigengrau-700: #444560;
+  --color-eigengrau-800: #3b3c51;
+  --color-eigengrau-900: #353545;
+  --color-eigengrau-950: #16161d;
 }
 
+emoji-picker {
+  --num-columns: 10;
+  --border-color: var(--color-slate-300);
+  --border-radius: --spacing(1);
+  --emoji-padding: --spacing(2);
+  --button-active-background: var(--color-slate-300);
+  --button-hover-background: var(--color-slate-200);
+  --category-emoji-padding: --spacing(2);
+  --indicator-color: var(--color-indigo-600);
+
+  --input-border-color: var(--color-slate-300);
+  --input-border-radius: --spacing(1);
+  --input-border-size: 1px;
+  --input-font-color: var(--color-slate-800);
+  --input-padding: --spacing(2);
+
+  --outline-color: var(--color-indigo-600);
+}
 
 .tooltip {
   @apply invisible absolute;
@@ -31,5 +44,5 @@ emoji-picker {
 }
 
 .sortable-ghost {
-  @apply invisible
+  @apply invisible;
 }

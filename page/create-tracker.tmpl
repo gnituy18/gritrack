@@ -4,7 +4,7 @@
 
     <div class="flex flex-col gap-3">
       <form
-        class="flex w-96 flex-col gap-4 rounded"
+        class="flex w-96 flex-col gap-4 rounded-sm"
         hx-target="#error"
         hx-post="/create-tracker/"
       >
@@ -13,7 +13,7 @@
           <p id="error" class="text-sm text-red-600"></p>
           <input
             id="display_name"
-            class="border-1 rounded border-slate-300 py-2"
+            class="border-1 rounded-sm border-slate-300 py-2"
             name="display_name"
             type="text"
             required
@@ -22,7 +22,7 @@
           />
         </div>
         <input
-          class="cursor-pointer rounded bg-eigengrau-700 py-2 text-white hover:bg-eigengrau-900"
+          class="cursor-pointer rounded-sm bg-eigengrau-700 py-2 text-white hover:bg-eigengrau-900"
           value="Create"
           type="submit"
         />

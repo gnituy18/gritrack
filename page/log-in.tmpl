@@ -9,7 +9,7 @@
 
     <div class="flex flex-col gap-3">
       <form
-        class="flex w-96 flex-col gap-4 rounded"
+        class="flex w-96 flex-col gap-4 rounded-sm"
         hx-target="#error"
         hx-post="/send-log-in-email/"
       >
@@ -21,7 +21,7 @@
           <input
             id="email"
             autocomplete="email"
-            class="border-1 rounded border-slate-300 py-2"
+            class="border-1 rounded-sm border-slate-300 py-2"
             name="email"
             type="email"
             required
@@ -29,7 +29,7 @@
           />
         </div>
         <input
-          class="cursor-pointer rounded bg-slate-950 py-2 font-semibold text-slate-50"
+          class="cursor-pointer rounded-sm bg-slate-950 py-2 font-semibold text-slate-50"
           value="Send Log In Email"
           type="submit"
         />
