@@ -17,6 +17,7 @@ CREATE TABLE trackers(
 	display_name TEXT NOT NULL,
 	position INTEGER NOT NULL,
 	description TEXT NOT NULL DEFAULT "",
+	link TEXT NOT NULL DEFAULT "",
 	public INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY (username, tracker_id)
 );

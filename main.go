@@ -210,14 +210,10 @@ func main() {
 
 		trackerEntries, err := sessionUser.TrackerEntries(trackerId, from, to)
 
-		fmt.Println(from, to)
-
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
-
-		fmt.Println(tracker, trackerEntries)
 
 		executeTemplates(w, map[string]any{
 			"tracker": tracker,
@@ -323,13 +319,14 @@ func main() {
 
 		displayName := r.FormValue("display_name")
 		description := r.FormValue("description")
+		link := r.FormValue("link")
 
 		if _, err := db.Exec(`
 			UPDATE trackers
-			SET display_name = ?, description = ?
+			SET display_name = ?, description = ?, link = ?
 			WHERE username = ?
 			AND tracker_id = ?
-			`, displayName, description, sessionUser.Username, trackerId); err != nil {
+			`, displayName, description, link, sessionUser.Username, trackerId); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
 		}
@@ -873,6 +870,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 		trackers.tracker_id,
 		trackers.display_name,
 		trackers.description,
+		trackers.link,
 		trackers.position,
 		trackers.public
 		FROM users
@@ -888,7 +886,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 	for rows.Next() {
 		var username, email, timeZone string
 		var userPublic bool
-		var trackerId, displayName, description string
+		var trackerId, displayName, description, link string
 		var position int
 		var trackerPublic bool
 
@@ -900,6 +898,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 			&trackerId,
 			&displayName,
 			&description,
+			&link,
 			&position,
 			&trackerPublic,
 		)
@@ -919,6 +918,7 @@ func getSessionUser(r *http.Request) (*User, bool, error) {
 				TrackerId:   trackerId,
 				DisplayName: displayName,
 				Description: description,
+				Link:        link,
 				Position:    position,
 				Public:      trackerPublic,
 			})
@@ -1110,6 +1110,7 @@ type Tracker struct {
 	TrackerId   string
 	DisplayName string
 	Description string
+	Link        string
 	Position    int
 	Public      bool
 }

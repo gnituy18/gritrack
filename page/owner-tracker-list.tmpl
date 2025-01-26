@@ -22,15 +22,21 @@
       </li>
       {{ range $ti, $t := .sessionUser.Trackers }}
         <li
-          class="item group col-span-5 flex grid h-12 grid-cols-subgrid items-center"
+          class="item group col-span-5 flex grid min-h-12 grid-cols-subgrid items-center"
         >
           <div
             class="invisible flex size-5 h-full cursor-move items-center group-hover:visible"
           >
             {{ template "icon-bars-3" dict "class" "handle size-5 text-eigengrau-500" }}
           </div>
-          <h2 class="handle max-w-80 cursor-move font-semibold">
-            {{ .DisplayName }}
+          <h2 class="max-w-80 font-semibold">
+            {{ if .Link }}
+              <a href="{{ .Link }}" target="_blank">
+                {{ .DisplayName }}
+              </a>
+            {{ else }}
+              {{ .DisplayName }}
+            {{ end }}
           </h2>
           <div class="flex gap-1">
             {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
