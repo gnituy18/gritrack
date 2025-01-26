@@ -31,8 +31,13 @@
           </div>
           <h2 class="max-w-80 font-semibold">
             {{ if .Link }}
-              <a href="{{ .Link }}" target="_blank">
+              <a
+                href="{{ .Link }}"
+                class="flex items-center gap-1"
+                target="_blank"
+              >
                 {{ .DisplayName }}
+                {{ template "icon-arrow-top-right-on-square" dict "class" "size-4 text-eigengrau-500" }}
               </a>
             {{ else }}
               {{ .DisplayName }}
