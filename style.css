@@ -35,6 +35,10 @@ emoji-picker {
   --outline-color: var(--color-indigo-600);
 }
 
+.button-primary {
+  @apply bg-eigengrau-950 hover:bg-eigengrau-800 active:bg-eigengrau-700 rounded-lg px-6 py-2 font-semibold text-white;
+}
+
 .tooltip {
   @apply invisible absolute;
 }

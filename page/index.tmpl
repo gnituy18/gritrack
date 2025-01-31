@@ -1,16 +1,12 @@
 {{ define "body" }}
   <main class="flex w-full flex-col items-center gap-8 pt-24">
-    {{ template "logo" dict "class" "size-24 text-eigengrau-900" }}
+    {{ template "logo" dict "class" "size-24 text-eigengrau-950" }}
     <h1 class="text-center text-xl font-bold">
       Gritrack helps you track your projects, habits, and life.
       <br />So, you can focus on making progress.
     </h1>
     <div class="flex gap-8">
-      <a
-        href="/log-in/"
-        class="rounded-sm bg-slate-950 px-6 py-2 font-semibold text-slate-50"
-        >Log In</a
-      >
+      <a href="/log-in/" class="button-primary">Log In</a>
       <a
         href="/sign-up/"
         class="rounded-sm border border-slate-950 px-6 py-2 font-semibold"

@@ -671,6 +671,22 @@ func main() {
 		executePage(w, r, "log-in.tmpl", nil)
 	})
 
+	http.HandleFunc("DELETE /log-out/{$}", func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("session")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if _, err := db.Exec("DELETE FROM user_sessions WHERE id = ?", cookie.Value); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Add("HX-Redirect", "/")
+		w.WriteHeader(http.StatusSeeOther)
+	})
+
 	http.HandleFunc("POST /send-log-in-email/{$}", func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		var username string
