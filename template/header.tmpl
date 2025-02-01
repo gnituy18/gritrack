@@ -6,10 +6,16 @@
     <a href="/examples/" class="ml-4 hover:underline">Examples</a>
     <a
       href="/settings/"
-      class="ml-auto flex items-center justify-center rounded-xl p-2 text-eigengrau-500 hover:bg-eigengrau-50"
+      class="text-eigengrau-500 hover:bg-eigengrau-50 ml-auto flex items-center justify-center rounded-xl p-2"
     >
       {{ template "icon-user" dict "class" "size-5 text-eigengrau-500" }}
     </a>
+    <button
+      hx-delete="/log-out/"
+      class="text-eigengrau-500 hover:bg-eigengrau-50 flex items-center justify-center rounded-xl p-2"
+    >
+      {{ template "icon-arrow-left-start-on-rectangle" dict "class" "size-5 text-eigengrau-500" }}
+    </button>
   </header>
   <script>
     const header = document.getElementById("header");
