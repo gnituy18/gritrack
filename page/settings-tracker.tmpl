@@ -13,7 +13,7 @@
           <label for="display_name" class="text-sm">Display Name</label>
           <input
             id="display_name"
-            class="border-1 rounded-xl border-slate-300 py-2"
+            class="rounded-xl border-1 border-slate-300 py-2"
             name="display_name"
             type="text"
             required
@@ -40,7 +40,7 @@
           <label for="link" class="text-sm">Link</label>
           <input
             id="link"
-            class="border-1 rounded-xl border-slate-300 py-2"
+            class="rounded-xl border-1 border-slate-300 py-2"
             name="link"
             type="url"
             value="{{ $tracker.Link }}"
@@ -48,11 +48,7 @@
             title="Please enter at least one non-space character."
           />
         </div>
-        <input
-          class="cursor-pointer rounded-xl bg-eigengrau-700 py-2 text-white hover:bg-eigengrau-900"
-          value="Save"
-          type="submit"
-        />
+        <input class="button-primary" value="Save" type="submit" />
       </form>
     </section>
     <hr />
@@ -67,7 +63,7 @@
           <label for="tracker_id" class="text-sm">Tracker ID (Slug)</label>
           <input
             id="tracker_id"
-            class="border-1 rounded-xl border-slate-300 py-2"
+            class="rounded-xl border-1 border-slate-300 py-2"
             name="tracker_id"
             type="text"
             required
@@ -75,11 +71,7 @@
             title="Please enter at least one non-space character."
           />
         </div>
-        <input
-          class="cursor-pointer rounded-xl bg-eigengrau-700 py-2 text-white hover:bg-eigengrau-900"
-          value="Save"
-          type="submit"
-        />
+        <input class="button-primary" value="Save" type="submit" />
       </form>
     </section>
     <hr />
