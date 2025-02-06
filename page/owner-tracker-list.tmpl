@@ -1,33 +1,22 @@
 {{ define "body" }}
   {{ template "header" }}
-  <main
-    class="mx-auto flex max-w-(--breakpoint-lg) flex-col justify-center gap-4 p-4"
-  >
-    <a
-      href="/create-tracker/"
-      class="bg-eigengrau-700 hover:bg-eigengrau-900 ml-auto flex items-center rounded-xl px-3 py-1 text-sm text-white"
-    >
-      {{ template "icon-plus" dict "class" "size-4" }}
-      New Tracker
-    </a>
+  <main class="container mx-auto flex flex-col gap-4 p-4">
     <ul
       id="trackers"
-      class="grid grid-cols-[auto_auto_auto_auto_auto] place-content-center gap-x-4 divide-y"
+      class="grid grid-cols-[auto_auto_auto_auto_auto] place-content-center gap-x-4 gap-y-2"
     >
-      <li
-        class="group text-eigengrau-500 col-span-5 flex grid grid-cols-subgrid text-sm"
-      >
+      <li class="text-eigengrau-700 col-span-5 grid grid-cols-subgrid text-sm">
         <span> </span>
-        <h1>Your Trackers</h1>
+        <h1>Trackers</h1>
         <span> Past 7 days </span>
         <span> Today </span>
       </li>
       {{ range $ti, $t := .sessionUser.Trackers }}
         <li
-          class="item group col-span-5 flex grid min-h-12 grid-cols-subgrid items-center"
+          class="bg-eigengrau-50 item group col-span-5 grid grid-cols-subgrid items-center rounded-lg px-4 py-3"
         >
           <div
-            class="invisible flex size-5 h-full cursor-move items-center group-hover:visible"
+            class="invisible flex size-5 cursor-move items-center group-hover:visible"
           >
             {{ template "icon-bars-3" dict "class" "handle size-5 text-eigengrau-500" }}
           </div>
@@ -50,12 +39,12 @@
               {{ template "day" dict "tracker" $t "day" $d }}
             {{ end }}
           </div>
-          <div class="flex max-w-80 items-center gap-1">
+          <div class="flex max-w-80 items-center gap-2">
             {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
             {{ template "day" dict "tracker" $t "day" $today }}
             {{ template "today-preview" dict "tracker" $t "day" $today }}
           </div>
-          <div class="invisible flex items-center gap-1 group-hover:visible">
+          <div class="invisible flex items-center gap-2 group-hover:visible">
             <a href="/settings/{{ .TrackerId }}/">
               {{ template "icon-cog-6-tooth" dict "class" "size-5 text-eigengrau-500" }}
             </a>

@@ -36,7 +36,7 @@ emoji-picker {
 }
 
 .button-primary {
-  @apply bg-eigengrau-950 hover:bg-eigengrau-800 active:bg-eigengrau-700 rounded-lg px-6 py-2 font-semibold text-white;
+  @apply cursor-pointer bg-eigengrau-950 hover:bg-eigengrau-800 active:bg-eigengrau-700 flex gap-1 rounded-lg px-6 py-2 font-semibold text-white items-center;
 }
 
 .tooltip {

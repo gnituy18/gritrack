@@ -5,14 +5,20 @@
     </a>
     <a href="/examples/" class="ml-4 hover:underline">Examples</a>
     <a
-      href="/settings/"
+      href="/create-tracker/"
       class="text-eigengrau-500 hover:bg-eigengrau-50 ml-auto flex items-center justify-center rounded-xl p-2"
+    >
+      {{ template "icon-plus" dict "class" "size-5" }}
+    </a>
+    <a
+      href="/settings/"
+      class="text-eigengrau-500 hover:bg-eigengrau-50 flex items-center justify-center rounded-xl p-2"
     >
       {{ template "icon-user" dict "class" "size-5 text-eigengrau-500" }}
     </a>
     <button
       hx-delete="/log-out/"
-      class="text-eigengrau-500 hover:bg-eigengrau-50 flex items-center justify-center rounded-xl p-2"
+      class="text-eigengrau-500 hover:bg-eigengrau-50 flex cursor-pointer items-center justify-center rounded-xl p-2"
     >
       {{ template "icon-arrow-left-start-on-rectangle" dict "class" "size-5 text-eigengrau-500" }}
     </button>

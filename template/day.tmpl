@@ -14,23 +14,16 @@
         '{{ $tracker.TrackerId }}', '{{ $day.String }}')"
       {{ end }}
 
-      class="{{- if $day.Emoji -}}
-        shadow-inner bg-slate-300
-      {{- else if $day.Content -}}
-        shadow-inner bg-slate-300
-      {{- else if $day.TimeRelation.IsPast -}}
-        {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
-          text-indigo-600 hover:bg-indigo-100
-        {{ else }}
-          hover:bg-slate-300
-        {{ end }}
+      class="{{- if or $day.Emoji $day.Content -}}
+        text-white inset-shadow bg-eigengrau-950 hover:bg-eigengrau-800
+        active:bg-eigengrau-700 cursor-pointer active:text-white
+      {{- else if or $day.TimeRelation.IsPast $day.TimeRelation.IsToday -}}
+        active:bg-eigengrau-700 text-eigengrau-500 hover:bg-eigengrau-800
+        hover:text-white cursor-pointer active:text-white
       {{- else if $day.TimeRelation.IsFuture -}}
-        cursor-default
-        {{ if or (eq $day.Weekday 1) (eq $day.Weekday 7) }}
-          text-indigo-300
-        {{ end }}
-      {{- else if $day.TimeRelation.IsToday -}}
-        bg-amber-300 text-amber-500 hover:bg-amber-400
+        cursor-default text-eigengrau-300
+      {{- end }} {{ if $day.TimeRelation.IsToday -}}
+        ring ring-eigengrau-500
       {{- end }} place-center grid size-6 rounded"
     >
       {{ if $day.Emoji }}
@@ -41,20 +34,20 @@
     </button>
     <div
       id="day-tooltip-{{ $tracker.TrackerId }}-{{ $day }}"
-      class="tooltip flex max-w-xs flex-col gap-1 rounded-sm border border-indigo-600 bg-slate-50 p-2 text-sm shadow-md"
+      class="tooltip border-eigengrau-500 bg-eigengrau-50 flex max-w-64 min-w-48 flex-col gap-2 rounded-lg border p-4 text-sm shadow"
     >
       <time
         datetime="{{ $day.String }}"
-        class="min-w-max font-semibold text-slate-400"
+        class="text-eigengrau-500 flex min-w-max gap-2 font-semibold"
         >{{ $day.String }}
-        <span class="text-indigo-400">
-          {{ $day.WeekdayString }}
-        </span>
+        {{ $day.WeekdayString }}
       </time>
       {{ if ne $day.Content "" }}
-        <div>
+        <div class="text-eigengrau-950">
           {{ $day.Content }}
         </div>
+      {{ else }}
+        <div class="text-eigengrau-400">This day hasn't been logged yet.</div>
       {{ end }}
     </div>
   <script type="module">

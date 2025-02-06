@@ -3,15 +3,16 @@
   {{ $tracker := get . "tracker" }}
   {{ $day := get . "day" }}
   <div
+    class="min-w-32"
     {{ if $oob }}hx-swap-oob="true"{{ end }}
     id="today-preview-{{ $tracker.TrackerId }}-{{ $day }}"
   >
     {{ if $day.Set }}
-      <span class="text-sm text-eigengrau-700">
+      <span class="text-eigengrau-700 text-sm">
         {{ $day.Content }}
       </span>
     {{ else }}
-      <span class="text-sm text-eigengrau-500"> Click to log today! </span>
+      <span class="text-eigengrau-500 text-sm"> Click to log today! </span>
     {{ end }}
   </div>
 {{ end }}

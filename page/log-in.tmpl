@@ -1,5 +1,5 @@
 {{ define "body" }}
-  <header class="sticky top-0 z-30 flex items-center bg-slate-50 px-6 py-4">
+  <header class="sticky top-0 z-30 flex items-center px-6 py-4">
     <a href="/">
       {{ template "logo" dict "class" "h-8 w-8" }}
     </a>
@@ -21,18 +21,14 @@
           <input
             id="email"
             autocomplete="email"
-            class="border-1 rounded-sm border-slate-300 py-2"
+            class="rounded-sm border-1 border-slate-300 py-2"
             name="email"
             type="email"
             required
             placeholder="you@example.com"
           />
         </div>
-        <input
-          class="cursor-pointer rounded-sm bg-slate-950 py-2 font-semibold text-slate-50"
-          value="Send Log In Email"
-          type="submit"
-        />
+        <input class="button-primary" value="Send Log In Email" type="submit" />
       </form>
       <p class="text-center text-slate-500">
         Don't have an account yet?
