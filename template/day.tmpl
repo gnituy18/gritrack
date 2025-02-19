@@ -15,15 +15,15 @@
       {{ end }}
 
       class="{{- if or $day.Emoji $day.Content -}}
-        text-white inset-shadow bg-eigengrau-950 hover:bg-eigengrau-800
-        active:bg-eigengrau-700 cursor-pointer active:text-white
+        text-white inset-shadow bg-gray-950 hover:bg-gray-800 active:bg-gray-700
+        cursor-pointer active:text-white
       {{- else if or $day.TimeRelation.IsPast $day.TimeRelation.IsToday -}}
-        active:bg-eigengrau-700 text-eigengrau-500 hover:bg-eigengrau-800
-        hover:text-white cursor-pointer active:text-white
+        active:bg-gray-700 text-gray-500 hover:bg-gray-800 hover:text-white
+        cursor-pointer active:text-white
       {{- else if $day.TimeRelation.IsFuture -}}
-        cursor-default text-eigengrau-300
+        cursor-default text-gray-300
       {{- end }} {{ if $day.TimeRelation.IsToday -}}
-        ring ring-eigengrau-950
+        ring ring-gray-950
       {{- end }} place-center grid size-6 rounded"
     >
       {{ if $day.Emoji }}
@@ -34,20 +34,20 @@
     </button>
     <div
       id="day-tooltip-{{ $tracker.TrackerId }}-{{ $day }}"
-      class="tooltip border-eigengrau-500 bg-eigengrau-50 flex max-w-64 min-w-48 flex-col gap-2 rounded-lg border p-4 text-sm shadow"
+      class="tooltip flex max-w-64 min-w-48 flex-col gap-2 rounded-lg border border-gray-500 bg-gray-50 p-4 text-sm shadow"
     >
       <time
         datetime="{{ $day.String }}"
-        class="text-eigengrau-500 flex min-w-max gap-2 font-semibold"
+        class="flex min-w-max gap-2 font-semibold text-gray-500"
         >{{ $day.String }}
         {{ $day.WeekdayString }}
       </time>
       {{ if ne $day.Content "" }}
-        <div class="text-eigengrau-950">
+        <div class="text-gray-950">
           {{ $day.Content }}
         </div>
       {{ else }}
-        <div class="text-eigengrau-400">This day hasn't been logged yet.</div>
+        <div class="text-gray-400">This day hasn't been logged yet.</div>
       {{ end }}
     </div>
   <script type="module">

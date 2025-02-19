@@ -1,26 +1,26 @@
 {{ define "header" }}
-  <header id="header" class="sticky top-0 z-30 flex items-center bg-white p-4">
+  <header id="header">
     <a href="/">
-      {{ template "logo" dict "class" "size-7 text-eigengrau-950" }}
+      {{ template "logo" dict "class" "size-7 text-gray-950" }}
     </a>
     <a href="/examples/" class="ml-4 hover:underline">Examples</a>
     <a
       href="/create-tracker/"
-      class="text-eigengrau-500 hover:bg-eigengrau-50 ml-auto flex items-center justify-center rounded-xl p-2"
+      class="ml-auto flex items-center justify-center rounded-xl p-2 text-gray-500 hover:bg-gray-50"
     >
       {{ template "icon-plus" dict "class" "size-5" }}
     </a>
     <a
       href="/settings/"
-      class="text-eigengrau-500 hover:bg-eigengrau-50 flex items-center justify-center rounded-xl p-2"
+      class="flex items-center justify-center rounded-xl p-2 text-gray-500 hover:bg-gray-50"
     >
-      {{ template "icon-user" dict "class" "size-5 text-eigengrau-500" }}
+      {{ template "icon-user" dict "class" "size-5 text-gray-500" }}
     </a>
     <button
       hx-delete="/log-out/"
-      class="text-eigengrau-500 hover:bg-eigengrau-50 flex cursor-pointer items-center justify-center rounded-xl p-2"
+      class="flex cursor-pointer items-center justify-center rounded-xl p-2 text-gray-500 hover:bg-gray-50"
     >
-      {{ template "icon-arrow-left-start-on-rectangle" dict "class" "size-5 text-eigengrau-500" }}
+      {{ template "icon-arrow-left-start-on-rectangle" dict "class" "size-5 text-gray-500" }}
     </button>
   </header>
   <script>

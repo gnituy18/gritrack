@@ -1,23 +1,21 @@
 {{ define "body" }}
-  <header class="sticky top-0 z-30 flex items-center px-6 py-4">
+  <header>
     <a href="/">
       {{ template "logo" dict "class" "h-8 w-8" }}
     </a>
   </header>
-  <main class="mt-12 flex w-full flex-col items-center gap-4">
-    <h2 class="text-2xl font-bold">Log In</h2>
+  <main class="mx-auto flex flex-col items-center gap-12 pt-24">
+    <h1 class="text-title">Log In</h1>
 
     <div class="flex flex-col gap-3">
       <form
-        class="flex w-96 flex-col gap-4 rounded-sm"
+        class="flex w-96 flex-col gap-4"
         hx-target="#error"
         hx-post="/send-log-in-email/"
       >
         <p id="error" class="text-center text-red-600">{{ . }}</p>
         <div class="flex flex-col gap-1">
-          <label for="email" class="text-sm text-slate-500"
-            >Email address</label
-          >
+          <label for="email" class="text-label">Email address</label>
           <input
             id="email"
             autocomplete="email"
@@ -30,11 +28,9 @@
         </div>
         <input class="button-primary" value="Send Log In Email" type="submit" />
       </form>
-      <p class="text-center text-slate-500">
+      <p class="text-secondary text-center">
         Don't have an account yet?
-        <a href="/sign-up/" class="font-bold text-slate-950 underline"
-          >Sign Up</a
-        >
+        <a href="/sign-up/" class="text-link">Sign Up</a>
       </p>
     </div>
   </main>

@@ -8,11 +8,11 @@
     id="today-preview-{{ $tracker.TrackerId }}-{{ $day }}"
   >
     {{ if $day.Set }}
-      <span class="text-eigengrau-700 text-sm">
+      <span class="text-sm text-gray-700">
         {{ $day.Content }}
       </span>
     {{ else }}
-      <span class="text-eigengrau-500 text-sm"> Click to log today! </span>
+      <span class="text-sm text-gray-500"> Click to log today! </span>
     {{ end }}
   </div>
 {{ end }}

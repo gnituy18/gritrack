@@ -5,7 +5,7 @@
       id="trackers"
       class="grid grid-cols-[auto_auto_auto_auto_auto] place-content-center gap-x-4 gap-y-2"
     >
-      <li class="text-eigengrau-700 col-span-5 grid grid-cols-subgrid text-sm">
+      <li class="col-span-5 grid grid-cols-subgrid text-sm text-gray-700">
         <span> </span>
         <h1>Trackers</h1>
         <span> Past 7 days </span>
@@ -13,12 +13,12 @@
       </li>
       {{ range $ti, $t := .sessionUser.Trackers }}
         <li
-          class="bg-eigengrau-50 item group col-span-5 grid grid-cols-subgrid items-center rounded-lg px-4 py-3"
+          class="item group col-span-5 grid grid-cols-subgrid items-center rounded-lg bg-gray-50 px-4 py-3"
         >
           <div
             class="invisible flex size-5 cursor-move items-center group-hover:visible"
           >
-            {{ template "icon-bars-3" dict "class" "handle size-5 text-eigengrau-500" }}
+            {{ template "icon-bars-3" dict "class" "handle size-5 text-gray-500" }}
           </div>
           <h2 class="max-w-80 font-semibold">
             {{ if .Link }}
@@ -28,7 +28,7 @@
                 target="_blank"
               >
                 {{ .DisplayName }}
-                {{ template "icon-arrow-top-right-on-square" dict "class" "size-4 text-eigengrau-500 flex-none" }}
+                {{ template "icon-arrow-top-right-on-square" dict "class" "size-4 text-gray-500 flex-none" }}
               </a>
             {{ else }}
               {{ .DisplayName }}
@@ -46,10 +46,10 @@
           </div>
           <div class="invisible flex items-center gap-2 group-hover:visible">
             <a href="/settings/{{ .TrackerId }}/">
-              {{ template "icon-cog-6-tooth" dict "class" "size-5 text-eigengrau-500" }}
+              {{ template "icon-cog-6-tooth" dict "class" "size-5 text-gray-500" }}
             </a>
             <a href="/{{ $.sessionUser.Username }}/{{ $t.TrackerId }}/">
-              {{ template "icon-arrows-pointing-out" dict "class" "size-5 text-eigengrau-500" }}
+              {{ template "icon-arrows-pointing-out" dict "class" "size-5 text-gray-500" }}
             </a>
           </div>
         </li>

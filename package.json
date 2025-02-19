@@ -1,10 +1,10 @@
 {
   "scripts": {
     "tailwindcss-watch": "npx @tailwindcss/cli -i ./style.css -o ./asset/style.css --watch",
-    "prettier-watch": "npx onchange \"./style.css\" \"**/*.tmpl\" -- prettier --write {{changed}}"
+    "prettier-watch": "npx onchange \"./style.css\" \"**/*.tmpl\" -- prettier --write {{changed}}",
+    "watch": "npx npm-run-all --parallel tailwindcss-watch prettier-watch"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.10",
     "prettier": "^3.3.3",
     "prettier-plugin-go-template": "^0.0.15",
     "prettier-plugin-tailwindcss": "^0.6.11",

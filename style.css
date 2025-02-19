@@ -1,21 +1,5 @@
 @import "tailwindcss";
 
-@plugin '@tailwindcss/forms';
-
-@theme {
-  --color-eigengrau-50: #f6f6f9;
-  --color-eigengrau-100: #ececf2;
-  --color-eigengrau-200: #d6d6e1;
-  --color-eigengrau-300: #b2b3c7;
-  --color-eigengrau-400: #888ba8;
-  --color-eigengrau-500: #696d8e;
-  --color-eigengrau-600: #545675;
-  --color-eigengrau-700: #444560;
-  --color-eigengrau-800: #3b3c51;
-  --color-eigengrau-900: #353545;
-  --color-eigengrau-950: #16161d;
-}
-
 emoji-picker {
   --num-columns: 10;
   --border-color: var(--color-slate-300);
@@ -35,8 +19,44 @@ emoji-picker {
   --outline-color: var(--color-indigo-600);
 }
 
+header {
+  @apply sticky top-0 z-30 flex items-center p-4;
+}
+
+mark {
+  @apply bg-yellow-200;
+}
+
 .button-primary {
-  @apply cursor-pointer bg-eigengrau-950 hover:bg-eigengrau-800 active:bg-eigengrau-700 flex gap-1 rounded-lg px-6 py-2 font-semibold text-white items-center;
+  @apply bg-gray-900 hover:bg-gray-800 active:bg-gray-700 flex cursor-pointer items-center gap-1 rounded px-6 py-2 font-semibold text-gray-50;
+}
+
+.button-secondary {
+  @apply bg-gray-50 border border-slate-900 hover:bg-gray-100 active:bg-gray-200 flex cursor-pointer items-center gap-1 rounded px-6 py-2 font-semibold text-gray-950;
+}
+
+.text-title {
+  @apply text-3xl text-gray-950 font-extrabold;
+}
+
+.text-link {
+  @apply font-semibold text-slate-950 underline;
+}
+
+.text-primary {
+  @apply text-gray-950;
+}
+
+.text-secondary {
+  @apply text-gray-500;
+}
+
+.text-label {
+  @apply text-gray-500 text-sm;
+}
+
+input[type=text], input[type=email] {
+  @apply border border-gray-300 rounded px-4 py-2;
 }
 
 .tooltip {

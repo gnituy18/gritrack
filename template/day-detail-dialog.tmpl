@@ -2,7 +2,7 @@
   <dialog
     x-data
     id="day-detail"
-    class="text-eigengrau-900 w-full max-w-md rounded-xl p-4"
+    class="w-full max-w-md rounded-xl p-4 text-gray-900"
   >
     <button
       type="button"
@@ -12,7 +12,7 @@
       {{ template "icon-x-mark" dict "class" "size-5" }}
     </button>
     <h1 id="day-detail-title" class="font-semibold"></h1>
-    <time id="day-detail-date" class="text-eigengrau-700 text-sm"></time>
+    <time id="day-detail-date" class="text-sm text-gray-700"></time>
     <form class="mt-4 flex flex-col gap-4">
       <input
         id="day-detail-tracker-id"
@@ -29,7 +29,7 @@
       <div class="flex gap-2">
         <div class="relative">
           <input
-            class="border-eigengrau-300 size-10 cursor-pointer rounded-xl p-0 text-center"
+            class="size-10 cursor-pointer rounded-xl border-gray-300 p-0 text-center"
             readonly
             id="day-detail-emoji"
             name="emoji"
@@ -40,13 +40,13 @@
             class="pointer-events-none absolute top-0 left-0 flex size-full items-center justify-center"
             x-show="!$store.dayDetail.emojiSelected"
           >
-            {{ template "icon-face-smile" dict "class" "size-5 text-eigengrau-300" }}
+            {{ template "icon-face-smile" dict "class" "size-5 text-gray-300" }}
           </div>
         </div>
         <input
           placeholder="Update notes for this day."
           autofocus
-          class="border-eigengrau-300 placeholder:text-eigengrau-300 h-10 flex-1 rounded-xl"
+          class="h-10 flex-1 rounded-xl border-gray-300 placeholder:text-gray-300"
           id="day-detail-content"
           type="text"
           name="content"
@@ -68,7 +68,7 @@
         hx-put="/day-detail/"
         hx-swap="none"
         hx-on::after-request="dayDetail.close()"
-        class="bg-eigengrau-700 w-full rounded-xl px-6 py-2 text-white"
+        class="w-full rounded-xl bg-gray-700 px-6 py-2 text-white"
       >
         Submit
       </button>
