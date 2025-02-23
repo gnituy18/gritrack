@@ -2,7 +2,7 @@
   {{ $class := get . "class" }}
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    {{ if $class }}class="{{ $class }}"{{ end }}
+    class="logo {{ if $class }}{{ $class }}{{ end }}"
     fill="currentColor"
     viewBox="9 9 62 62"
     width="62"
