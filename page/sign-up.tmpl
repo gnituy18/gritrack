@@ -1,19 +1,23 @@
 {{ define "body" }}
-  <main class="mt-12 flex w-full flex-col items-center gap-4">
-    <h2 class="text-2xl font-bold">Sign Up</h2>
-    <div class="flex flex-col gap-3">
+  <header>
+    <a href="/">
+      {{ template "logo" dict "class" "h-8 w-8" }}
+    </a>
+  </header>
+  <main class="mx-auto flex flex-col items-center gap-12 pt-24">
+    <h1 class="text-title">Sign Up</h1>
+    <div class="flex flex-col gap-2">
       <form
-        class="flex w-96 flex-col gap-4 rounded-sm"
+        class="flex w-96 flex-col gap-4"
         hx-target="#error"
         hx-post="/sign-up/"
       >
         <p id="error" class="text-center text-red-600"></p>
         <div class="flex flex-col gap-1">
-          <label for="email" class="text-sm">Email address</label>
+          <label for="email" class="text-label">Email address</label>
           <input
             id="email"
             autocomplete="email"
-            class="rounded-sm border-1 border-slate-300 py-2"
             name="email"
             type="email"
             required
@@ -21,13 +25,11 @@
           />
         </div>
         <div class="flex flex-col gap-1">
-          <label for="username" class="text-sm">Username</label>
+          <label for="username" class="text-label">Username</label>
           <input
             id="username"
             autocomplete="username"
-            class="rounded-sm border-1 border-slate-300 py-2"
             name="username"
-            type="text"
             required
             pattern="[a-zA-Z0-9\-._]{3,32}"
             placeholder="username"
@@ -36,11 +38,7 @@
 
         <div class="flex flex-col gap-1">
           <label class="text-sm" for="timezone">Time Zone</label>
-          <select
-            id="timezone"
-            class="rounded-sm border-1 border-slate-300 py-2"
-            name="timezone"
-          >
+          <select id="timezone" name="timezone">
             <option value="Africa/Abidjan">Africa/Abidjan</option>
             <option value="Africa/Accra">Africa/Accra</option>
             <option value="Africa/Addis_Ababa">Africa/Addis_Ababa</option>
@@ -514,18 +512,11 @@
             <option value="Pacific/Wallis">Pacific/Wallis</option>
           </select>
         </div>
-
-        <p class="list-inside list-disc text-slate-600">
-          📌 Your <strong class="font-semibold">Email address</strong> will
-          always be hidden.
-        </p>
         <input class="button-primary" value="Create Account" type="submit" />
       </form>
-      <p class="text-center text-slate-600">
+      <p class="text-secondary text-center">
         Already have an account?
-        <a href="/log-in/" class="font-bold text-indigo-600 underline"
-          >Log In</a
-        >
+        <a href="/log-in/" class="text-link">Log In</a>
       </p>
       <script>
         Array.from(document.getElementsByTagName("option"))

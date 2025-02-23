@@ -1,18 +1,16 @@
 {{ define "body" }}
-  <main class="mx-auto flex flex-col items-center gap-12 pt-24">
-    {{ template "logo" dict "class" "size-24" }}
-    <div class="flex flex-col gap-8">
-      <h1 class="text-title text-center">
-        Welcome to
-        <span class="font-extrabold">Gritrack</span>!
-        <br />
-        Track your <mark>habits</mark>, <mark>goals</mark>, and
-        <mark>time</mark> effortlessly.
-      </h1>
-      <div class="flex flex-wrap justify-center gap-8">
-        <a href="/log-in/" class="button-primary">Log In</a>
-        <a href="/sign-up/" class="button-secondary">Sign Up</a>
-      </div>
+  <main>
+    {{ template "logo" dict "class" "logo logo-large" }}
+    <h1 style="text-align:center">
+      Welcome to
+      <span class="font-extrabold">Gritrack</span>!
+      <br />
+      Track your <mark>habits</mark>, <mark>goals</mark>, and
+      <mark>time</mark> effortlessly.
+    </h1>
+    <div style="display:flex;gap:2rem">
+      <a href="/log-in/" class="button button-primary">Log In</a>
+      <a href="/sign-up/" class="button button-secondary">Sign Up</a>
     </div>
   </main>
 {{ end }}

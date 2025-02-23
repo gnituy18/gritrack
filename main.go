@@ -109,6 +109,7 @@ func main() {
 		} else if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
+			return
 		}
 
 		http.Redirect(w, r, fmt.Sprintf("/%s/", username), http.StatusFound)
@@ -146,7 +147,14 @@ func main() {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Panic(err)
+			return
 		}
+
+		if !ok {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 
 		username := r.PathValue("username")
 		trackerId := r.PathValue("tracker_id")
@@ -732,7 +740,7 @@ func main() {
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 
-	style, err := os.ReadFile("asset/style.css")
+	style, err := os.ReadFile("style.css")
 	if err != nil {
 		log.Fatal(err)
 	}

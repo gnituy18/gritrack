@@ -1,72 +1,277 @@
-@import "tailwindcss";
+/**
+ * Minified by jsDelivr using clean-css v5.3.2.
+ * Original file: /npm/modern-normalize@3.0.1/modern-normalize.css
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+/*! modern-normalize v3.0.1 | MIT License | https://github.com/sindresorhus/modern-normalize */
+*,
+::after,
+::before {
+  box-sizing: border-box;
+}
+html {
+  line-height: 1.15;
+  font-family:
+    system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+body {
+  margin: 0;
+}
+b,
+strong {
+  font-weight: bolder;
+}
+code,
+kbd,
+pre,
+samp {
+  font-size: 1em;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  position: relative;
+  vertical-align: baseline;
+  font-size: 75%;
+  line-height: 0;
+}
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+table {
+  border-color: currentcolor;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  margin: 0;
+  font-size: 100%;
+  line-height: 1.15;
+  font-family: inherit;
+}
+[type="button"],
+[type="reset"],
+[type="submit"],
+button {
+  -webkit-appearance: button;
+}
+legend {
+  padding: 0;
+}
+progress {
+  vertical-align: baseline;
+}
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+[type="search"] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+summary {
+  display: list-item;
+}
 
-emoji-picker {
-  --num-columns: 10;
-  --border-color: var(--color-slate-300);
-  --border-radius: --spacing(1);
-  --emoji-padding: --spacing(2);
-  --button-active-background: var(--color-slate-300);
-  --button-hover-background: var(--color-slate-200);
-  --category-emoji-padding: --spacing(2);
-  --indicator-color: var(--color-indigo-600);
+:root {
+  --gray-1: oklch(0.03125 0 0);
+  --gray-2: oklch(0.0625 0 0);
+  --gray-3: oklch(0.09375 0 0);
+  --gray-4: oklch(0.125 0 0);
+  --gray-5: oklch(0.15625 0 0);
+  --gray-6: oklch(0.1875 0 0);
+  --gray-7: oklch(0.21875 0 0);
+  --gray-8: oklch(0.25 0 0);
+  --gray-9: oklch(0.28125 0 0);
+  --gray-10: oklch(0.3125 0 0);
+  --gray-11: oklch(0.34375 0 0);
+  --gray-12: oklch(0.375 0 0);
+  --gray-13: oklch(0.40625 0 0);
+  --gray-14: oklch(0.4375 0 0);
+  --gray-15: oklch(0.46875 0 0);
+  --gray-16: oklch(0.5 0 0);
+  --gray-17: oklch(0.53125 0 0);
+  --gray-18: oklch(0.5625 0 0);
+  --gray-19: oklch(0.59375 0 0);
+  --gray-20: oklch(0.625 0 0);
+  --gray-21: oklch(0.65625 0 0);
+  --gray-22: oklch(0.6875 0 0);
+  --gray-23: oklch(0.71875 0 0);
+  --gray-24: oklch(0.75 0 0);
+  --gray-25: oklch(0.78125 0 0);
+  --gray-26: oklch(0.8125 0 0);
+  --gray-27: oklch(0.84375 0 0);
+  --gray-28: oklch(0.875 0 0);
+  --gray-29: oklch(0.90625 0 0);
+  --gray-30: oklch(0.9375 0 0);
+  --gray-31: oklch(0.96875 0 0);
 
-  --input-border-color: var(--color-slate-300);
-  --input-border-radius: --spacing(1);
-  --input-border-size: 1px;
-  --input-font-color: var(--color-slate-800);
-  --input-padding: --spacing(2);
+  --semibold: 600;
 
-  --outline-color: var(--color-indigo-600);
+  --radius: 0.25rem;
+}
+
+body {
+  background-color: var(--gray-31);
+  color: var(--gray-1);
 }
 
 header {
-  @apply sticky top-0 z-30 flex items-center p-4;
+  position: sticky;
+  dsiplay: flex;
+  top: 0;
+  justify-content: center;
+  z-index: 30;
+  padding: 1rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  margin-top: 8rem;
+  margin-right: auto;
+  margin-bottom: 8rem;
+  margin-left: auto;
+}
+
+h1 {
+  margin: 0;
+  color: var(--gray-1);
+  font-weight: bold;
 }
 
 mark {
-  @apply bg-yellow-200;
+  background-color: Khaki;
+}
+
+.logo {
+  color: var(--gray-1);
+}
+
+.logo-large {
+  width: 8rem;
+  height: 8rem;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  padding-top: 0.5rem;
+  padding-right: 2rem;
+  padding-bottom: 0.5rem;
+  padding-left: 2rem;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .button-primary {
-  @apply bg-gray-900 hover:bg-gray-800 active:bg-gray-700 flex cursor-pointer items-center gap-1 rounded px-6 py-2 font-semibold text-gray-50;
+  background-color: var(--gray-4);
+  color: var(--gray-31);
+}
+
+.button-primary:hover {
+  background-color: var(--gray-8);
+}
+
+.button-primary:active {
+  background-color: var(--gray-12);
 }
 
 .button-secondary {
-  @apply bg-gray-50 border border-slate-900 hover:bg-gray-100 active:bg-gray-200 flex cursor-pointer items-center gap-1 rounded px-6 py-2 font-semibold text-gray-950;
+  border: 1px solid var(--gray-1);
+  background-color: var(--gray-31);
+  color: var(--gray-1);
 }
 
-.text-title {
-  @apply text-3xl text-gray-950 font-extrabold;
+.button-secondary:hover {
+  background-color: var(--gray-30);
+}
+
+.button-secondary:active {
+  background-color: var(--gray-29);
 }
 
 .text-link {
-  @apply font-semibold text-slate-950 underline;
+  color: var(--gray-1);
+  font-weight: var(--semibold);
+  text-decoration: underline;
 }
 
 .text-primary {
-  @apply text-gray-950;
+  color: #0f172a; /* gray-950 */
 }
 
 .text-secondary {
-  @apply text-gray-500;
+  color: #1f2937; /* gray-800 */
 }
 
 .text-label {
-  @apply text-gray-500 text-sm;
+  color: #4b5563; /* gray-600 */
+  font-size: 0.875rem; /* text-sm = 14px */
 }
 
-input[type=text], input[type=email] {
-  @apply border border-gray-300 rounded px-4 py-2;
+input,
+input[type="email"],
+select {
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: var(--radius);
+  padding: 0.5rem; /* p-2 = 8px */
 }
 
 .tooltip {
-  @apply invisible absolute;
+  position: absolute;
+  visibility: hidden;
 }
 
 .has-tooltip:hover .tooltip {
-  @apply visible z-20;
+  visibility: visible;
+  z-index: 20;
 }
 
 .sortable-ghost {
-  @apply invisible;
+  visibility: hidden;
+}
+
+emoji-picker {
+  --num-columns: 10;
+  --border-color: var(--slate-300);
+  --border-radius: --spacing(1);
+  --emoji-padding: --spacing(2);
+  --button-active-background: var(--slate-300);
+  --button-hover-background: var(--slate-200);
+  --category-emoji-padding: --spacing(2);
+  --indicator-color: var(--indigo-600);
+
+  --input-border-color: var(--slate-300);
+  --input-border-radius: --spacing(1);
+  --input-border-size: 1px;
+  --input-font-color: var(--slate-800);
+  --input-padding: --spacing(2);
+
+  --outline-color: var(--indigo-600);
 }

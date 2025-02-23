@@ -1,13 +1,11 @@
 {
   "scripts": {
-    "tailwindcss-watch": "npx @tailwindcss/cli -i ./style.css -o ./asset/style.css --watch",
-    "prettier-watch": "npx onchange \"./style.css\" \"**/*.tmpl\" -- prettier --write {{changed}}",
-    "watch": "npx npm-run-all --parallel tailwindcss-watch prettier-watch"
+    "prettier-watch": "onchange \"**/*\" -- prettier --write --ignore-unknown {{changed}}"
   },
   "devDependencies": {
+    "onchange": "^7.1.0",
     "prettier": "^3.3.3",
-    "prettier-plugin-go-template": "^0.0.15",
-    "prettier-plugin-tailwindcss": "^0.6.11",
-    "tailwindcss": "^4.0.0"
+    "prettier-plugin-css-order": "^2.1.2",
+    "prettier-plugin-go-template": "^0.0.15"
   }
 }
