@@ -1,8 +1,12 @@
 {{ define "body" }}
+  <header>
+    {{ template "logo-and-text" }}
+  </header>
   <main>
-    {{ template "logo" dict "class" "logo-large" }}
+    <div style="display:flex;align-items:center;gap:1rem">
+      {{ template "logo" dict "class" "logo-large" }}
+    </div>
     <h1>
-      Gritrack:<br />
       Track your <mark>habits</mark>, <mark>goals</mark>, and
       <mark>time</mark> effortlessly.
     </h1>

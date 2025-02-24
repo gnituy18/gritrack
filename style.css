@@ -94,37 +94,37 @@ summary {
 }
 
 :root {
-  --gray-1: oklch(0.03125 0 0);
-  --gray-2: oklch(0.0625 0 0);
-  --gray-3: oklch(0.09375 0 0);
-  --gray-4: oklch(0.125 0 0);
-  --gray-5: oklch(0.15625 0 0);
-  --gray-6: oklch(0.1875 0 0);
-  --gray-7: oklch(0.21875 0 0);
-  --gray-8: oklch(0.25 0 0);
-  --gray-9: oklch(0.28125 0 0);
-  --gray-10: oklch(0.3125 0 0);
-  --gray-11: oklch(0.34375 0 0);
-  --gray-12: oklch(0.375 0 0);
-  --gray-13: oklch(0.40625 0 0);
-  --gray-14: oklch(0.4375 0 0);
-  --gray-15: oklch(0.46875 0 0);
+  --gray-1: oklch(0.96875 0 0);
+  --gray-2: oklch(0.9375 0 0);
+  --gray-3: oklch(0.90625 0 0);
+  --gray-4: oklch(0.875 0 0);
+  --gray-5: oklch(0.84375 0 0);
+  --gray-6: oklch(0.8125 0 0);
+  --gray-7: oklch(0.78125 0 0);
+  --gray-8: oklch(0.75 0 0);
+  --gray-9: oklch(0.71875 0 0);
+  --gray-10: oklch(0.6875 0 0);
+  --gray-11: oklch(0.65625 0 0);
+  --gray-12: oklch(0.625 0 0);
+  --gray-13: oklch(0.59375 0 0);
+  --gray-14: oklch(0.5625 0 0);
+  --gray-15: oklch(0.53125 0 0);
   --gray-16: oklch(0.5 0 0);
-  --gray-17: oklch(0.53125 0 0);
-  --gray-18: oklch(0.5625 0 0);
-  --gray-19: oklch(0.59375 0 0);
-  --gray-20: oklch(0.625 0 0);
-  --gray-21: oklch(0.65625 0 0);
-  --gray-22: oklch(0.6875 0 0);
-  --gray-23: oklch(0.71875 0 0);
-  --gray-24: oklch(0.75 0 0);
-  --gray-25: oklch(0.78125 0 0);
-  --gray-26: oklch(0.8125 0 0);
-  --gray-27: oklch(0.84375 0 0);
-  --gray-28: oklch(0.875 0 0);
-  --gray-29: oklch(0.90625 0 0);
-  --gray-30: oklch(0.9375 0 0);
-  --gray-31: oklch(0.96875 0 0);
+  --gray-17: oklch(0.46875 0 0);
+  --gray-18: oklch(0.4375 0 0);
+  --gray-19: oklch(0.40625 0 0);
+  --gray-20: oklch(0.375 0 0);
+  --gray-21: oklch(0.34375 0 0);
+  --gray-22: oklch(0.3125 0 0);
+  --gray-23: oklch(0.28125 0 0);
+  --gray-24: oklch(0.25 0 0);
+  --gray-25: oklch(0.21875 0 0);
+  --gray-26: oklch(0.1875 0 0);
+  --gray-27: oklch(0.15625 0 0);
+  --gray-28: oklch(0.125 0 0);
+  --gray-29: oklch(0.09375 0 0);
+  --gray-30: oklch(0.0625 0 0);
+  --gray-31: oklch(0.03125 0 0);
 
   --semibold: 600;
 
@@ -132,15 +132,14 @@ summary {
 }
 
 body {
-  background-color: var(--gray-31);
-  color: var(--gray-1);
+  background-color: var(--gray-1);
+  color: var(--gray-31);
 }
 
 header {
+  display: flex;
   position: sticky;
-  dsiplay: flex;
   top: 0;
-  justify-content: center;
   z-index: 30;
   padding: 1rem;
 }
@@ -158,9 +157,13 @@ main {
 
 h1 {
   margin: 0;
-  color: var(--gray-1);
+  color: var(--gray-31);
   font-weight: bold;
   text-align: center;
+}
+
+a {
+  text-decoration: none;
 }
 
 mark {
@@ -170,12 +173,19 @@ mark {
 .logo {
   width: 2rem;
   height: 2rem;
-  color: var(--gray-1);
+  color: var(--gray-31);
 }
 
 .logo-large {
-  width: 8rem;
-  height: 8rem;
+  width: 6rem;
+  height: 6rem;
+}
+
+.logo-text {
+  color: var(--gray-24);
+  font-weight: 600;
+  font-size: 1.5rem;
+  font-family: "Times New Roman";
 }
 
 .button {
@@ -193,57 +203,57 @@ mark {
 }
 
 .button-primary {
-  background-color: var(--gray-4);
-  color: var(--gray-31);
+  background-color: var(--gray-30);
+  color: var(--gray-1);
 }
 
 .button-primary:hover {
-  background-color: var(--gray-8);
+  background-color: var(--gray-26);
 }
 
 .button-primary:active {
-  background-color: var(--gray-12);
+  background-color: var(--gray-22);
 }
 
 .button-secondary {
-  border: 1px solid var(--gray-1);
-  background-color: var(--gray-31);
-  color: var(--gray-1);
+  border: 1px solid var(--gray-31);
+  background-color: var(--gray-1);
+  color: var(--gray-31);
 }
 
 .button-secondary:hover {
-  background-color: var(--gray-30);
+  background-color: var(--gray-2);
 }
 
 .button-secondary:active {
-  background-color: var(--gray-29);
+  background-color: var(--gray-3);
 }
 
 .text-link {
-  color: var(--gray-1);
+  color: var(--gray-31);
   font-weight: var(--semibold);
   text-decoration: underline;
 }
 
 .text-primary {
-  color: #0f172a; /* gray-950 */
+  color: var(--gray-31);
 }
 
 .text-secondary {
-  color: #1f2937; /* gray-800 */
+  color: var(--gray-16);
 }
 
 .text-label {
-  color: #4b5563; /* gray-600 */
-  font-size: 0.875rem; /* text-sm = 14px */
+  color: var(--gray-16);
+  font-size: 0.875rem;
 }
 
 input,
 input[type="email"],
 select {
-  border: 1px solid #d1d5db; /* gray-300 */
+  border: 1px solid var(--gray-31);
   border-radius: var(--radius);
-  padding: 0.5rem; /* p-2 = 8px */
+  padding: 0.5rem;
 }
 
 .tooltip {
