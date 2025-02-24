@@ -1,96 +1,170 @@
-/**
- * Minified by jsDelivr using clean-css v5.3.2.
- * Original file: /npm/modern-normalize@3.0.1/modern-normalize.css
- *
- * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
- */
-/*! modern-normalize v3.0.1 | MIT License | https://github.com/sindresorhus/modern-normalize */
-*,
-::after,
-::before {
-  box-sizing: border-box;
-}
-html {
-  line-height: 1.15;
-  font-family:
-    system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji";
-  -webkit-text-size-adjust: 100%;
-  tab-size: 4;
-}
 body {
+  background-color: var(--gray-1);
+  color: var(--gray-31);
+}
+
+header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 1rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 4rem;
+  margin-right: auto;
+  margin-bottom: 8rem;
+  margin-left: auto;
+  padding: 1rem;
+}
+
+h1 {
+  margin: 0;
+  color: var(--gray-31);
+  font-weight: bold;
+  text-align: center;
+}
+
+p {
   margin: 0;
 }
-b,
-strong {
-  font-weight: bolder;
+
+a {
+  text-decoration: none;
 }
-code,
-kbd,
-pre,
-samp {
-  font-size: 1em;
-  font-family:
-    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+
+mark {
+  background-color: Khaki;
 }
-small {
-  font-size: 80%;
+
+form {
+  width: 24rem;
 }
-sub,
-sup {
-  position: relative;
-  vertical-align: baseline;
-  font-size: 75%;
-  line-height: 0;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
-sub {
-  bottom: -0.25em;
-}
-sup {
-  top: -0.5em;
-}
-table {
-  border-color: currentcolor;
-}
-button,
+
 input,
-optgroup,
-select,
-textarea {
-  margin: 0;
-  font-size: 100%;
-  line-height: 1.15;
-  font-family: inherit;
+input[type="email"],
+select {
+  border: 1px solid var(--gray-8);
+  border-radius: var(--radius);
+  background-color: white;
+  padding: 0.5rem;
+  padding-top: 1.5rem;
+  width: 100%;
+
+  &::placeholder {
+    color: var(--gray-4);
+  }
 }
-[type="button"],
-[type="reset"],
-[type="submit"],
-button {
-  -webkit-appearance: button;
+.button,
+input[type="submit"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: 0;
+  border-radius: var(--radius);
+  padding-top: 0.75rem;
+  padding-right: 2rem;
+  padding-bottom: 0.75rem;
+  padding-left: 2rem;
+  font-weight: bold;
+  text-decoration: none;
 }
-legend {
-  padding: 0;
+
+.button-primary {
+  background-color: var(--gray-30);
+  color: var(--gray-1);
+
+  &:hover {
+    background-color: var(--gray-26);
+  }
+
+  &:active {
+    background-color: var(--gray-22);
+  }
 }
-progress {
-  vertical-align: baseline;
+
+.button-secondary {
+  border: 1px solid var(--gray-31);
+  background-color: var(--gray-1);
+  color: var(--gray-31);
+
+  &:hover {
+    background-color: var(--gray-2);
+  }
+
+  &:active {
+    background-color: var(--gray-3);
+  }
 }
-::-webkit-inner-spin-button,
-::-webkit-outer-spin-button {
-  height: auto;
+
+.input-group {
+  position: relative;
+
+  label {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    color: var(--gray-16);
+    font-size: 0.75rem;
+  }
 }
-[type="search"] {
-  -webkit-appearance: textfield;
-  outline-offset: -2px;
+
+.logo {
+  width: 2rem;
+  height: 2rem;
+  color: var(--gray-31);
 }
-::-webkit-search-decoration {
-  -webkit-appearance: none;
+
+.logo-large {
+  width: 6rem;
+  height: 6rem;
 }
-::-webkit-file-upload-button {
-  -webkit-appearance: button;
-  font: inherit;
+
+.logo-text {
+  color: var(--gray-24);
+  font-weight: bold;
+  font-size: 1.5rem;
+  font-family: "Times New Roman";
 }
-summary {
-  display: list-item;
+
+.text-link {
+  color: var(--gray-31);
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.text-primary {
+  color: var(--gray-31);
+}
+
+.text-secondary {
+  color: var(--gray-16);
+}
+
+.tooltip {
+  position: absolute;
+  visibility: hidden;
+}
+
+.has-tooltip:hover .tooltip {
+  visibility: visible;
+  z-index: 20;
+}
+
+.sortable-ghost {
+  visibility: hidden;
 }
 
 :root {
@@ -126,148 +200,12 @@ summary {
   --gray-30: oklch(0.0625 0 0);
   --gray-31: oklch(0.03125 0 0);
 
-  --semibold: 600;
-
   --radius: 0.25rem;
 }
 
-body {
-  background-color: var(--gray-1);
-  color: var(--gray-31);
-}
-
-header {
-  display: flex;
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  padding: 1rem;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3rem;
-  margin-top: 8rem;
-  margin-right: auto;
-  margin-bottom: 8rem;
-  margin-left: auto;
-}
-
-h1 {
-  margin: 0;
-  color: var(--gray-31);
-  font-weight: bold;
+/* utils */
+.text-center {
   text-align: center;
-}
-
-a {
-  text-decoration: none;
-}
-
-mark {
-  background-color: Khaki;
-}
-
-.logo {
-  width: 2rem;
-  height: 2rem;
-  color: var(--gray-31);
-}
-
-.logo-large {
-  width: 6rem;
-  height: 6rem;
-}
-
-.logo-text {
-  color: var(--gray-24);
-  font-weight: 600;
-  font-size: 1.5rem;
-  font-family: "Times New Roman";
-}
-
-.button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  border-radius: var(--radius);
-  padding-top: 0.5rem;
-  padding-right: 2rem;
-  padding-bottom: 0.5rem;
-  padding-left: 2rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.button-primary {
-  background-color: var(--gray-30);
-  color: var(--gray-1);
-}
-
-.button-primary:hover {
-  background-color: var(--gray-26);
-}
-
-.button-primary:active {
-  background-color: var(--gray-22);
-}
-
-.button-secondary {
-  border: 1px solid var(--gray-31);
-  background-color: var(--gray-1);
-  color: var(--gray-31);
-}
-
-.button-secondary:hover {
-  background-color: var(--gray-2);
-}
-
-.button-secondary:active {
-  background-color: var(--gray-3);
-}
-
-.text-link {
-  color: var(--gray-31);
-  font-weight: var(--semibold);
-  text-decoration: underline;
-}
-
-.text-primary {
-  color: var(--gray-31);
-}
-
-.text-secondary {
-  color: var(--gray-16);
-}
-
-.text-label {
-  color: var(--gray-16);
-  font-size: 0.875rem;
-}
-
-input,
-input[type="email"],
-select {
-  border: 1px solid var(--gray-31);
-  border-radius: var(--radius);
-  padding: 0.5rem;
-}
-
-.tooltip {
-  position: absolute;
-  visibility: hidden;
-}
-
-.has-tooltip:hover .tooltip {
-  visibility: visible;
-  z-index: 20;
-}
-
-.sortable-ghost {
-  visibility: hidden;
 }
 
 emoji-picker {
