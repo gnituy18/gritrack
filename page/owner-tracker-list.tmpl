@@ -59,6 +59,7 @@
   <script>
     const trackers = document.getElementById("trackers");
     const sortable = new Sortable(trackers, {
+      handle: ".cursor-grab",
       onUpdate: function (event) {
         const body = new FormData();
         body.append("old_position", event.oldIndex);
