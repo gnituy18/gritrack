@@ -5,17 +5,20 @@
     </a>
   </header>
   <main>
-    <h1 class="text-title">Log In</h1>
+    <h1>Log In</h1>
 
-    <div class="container">
-      <form class="container" hx-target="#error" hx-post="/send-log-in-email/">
+    <div class="flex-v gap-1">
+      <form
+        class="flex-v gap-1"
+        hx-target="#error"
+        hx-post="/send-log-in-email/"
+      >
         <p id="error">{{ . }}</p>
         <div class="input-group">
           <label for="email">Email address</label>
           <input
             id="email"
             autocomplete="email"
-            class="rounded-sm border-1 border-slate-300 py-2"
             name="email"
             type="email"
             required

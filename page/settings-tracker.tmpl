@@ -3,17 +3,13 @@
   {{ $tracker := .tracker }}
   {{ template "header" }}
   <main>
-    <section class="flex flex-col gap-2">
-      <h2 class="text-lg font-semibold">Tracker Info</h2>
-      <form
-        hx-patch="/settings/{{ $tracker.TrackerId }}/"
-        class="flex flex-col gap-4 rounded-xl"
-      >
-        <div class="flex flex-col gap-1">
-          <label for="display_name" class="text-sm">Display Name</label>
+    <section class="flex-v">
+      <h2>Tracker Info</h2>
+      <form hx-patch="/settings/{{ $tracker.TrackerId }}/" class="flex-v">
+        <div class="input-group">
+          <label for="display_name">Display Name</label>
           <input
             id="display_name"
-            class="rounded-xl border-1 border-slate-300 py-2"
             name="display_name"
             type="text"
             required
@@ -22,25 +18,10 @@
             value="{{ $tracker }}"
           />
         </div>
-        <!--
-        <div class="flex flex-col gap-1">
-          <label for="description" class="text-sm">Description</label>
-          <input
-            id="description"
-            class="border-1 rounded-xl border-slate-300 py-2"
-            name="description"
-            type="text"
-            value="{{ $tracker.Description }}"
-            pattern=".*\S.*"
-            title="Please enter at least one non-space character."
-          />
-        </div>
-	-->
-        <div class="flex flex-col gap-1">
-          <label for="link" class="text-sm">Link</label>
+        <div class="input-group">
+          <label for="link">Link</label>
           <input
             id="link"
-            class="rounded-xl border-1 border-slate-300 py-2"
             name="link"
             type="url"
             value="{{ $tracker.Link }}"
@@ -51,19 +32,17 @@
         <input class="button-primary" value="Save" type="submit" />
       </form>
     </section>
-    <hr />
-    <section>
-      <h2 class="text-lg font-semibold">Change Tracker ID (Slug)</h2>
+    <section class="flex-v">
+      <h2>Change Tracker ID (Slug)</h2>
       <form
         hx-patch="/settings/{{ $tracker.TrackerId }}/tracker_id/"
         hx-confirm="Are you sure you want update '{{ $tracker.TrackerId }}'?"
-        class="flex flex-col gap-4 rounded-xl"
+        class="flex-v"
       >
-        <div class="flex flex-col gap-1">
-          <label for="tracker_id" class="text-sm">Tracker ID (Slug)</label>
+        <div class="input-group">
+          <label for="tracker_id">Tracker ID (Slug)</label>
           <input
             id="tracker_id"
-            class="rounded-xl border-1 border-slate-300 py-2"
             name="tracker_id"
             type="text"
             required
@@ -74,18 +53,13 @@
         <input class="button-primary" value="Save" type="submit" />
       </form>
     </section>
-    <hr />
-    <section class="flex flex-col gap-2">
-      <h2 class="text-lg font-semibold text-red-500">Delete Tracker</h2>
+    <section class="flex-v">
+      <h2>Delete Tracker</h2>
       <form
         hx-delete="/settings/{{ $tracker.TrackerId }}/"
         hx-confirm="Are you sure you want to delete '{{ $tracker }}'?"
       >
-        <input
-          class="cursor-pointer rounded-xl bg-red-600 px-6 py-2 text-white hover:bg-red-700"
-          value="Delete"
-          type="submit"
-        />
+        <input class="button-danger" value="Delete" type="submit" />
       </form>
     </section>
   </main>

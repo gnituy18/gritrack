@@ -1,67 +1,64 @@
 {{ define "body" }}
   {{ template "header" }}
-  <main class="container mx-auto flex flex-col gap-4 p-4">
-    <ul
-      id="trackers"
-      class="grid grid-cols-[auto_auto_auto_auto_auto] place-content-center gap-x-4 gap-y-2"
-    >
-      <li class="col-span-5 grid grid-cols-subgrid text-sm text-gray-700">
-        <span> </span>
-        <h1>Trackers</h1>
-        <span> Past 7 days </span>
-        <span> Today </span>
-      </li>
-      {{ range $ti, $t := .sessionUser.Trackers }}
-        <li
-          class="item group col-span-5 grid grid-cols-subgrid items-center rounded-lg bg-gray-50 px-4 py-3"
-        >
-          <div
-            class="invisible flex size-5 cursor-move items-center group-hover:visible"
-          >
-            {{ template "icon-bars-3" dict "class" "handle size-5 text-gray-500" }}
-          </div>
-          <h2 class="max-w-80 font-semibold">
-            {{ if .Link }}
-              <a
-                href="{{ .Link }}"
-                class="flex items-center gap-1"
-                target="_blank"
-              >
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Trackers</th>
+          <th>Past 7 days</th>
+          <th>Today</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="trackers">
+        {{ range $ti, $t := .sessionUser.Trackers }}
+          <tr>
+            <td>
+              {{ template "icon-bars-3" dict "class" "cursor-grab button-icon" }}
+            </td>
+            <td>
+              {{ if .Link }}
+                <a href="{{ .Link }}" class="text-link" target="_blank">
+                  {{ .DisplayName }}
+                </a>
+              {{ else }}
                 {{ .DisplayName }}
-                {{ template "icon-arrow-top-right-on-square" dict "class" "size-4 text-gray-500 flex-none" }}
-              </a>
-            {{ else }}
-              {{ .DisplayName }}
-            {{ end }}
-          </h2>
-          <div class="flex gap-1">
-            {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
-              {{ template "day" dict "tracker" $t "day" $d }}
-            {{ end }}
-          </div>
-          <div class="flex max-w-80 items-center gap-2">
-            {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
-            {{ template "day" dict "tracker" $t "day" $today }}
-            {{ template "today-preview" dict "tracker" $t "day" $today }}
-          </div>
-          <div class="invisible flex items-center gap-2 group-hover:visible">
-            <a href="/settings/{{ .TrackerId }}/">
-              {{ template "icon-cog-6-tooth" dict "class" "size-5 text-gray-500" }}
-            </a>
-            <a href="/{{ $.sessionUser.Username }}/{{ $t.TrackerId }}/">
-              {{ template "icon-arrows-pointing-out" dict "class" "size-5 text-gray-500" }}
-            </a>
-          </div>
-        </li>
-      {{ end }}
-    </ul>
+              {{ end }}
+            </td>
+            <td>
+              <div class="flex-h">
+                {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
+                  {{ template "day" dict "tracker" $t "day" $d }}
+                {{ end }}
+              </div>
+            </td>
+            <td>
+              <div class="flex-h">
+                {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
+                {{ template "day" dict "tracker" $t "day" $today }}
+                {{ template "today-preview" dict "tracker" $t "day" $today }}
+              </div>
+            </td>
+            <td>
+              <div class="flex-h">
+                <a class="" href="/settings/{{ .TrackerId }}/">
+                  {{ template "icon-cog-6-tooth" dict "class" "button-icon" }}
+                </a>
+                <a href="/{{ $.sessionUser.Username }}/{{ $t.TrackerId }}/">
+                  {{ template "icon-arrows-pointing-out" dict "class" "button-icon" }}
+                </a>
+              </div>
+            </td>
+          </tr>
+        {{ end }}
+      </tbody>
+    </table>
   </main>
   {{ template "day-detail-dialog" }}
   <script>
     const trackers = document.getElementById("trackers");
     const sortable = new Sortable(trackers, {
-      handle: ".handle",
-      draggable: ".item",
       onUpdate: function (event) {
         const body = new FormData();
         body.append("old_position", event.oldIndex);
