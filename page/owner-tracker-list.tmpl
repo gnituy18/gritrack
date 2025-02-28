@@ -15,7 +15,7 @@
         {{ range $ti, $t := .sessionUser.Trackers }}
           <tr>
             <td>
-              {{ template "icon-bars-3" dict "class" "cursor-grab button-icon" }}
+              {{ template "icon-bars-3" dict "class" "handle cursor-grab button-icon" }}
             </td>
             <td>
               {{ if .Link }}
@@ -27,17 +27,16 @@
               {{ end }}
             </td>
             <td>
-              <div class="flex-h">
+              <div class="flex-h gap-05">
                 {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
                   {{ template "day" dict "tracker" $t "day" $d }}
                 {{ end }}
               </div>
             </td>
             <td>
-              <div class="flex-h">
+              <div class="flex-h gap-1">
                 {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
                 {{ template "day" dict "tracker" $t "day" $today }}
-                {{ template "today-preview" dict "tracker" $t "day" $today }}
               </div>
             </td>
             <td>
@@ -59,11 +58,12 @@
   <script>
     const trackers = document.getElementById("trackers");
     const sortable = new Sortable(trackers, {
-      handle: ".cursor-grab",
+      ghostClass: "sortable-ghost",
+      handle: ".handle",
       onUpdate: function (event) {
         const body = new FormData();
-        body.append("old_position", event.oldIndex);
-        body.append("new_position", event.newIndex);
+        body.append("old_position", event.oldIndex + 1);
+        body.append("new_position", event.newIndex + 1);
         fetch("/move-tracker/", {
           method: "PATCH",
           body: body,

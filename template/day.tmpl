@@ -15,16 +15,14 @@
       {{ end }}
 
       class="{{- if or $day.Emoji $day.Content -}}
-        text-white inset-shadow bg-gray-950 hover:bg-gray-800 active:bg-gray-700
-        cursor-pointer active:text-white
+        day-is-logged
       {{- else if or $day.TimeRelation.IsPast $day.TimeRelation.IsToday -}}
-        active:bg-gray-700 text-gray-500 hover:bg-gray-800 hover:text-white
-        cursor-pointer active:text-white
+        day-is-not-logged
       {{- else if $day.TimeRelation.IsFuture -}}
         cursor-default text-gray-300
       {{- end }} {{ if $day.TimeRelation.IsToday -}}
         ring ring-gray-950
-      {{- end }} place-center grid size-6 rounded"
+      {{- end }} day"
     >
       {{ if $day.Emoji }}
         {{ $day.Emoji }}
