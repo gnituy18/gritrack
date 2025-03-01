@@ -3,9 +3,9 @@
   {{ $tracker := .tracker }}
   {{ template "header" }}
   <main>
-    <section class="flex-v">
+    <section class="flex-v gap-1">
       <h2>Tracker Info</h2>
-      <form hx-patch="/settings/{{ $tracker.TrackerId }}/" class="flex-v">
+      <form hx-patch="/settings/{{ $tracker.TrackerId }}/" class="flex-v gap-1">
         <div class="input-group">
           <label for="display_name">Display Name</label>
           <input
@@ -32,12 +32,12 @@
         <input class="button-primary" value="Save" type="submit" />
       </form>
     </section>
-    <section class="flex-v">
+    <section class="flex-v gap-1">
       <h2>Change Tracker ID (Slug)</h2>
       <form
         hx-patch="/settings/{{ $tracker.TrackerId }}/tracker_id/"
         hx-confirm="Are you sure you want update '{{ $tracker.TrackerId }}'?"
-        class="flex-v"
+        class="flex-v gap-1"
       >
         <div class="input-group">
           <label for="tracker_id">Tracker ID (Slug)</label>
@@ -53,7 +53,7 @@
         <input class="button-primary" value="Save" type="submit" />
       </form>
     </section>
-    <section class="flex-v">
+    <section class="flex-v gap-1">
       <h2>Delete Tracker</h2>
       <form
         hx-delete="/settings/{{ $tracker.TrackerId }}/"

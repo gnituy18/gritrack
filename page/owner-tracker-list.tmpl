@@ -1,64 +1,72 @@
 {{ define "body" }}
   {{ template "header" }}
   <main>
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>Trackers</th>
-          <th>Past 7 days</th>
-          <th>Today</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="trackers">
-        {{ range $ti, $t := .sessionUser.Trackers }}
+    <section class="flex-v gap-05">
+      <a
+        style="align-self:end"
+        href="/create-tracker"
+        class="button button-soft button-sm"
+        >New Tracker</a
+      >
+      <table>
+        <thead>
           <tr>
-            <td>
-              {{ template "icon-bars-3" dict "class" "handle cursor-grab button-icon" }}
-            </td>
-            <td>
-              {{ if .Link }}
-                <a href="{{ .Link }}" class="text-link" target="_blank">
-                  {{ .DisplayName }}
-                </a>
-              {{ else }}
-                {{ .DisplayName }}
-              {{ end }}
-            </td>
-            <td>
-              <div class="flex-h gap-05">
-                {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
-                  {{ template "day" dict "tracker" $t "day" $d }}
-                {{ end }}
-              </div>
-            </td>
-            <td>
-              <div class="flex-h gap-1">
-                {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
-                {{ template "day" dict "tracker" $t "day" $today }}
-              </div>
-            </td>
-            <td>
-              <div class="flex-h">
-                <a class="" href="/settings/{{ .TrackerId }}/">
-                  {{ template "icon-cog-6-tooth" dict "class" "button-icon" }}
-                </a>
-                <a href="/{{ $.sessionUser.Username }}/{{ $t.TrackerId }}/">
-                  {{ template "icon-arrows-pointing-out" dict "class" "button-icon" }}
-                </a>
-              </div>
-            </td>
+            <th></th>
+            <th>Trackers</th>
+            <th>Past 7 days</th>
+            <th>Today</th>
+            <th>Actions</th>
           </tr>
-        {{ end }}
-      </tbody>
-    </table>
+        </thead>
+        <tbody id="trackers">
+          {{ range $ti, $t := .sessionUser.Trackers }}
+            <tr>
+              <td>
+                {{ template "icon-bars-3" dict "class" "handle cursor-grab button-icon" }}
+              </td>
+              <td>
+                {{ if .Link }}
+                  <a href="{{ .Link }}" class="text-link" target="_blank">
+                    {{ .DisplayName }}
+                  </a>
+                {{ else }}
+                  {{ .DisplayName }}
+                {{ end }}
+              </td>
+              <td>
+                <div class="flex-h gap-05">
+                  {{ range $i, $d := slice (index $.daysArr $t.TrackerId ) 0 7 }}
+                    {{ template "day" dict "tracker" $t "day" $d }}
+                  {{ end }}
+                </div>
+              </td>
+              <td>
+                <div class="flex-h gap-1">
+                  {{ $today := index (index $.daysArr $t.TrackerId ) 7 }}
+                  {{ template "day" dict "tracker" $t "day" $today }}
+                </div>
+              </td>
+              <td>
+                <div class="flex-h">
+                  <a class="" href="/settings/{{ .TrackerId }}/">
+                    {{ template "icon-cog-6-tooth" dict "class" "button-icon" }}
+                  </a>
+                  <a href="/{{ $.sessionUser.Username }}/{{ $t.TrackerId }}/">
+                    {{ template "icon-arrows-pointing-out" dict "class" "button-icon" }}
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </section>
   </main>
   {{ template "day-detail-dialog" }}
   <script>
     const trackers = document.getElementById("trackers");
     const sortable = new Sortable(trackers, {
-      ghostClass: "sortable-ghost",
+      animation: 150,
       handle: ".handle",
       onUpdate: function (event) {
         const body = new FormData();

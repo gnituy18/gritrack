@@ -1,15 +1,10 @@
 {{ define "body" }}
-  <div class="mx-auto mt-12 flex w-96 flex-col">
-    <h2 class="text-lg font-semibold">👤 {{ .Username }}</h2>
-    <h2 class="text-lg font-semibold">📧 {{ .Email }}</h2>
-    <h2 class="mt-12 text-lg font-semibold text-indigo-600">Trackers</h2>
-    <ol>
-      {{ range .Trackers }}
-        <li>
-          {{ .String }}
-        </li>
-      {{ end }}
-    </ol>
-    <button hx-delete="/log-out/">Log Out</button>
-  </div>
+  {{ template "header" }}
+  <main>
+    <h1>Settings</h1>
+    <section>
+      <h2>👤 {{ .Username }} / {{ .Email }}</h2>
+    </section>
+    <button class="button button-danger" hx-delete="/log-out/">Log Out</button>
+  </main>
 {{ end }}

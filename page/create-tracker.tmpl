@@ -1,32 +1,21 @@
 {{ define "body" }}
-  <main class="mt-12 flex w-full flex-col items-center gap-4">
-    <h2 class="text-2xl font-bold">Create A New Tracker</h2>
-
-    <div class="flex flex-col gap-3">
-      <form
-        class="flex w-96 flex-col gap-4 rounded-sm"
-        hx-target="#error"
-        hx-post="/create-tracker/"
-      >
-        <div class="flex flex-col gap-1">
-          <label for="display_name" class="text-sm">Tracker Name</label>
-          <p id="error" class="text-sm text-red-600"></p>
-          <input
-            id="display_name"
-            class="rounded-sm border-1 border-slate-300 py-2"
-            name="display_name"
-            type="text"
-            required
-            pattern=".*\S.*"
-            title="Please enter at least one non-space character."
-          />
-        </div>
+  {{ template "header" }}
+  <main>
+    <h1>Create A New Tracker</h1>
+    <form class="flex-v gap-1" hx-target="#error" hx-post="/create-tracker/">
+      <div class="input-group">
+        <label for="display_name" class="text-sm">Tracker Name</label>
         <input
-          class="cursor-pointer rounded-sm bg-gray-700 py-2 text-white hover:bg-gray-900"
-          value="Create"
-          type="submit"
+          id="display_name"
+          class="rounded-sm border-1 border-slate-300 py-2"
+          name="display_name"
+          type="text"
+          required
+          pattern=".*\S.*"
+          title="Please enter at least one non-space character."
         />
-      </form>
-    </div>
+      </div>
+      <input class="button-primary" value="Create" type="submit" />
+    </form>
   </main>
 {{ end }}
