@@ -32,20 +32,18 @@
     </button>
     <div
       id="day-tooltip-{{ $tracker.TrackerId }}-{{ $day }}"
-      class="tooltip flex max-w-64 min-w-48 flex-col gap-2 rounded-lg border border-gray-500 bg-gray-50 p-4 text-sm shadow"
+      class="tooltip flex-v gap-05"
     >
-      <time
-        datetime="{{ $day.String }}"
-        class="flex min-w-max gap-2 font-semibold text-gray-500"
+      <time datetime="{{ $day.String }}" class="flex-h gap-1 text-secondary"
         >{{ $day.String }}
         {{ $day.WeekdayString }}
       </time>
       {{ if ne $day.Content "" }}
-        <div class="text-gray-950">
+        <div class="text-primary">
           {{ $day.Content }}
         </div>
       {{ else }}
-        <div class="text-gray-400">This day hasn't been logged yet.</div>
+        <div class="text-secondary">This day hasn't been logged yet.</div>
       {{ end }}
     </div>
   <script type="module">

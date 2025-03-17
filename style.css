@@ -160,6 +160,7 @@ input[type="submit"] {
 
 .button-soft {
   color: var(--gray-16);
+  text-decoration: underline;
 
   &:hover {
     background-color: var(--gray-2);
@@ -281,6 +282,12 @@ input[type="submit"] {
 .tooltip {
   position: absolute;
   visibility: hidden;
+
+  border: 1px solid var(--gray-16);
+  border-radius: var(--radius);
+  background-color: white;
+  padding: 1rem;
+  max-width: 16rem;
 }
 
 .has-tooltip:hover .tooltip {
