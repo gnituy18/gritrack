@@ -1,9 +1,5 @@
 {{ define "day-detail-dialog" }}
-  <dialog
-    x-data
-    id="day-detail"
-    class="w-full max-w-md rounded-xl p-4 text-gray-900"
-  >
+  <dialog x-data id="day-detail">
     <button
       type="button"
       class="absolute top-4 right-4"
@@ -68,7 +64,8 @@
         hx-put="/day-detail/"
         hx-swap="none"
         hx-on::after-request="dayDetail.close()"
-        class="w-full rounded-xl bg-gray-700 px-6 py-2 text-white"
+        style="width:100%"
+        class="button button-primary"
       >
         Submit
       </button>

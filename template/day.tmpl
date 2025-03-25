@@ -48,6 +48,7 @@
     </div>
   <script type="module">
     import {
+      autoUpdate,
       computePosition,
       flip,
       shift,
@@ -55,15 +56,20 @@
     } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.12/+esm';
     const button = document.getElementById('day-button-{{ $tracker.TrackerId }}-{{ $day }}')
     const tooltip = document.getElementById('day-tooltip-{{ $tracker.TrackerId }}-{{ $day }}');
-    computePosition(button, tooltip, {
-      placement: 'bottom',
-      middleware: [offset(8), flip(), shift({padding: 5})],
-    }).then(({x, y}) => {
-      Object.assign(tooltip.style, {
-        left: `${x}px`,
-        top: `${y}px`,
+
+    function updatePosition() {
+      computePosition(button, tooltip, {
+        placement: 'bottom',
+        middleware: [offset(8), flip(), shift({padding: 5})],
+      }).then(({x, y}) => {
+        Object.assign(tooltip.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
       });
-    });
+    }
+
+    const cleanup = autoUpdate(button, tooltip, updatePosition);
   </script>
   </div>
 {{ end }}

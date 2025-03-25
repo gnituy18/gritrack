@@ -1,13 +1,13 @@
 {{ define "body" }}
   {{ template "header" }}
-  <main>
-    <section class="flex-v gap-05">
-      <a
-        style="align-self:end"
-        href="/create-tracker"
-        class="button button-soft button-sm"
-        >New Tracker</a
-      >
+  <main class="flex-v gap-05">
+    <a
+      style="align-self:end"
+      href="/create-tracker"
+      class="button button-soft button-sm"
+      >New Tracker</a
+    >
+    <div style="width:100%;overflow-x:auto;">
       <table>
         <thead>
           <tr>
@@ -60,7 +60,7 @@
           {{ end }}
         </tbody>
       </table>
-    </section>
+    </div>
   </main>
   {{ template "day-detail-dialog" }}
   <script>
