@@ -21,7 +21,6 @@ main {
   gap: 4rem;
   margin-top: 4rem;
   margin-right: auto;
-  margin-bottom: 4rem;
   margin-left: auto;
   padding: 1rem;
   max-width: 48rem;
@@ -98,6 +97,7 @@ form {
 input,
 input[type="email"],
 select {
+  outline: none;
   border: 1px solid var(--gray-8);
   border-radius: var(--radius);
   background-color: white;
@@ -110,12 +110,21 @@ select {
   }
 }
 
+input:invalid {
+  border-color: Crimson;
+}
+
 dialog {
+  border: 1px solid var(--gray-8);
+  border-radius: var(--radius);
+  background-color: white;
+  padding: 1rem;
 }
 
 .button,
 input[type="submit"] {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
@@ -334,6 +343,16 @@ input[type="submit"] {
   --gray-31: oklch(0.03125 0 0);
 
   --radius: 0.5rem;
+}
+
+.top-right {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.relative {
+  position: relative;
 }
 
 .text-center {

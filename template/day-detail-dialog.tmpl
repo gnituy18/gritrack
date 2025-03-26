@@ -1,84 +1,56 @@
 {{ define "day-detail-dialog" }}
-  <dialog x-data id="day-detail">
-    <button
-      type="button"
-      class="absolute top-4 right-4"
-      @click="dayDetail.close();$store.dayDetail.emojiPickerOpen = false"
-    >
-      {{ template "icon-x-mark" dict "class" "size-5" }}
-    </button>
-    <h1 id="day-detail-title" class="font-semibold"></h1>
-    <time id="day-detail-date" class="text-sm text-gray-700"></time>
-    <form class="mt-4 flex flex-col gap-4">
-      <input
-        id="day-detail-tracker-id"
-        type="text"
-        class="hidden"
-        name="tracker_id"
-      />
-      <input
-        id="day-detail-input-date"
-        type="text"
-        class="hidden"
-        name="date"
-      />
-      <div class="flex gap-2">
-        <div class="relative">
-          <input
-            class="size-10 cursor-pointer rounded-xl border-gray-300 p-0 text-center"
-            readonly
-            id="day-detail-emoji"
-            name="emoji"
-            type="text"
-            @click="$store.dayDetail.emojiPickerOpen = true"
-          />
-          <div
-            class="pointer-events-none absolute top-0 left-0 flex size-full items-center justify-center"
-            x-show="!$store.dayDetail.emojiSelected"
-          >
-            {{ template "icon-face-smile" dict "class" "size-5 text-gray-300" }}
-          </div>
-        </div>
-        <input
-          placeholder="Update notes for this day."
-          autofocus
-          class="h-10 flex-1 rounded-xl border-gray-300 placeholder:text-gray-300"
-          id="day-detail-content"
-          type="text"
-          name="content"
-        />
-        <button
-          type="button"
-          @click="$store.dayDetail.emojiSelected = false;dayDetailEmoji.value='';dayDetailContent.value = ''"
-        >
-          {{ template "icon-trash" dict "class" "size-5" }}
+  <dialog id="day-detail">
+    <div class="flex-v gap-1">
+      <div class="flex-v">
+        <button type="button" class="top-right" hx-on:click="dayDetail.close()">
+          {{ template "icon-x-mark" dict "class" "button-icon" }}
         </button>
+        <h1 id="day-detail-title"></h1>
+        <time id="day-detail-date" class="text-secondary"></time>
       </div>
-      <emoji-picker
-        class="w-full"
-        x-show="$store.dayDetail.emojiPickerOpen"
-        @emoji-click="$store.dayDetail.emojiSelected = true;dayDetailEmoji.value = $event.detail.unicode"
-      >
-      </emoji-picker>
-      <button
+      <form
+        id="day-detail-form"
         hx-put="/day-detail/"
         hx-swap="none"
         hx-on::after-request="dayDetail.close()"
-        style="width:100%"
-        class="button button-primary"
+        class="flex-v gap-1"
       >
-        Submit
-      </button>
-    </form>
+        <input
+          id="day-detail-tracker-id"
+          type="text"
+          style="display:none"
+          name="tracker_id"
+        />
+        <input
+          id="day-detail-input-date"
+          type="text"
+          style="display:none"
+          name="date"
+        />
+        <div class="input-group">
+          <label for="day-detail-emoji">Emoji</label>
+          <input
+            id="day-detail-emoji"
+            pattern="[\p{Emoji_Presentation}]"
+            name="emoji"
+            type="text"
+          />
+        </div>
+        <div class="input-group">
+          <label for="day-detail-content">Note</label>
+          <input
+            placeholder="Update notes for this day."
+            autofocus
+            id="day-detail-content"
+            type="text"
+            name="content"
+          />
+        </div>
+        <button class="button button-primary">Submit</button>
+      </form>
+    </div>
   </dialog>
   <script>
-    document.addEventListener("alpine:init", () => {
-      Alpine.store("dayDetail", {
-        emojiPickerOpen: false,
-        emojiSelected: false,
-      });
-    });
-
     const dayDetail = document.getElementById("day-detail");
     const dayDetailTitle = document.getElementById("day-detail-title");
     const dayDetailDate = document.getElementById("day-detail-date");
@@ -100,12 +72,6 @@
         dayDetailEmoji.value = emoji;
         dayDetailContent.value = content;
         dayDetailTrackerId.value = trackerId;
-
-        if (emoji !== "") {
-          Alpine.store("dayDetail").emojiSelected = true;
-        } else {
-          Alpine.store("dayDetail").emojiSelected = false;
-        }
 
         dayDetail.showModal();
       } catch (err) {
