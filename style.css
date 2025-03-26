@@ -296,17 +296,18 @@ input[type="submit"] {
 .tooltip {
   position: absolute;
   visibility: hidden;
+  z-index: 20;
 
   border: 1px solid var(--gray-16);
   border-radius: var(--radius);
   background-color: white;
   padding: 1rem;
+  width: max-content;
   max-width: 16rem;
 }
 
 .has-tooltip:hover .tooltip {
   visibility: visible;
-  z-index: 20;
 }
 
 :root {
