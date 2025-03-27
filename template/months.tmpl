@@ -2,38 +2,19 @@
   {{ $tracker := get . "tracker" }}
   {{ $entries := get . "entries" }}
   {{ range $entries.Months }}
-    <section class="col-span-7 grid grid-cols-subgrid place-items-center">
-      <time class="col-span-7 text-center font-semibold text-slate-600">
+    <section class="month">
+      <time class="month-time">
         {{ .FormatYYYYMM }}
       </time>
-      <div
-        class="grid h-7 w-7 place-items-center font-semibold text-indigo-600"
-      >
-        Su
-      </div>
-      <div class="grid h-7 w-7 place-items-center font-semibold text-slate-600">
-        Mo
-      </div>
-      <div class="grid h-7 w-7 place-items-center font-semibold text-slate-600">
-        Tu
-      </div>
-      <div class="grid h-7 w-7 place-items-center font-semibold text-slate-600">
-        We
-      </div>
-      <div class="grid h-7 w-7 place-items-center font-semibold text-slate-600">
-        Th
-      </div>
-      <div class="grid h-7 w-7 place-items-center font-semibold text-slate-600">
-        Fr
-      </div>
-      <div
-        class="grid h-7 w-7 place-items-center font-semibold text-indigo-600"
-      >
-        Sa
-      </div>
+      <div class="month-days" style="color:LightCoral">Su</div>
+      <div class="month-days">Mo</div>
+      <div class="month-days">Tu</div>
+      <div class="month-days">We</div>
+      <div class="month-days">Th</div>
+      <div class="month-days">Fr</div>
+      <div class="month-days" style="color:LightCoral">Sa</div>
       {{ range $i, $e :=  .Days }}
         <time
-          class="grid size-7 place-items-center"
           style="grid-column-start: {{ .Weekday }};grid-row-start: {{ add .Week 2 }};"
         >
           {{ template "day" dict "tracker" $tracker "day" $e }}

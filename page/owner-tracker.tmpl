@@ -4,10 +4,7 @@
     <h1>
       {{ .tracker }}
     </h1>
-    <div
-      id="months"
-      class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto] place-content-center gap-y-12"
-    >
+    <div id="months" class="months">
       {{ template "months" dict "tracker" .tracker "entries" .entries }}
     </div>
     <button
@@ -16,7 +13,7 @@
       hx-get="/{{ .sessionUser.Username }}/{{ .tracker.TrackerId }}/months/"
       hx-vals="js:{...getNextFromTo()}"
       hx-on::after-request="updateFromTo(getNextFromTo().from, to.dataset.to)"
-      class="rounded-full border border-slate-200 bg-white px-6 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+      class="button button-secondary"
     >
       Load More
     </button>
@@ -70,4 +67,34 @@
       to.dataset.to = toStr;
     }
   </script>
+  <style>
+    .months {
+      display: grid;
+      grid-template-columns: repeat(7, auto);
+      row-gap: 4rem;
+    }
+
+    .month {
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-column: 1 / -1;
+      gap: 0.5rem;
+      border-radius: var(--radius);
+      background: white;
+      padding: 2rem;
+    }
+
+    .month-time {
+      grid-column: 1 / -1;
+      color: var(--gray-16);
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .month-days {
+      color: var(--gray-16);
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 {{ end }}

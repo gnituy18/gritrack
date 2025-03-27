@@ -16,12 +16,12 @@
 
       class="{{- if or $day.Emoji $day.Content -}}
         day-is-logged
-      {{- else if or $day.TimeRelation.IsPast $day.TimeRelation.IsToday -}}
+      {{- else if $day.TimeRelation.IsPast -}}
         day-is-not-logged
       {{- else if $day.TimeRelation.IsFuture -}}
-        cursor-default text-gray-300
+        day-is-future
       {{- end }} {{ if $day.TimeRelation.IsToday -}}
-        ring ring-gray-950
+        day-is-today
       {{- end }} day"
     >
       {{ if $day.Emoji }}

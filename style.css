@@ -241,6 +241,18 @@ input[type="submit"] {
   }
 }
 
+.day-is-future {
+  color: var(--gray-8);
+}
+
+.day-is-today {
+  background-color: Gold;
+
+  &:hover {
+    background-color: GoldenRod;
+  }
+}
+
 .day {
   display: grid;
   place-items: center;
